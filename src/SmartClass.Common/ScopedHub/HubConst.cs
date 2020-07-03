@@ -19,7 +19,10 @@
         #endregion
 
         #region for scope locate
-        
+
+        public static string Args_ScopeId = "scopeId";
+        public static string Args_ClientId = "clientId";
+
         public static string DefaultScopeId = "default";
         public static string AllGroupId = string.Empty;
 
