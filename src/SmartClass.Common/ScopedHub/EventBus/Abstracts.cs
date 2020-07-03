@@ -5,17 +5,12 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopedHub.EventBus
 {
-    public interface ISignalREvent : IScopeKey
+    public interface ISignalREvent : IScopeKey, IHaveBags
     {
         /// <summary>
         /// 触发事件的时间
         /// </summary>
         DateTime RaiseAt { get; }
-
-        /// <summary>
-        /// 时间的上下文
-        /// </summary>
-        HubEventHandleContext HandleContext { get; set; }
     }
 
     public interface IHubEvent : ISignalREvent
@@ -71,12 +66,13 @@ namespace SmartClass.Common.ScopedHub.EventBus
             ScopeId = scopeId;
             RaiseAt = DateHelper.Instance.GetDateNow();
             RaiseHub = raiseHub;
+
         }
 
         public DateTime RaiseAt { get; private set; }
-        public HubEventHandleContext HandleContext { get; set; } = new HubEventHandleContext();
         public Hub RaiseHub { get; private set; }
         public string ScopeId { get; set; }
+        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
     }
 
     public abstract class BaseHubCrossEvent : IHubEvent, IHubContextEvent
@@ -96,7 +92,7 @@ namespace SmartClass.Common.ScopedHub.EventBus
 
         public string ScopeId { get; set; }
         public DateTime RaiseAt { get; }
-        public HubEventHandleContext HandleContext { get; set; } = new HubEventHandleContext();
+        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
 
         public Hub RaiseHub { get; }
         public HubContextWrapper Context { get; }
@@ -112,56 +108,46 @@ namespace SmartClass.Common.ScopedHub.EventBus
 
     #endregion
 
-    #region handle context
-
-    public class HubEventHandleContext : IHaveBags
-    {
-        public HubEventHandleContext()
-        {
-            Bags = BagsHelper.Create();
-        }
-
-        public IDictionary<string, object> Bags { get; set; }
-    }
-
-    public static class HubEventHandleContextExtensions
+    #region event context
+    
+    public static class SignalREventExtensions
     {
         public static string ShouldWaitComplete = "ShouldWaitComplete";
-        public static bool GetShouldWaitComplete(this HubEventHandleContext ctx, ISignalREventHandler handler, bool defaultValue)
+        public static bool GetShouldWaitComplete(this ISignalREvent @event, ISignalREventHandler handler, bool defaultValue)
         {
-            return ctx.GetAs(handler, ShouldWaitComplete, defaultValue);
+            return @event.GetAs(handler, ShouldWaitComplete, defaultValue);
         }
-        public static void SetShouldWaitComplete(this HubEventHandleContext ctx, ISignalREventHandler handler, bool shouldWait)
+        public static void SetShouldWaitComplete(this ISignalREvent @event, ISignalREventHandler handler, bool shouldWait)
         {
-            ctx.Set(handler, ShouldWaitComplete, shouldWait);
+            @event.Set(handler, ShouldWaitComplete, shouldWait);
         }
 
         public static string ShouldThrowWhenException = "ShouldThrowWhenException";
-        public static bool GetShouldThrowWhenException(this HubEventHandleContext ctx, ISignalREventHandler handler, bool defaultValue)
+        public static bool GetShouldThrowWhenException(this ISignalREvent @event, ISignalREventHandler handler, bool defaultValue)
         {
-            return ctx.GetAs(handler, ShouldThrowWhenException, defaultValue);
+            return @event.GetAs(handler, ShouldThrowWhenException, defaultValue);
         }
-        public static void SetShouldThrowWhenException(this HubEventHandleContext ctx, ISignalREventHandler handler, bool shouldThrow)
+        public static void SetShouldThrowWhenException(this ISignalREvent @event, ISignalREventHandler handler, bool shouldThrow)
         {
-            ctx.Set(handler, ShouldThrowWhenException, shouldThrow);
+            @event.Set(handler, ShouldThrowWhenException, shouldThrow);
         }
 
         public static string ShouldStopSend = "StopSend";
-        public static bool GetStopSend(this HubEventHandleContext ctx, ISignalREventHandler handler, bool defaultValue)
+        public static bool GetStopSend(this ISignalREvent @event, ISignalREventHandler handler, bool defaultValue)
         {
-            return ctx.GetAs(handler, ShouldStopSend, defaultValue);
+            return @event.GetAs(handler, ShouldStopSend, defaultValue);
         }
-        public static void SetStopSend(this HubEventHandleContext ctx, ISignalREventHandler handler, bool shouldStop)
+        public static void SetStopSend(this ISignalREvent @event, ISignalREventHandler handler, bool shouldStop)
         {
-            ctx.Set(handler, ShouldStopSend, shouldStop);
+            @event.Set(handler, ShouldStopSend, shouldStop);
         }
 
         //helpers
-        private static void Set(this HubEventHandleContext ctx, ISignalREventHandler handler, string key, object value)
+        private static void Set(this ISignalREvent @event, ISignalREventHandler handler, string key, object value)
         {
-            if (ctx == null)
+            if (@event == null)
             {
-                throw new ArgumentNullException(nameof(ctx));
+                throw new ArgumentNullException(nameof(@event));
             }
 
             if (handler == null)
@@ -169,13 +155,13 @@ namespace SmartClass.Common.ScopedHub.EventBus
                 throw new ArgumentNullException(nameof(handler));
             }
             var theKey = string.Format("{0}_{1}", key, handler.GetType().FullName);
-            ctx.Bags[theKey] = value;
+            @event.Bags[theKey] = value;
         }
-        private static object Get(this HubEventHandleContext ctx, ISignalREventHandler handler, string key, object defaultValue)
+        private static object Get(this ISignalREvent @event, ISignalREventHandler handler, string key, object defaultValue)
         {
-            if (ctx == null)
+            if (@event == null)
             {
-                throw new ArgumentNullException(nameof(ctx));
+                throw new ArgumentNullException(nameof(@event));
             }
 
             if (handler == null)
@@ -184,15 +170,15 @@ namespace SmartClass.Common.ScopedHub.EventBus
             }
 
             var theKey = string.Format("{0}_{1}", key, handler.GetType().FullName);
-            if (!ctx.Bags.ContainsKey(theKey))
+            if (!@event.Bags.ContainsKey(theKey))
             {
                 return defaultValue;
             }
-            return ctx.Bags[theKey];
+            return @event.Bags[theKey];
         }
-        private static T GetAs<T>(this HubEventHandleContext ctx, ISignalREventHandler handler, string key, T defaultValue)
+        private static T GetAs<T>(this ISignalREvent @event, ISignalREventHandler handler, string key, T defaultValue)
         {
-            var theValue = ctx.Get(handler, key, defaultValue);
+            var theValue = @event.Get(handler, key, defaultValue);
             if (theValue == null)
             {
                 return defaultValue;

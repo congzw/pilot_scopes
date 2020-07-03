@@ -17,23 +17,21 @@ namespace SmartClass.Common.ScopedHub.EventBus
         public async Task Raise(ISignalREvent hubEvent)
         {
             Trace(hubEvent, "HubEvent -> ");
-            if (hubEvent.HandleContext == null)
+            if (hubEvent.Bags == null)
             {
                 //auto fix null if not impl from base event!
-                hubEvent.HandleContext = new HubEventHandleContext();
+                hubEvent.Bags = BagsHelper.Create();
             }
 
             var sortedHandlers = Handlers
                 .Where(x => x.ShouldHandle(hubEvent))
                 .OrderBy(x => x.HandleOrder)
                 .ToList();
-
-            var ctx = hubEvent.HandleContext;
-
+            
             foreach (var handler in sortedHandlers)
             {
-                var shouldThrowWhenException = ctx.GetShouldThrowWhenException(handler, true);
-                var shouldWaitComplete = ctx.GetShouldWaitComplete(handler, true);
+                var shouldThrowWhenException = hubEvent.GetShouldThrowWhenException(handler, true);
+                var shouldWaitComplete = hubEvent.GetShouldWaitComplete(handler, true);
                 try
                 {
                     Trace(handler.GetType().Name, "HubEventHandler Invoking -> ");
