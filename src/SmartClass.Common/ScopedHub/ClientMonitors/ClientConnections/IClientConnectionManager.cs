@@ -9,6 +9,7 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections
         Task OnConnected(OnConnectedEvent theEvent);
         Task OnDisconnected(OnDisconnectedEvent theEvent);
         Task OnKick(OnKickEvent theEvent);
+        Task OnReset(OnResetEvent theEvent);
     }
 
     #region events
@@ -45,6 +46,21 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections
         }
     }
 
+    public class OnResetEvent : BaseHubCrossEvent
+    {
+        public ScopeContext Args { get; }
+
+        public OnResetEvent(Hub raiseHub, ScopeContext args) : base(raiseHub, args.ScopeId)
+        {
+            Args = args;
+        }
+
+        public OnResetEvent(HubContextWrapper context, ScopeContext args) : base(context, args.ScopeId)
+        {
+            Args = args;
+        }
+    }
+    
     public class KickClientArgs : IScopeClientLocate
     {
         public string ScopeId { get; set; }

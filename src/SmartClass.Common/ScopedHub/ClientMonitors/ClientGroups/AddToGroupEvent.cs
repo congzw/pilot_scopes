@@ -8,23 +8,25 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups
     {
         public AddToGroup Args { get; set; }
 
-        public AddToGroupEvent(Hub raiseHub, string scopeId, AddToGroup args) : base(raiseHub, scopeId)
+        public AddToGroupEvent(Hub raiseHub, AddToGroup args) : base(raiseHub, args.ScopeId)
         {
             Args = args;
         }
 
-        public AddToGroupEvent(HubContextWrapper context, string scopeId, AddToGroup args) : base(context, scopeId)
+        public AddToGroupEvent(HubContextWrapper context, AddToGroup args) : base(context, args.ScopeId)
         {
             Args = args;
         }
     }
 
-    public class AddToGroup
+    public class AddToGroup : IScopeGroupLocate
     {
         public AddToGroup()
         {
-            Items = new List<ScopeClientGroupLocate>();
+            ClientIds = new List<string>();
         }
-        public IList<ScopeClientGroupLocate> Items { get; set; }
+        public string ScopeId { get; set; }
+        public string Group { get; set; }
+        public IList<string> ClientIds { get; set; }
     }
 }

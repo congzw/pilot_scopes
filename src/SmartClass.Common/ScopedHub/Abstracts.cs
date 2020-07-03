@@ -1,4 +1,6 @@
-﻿namespace SmartClass.Common.ScopedHub
+﻿using System.Collections.Generic;
+
+namespace SmartClass.Common.ScopedHub
 {
     public interface IScopeKey
     {
@@ -50,6 +52,12 @@
     public interface IScopeClientConnectionLocate : IScopeGroupLocate, IConnectionKey
     {
     }
-    
+
     #endregion
+    
+    public class ScopeContext : IHaveBags, IScopeKey
+    {
+        public string ScopeId { get; set; }
+        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
+    }
 }

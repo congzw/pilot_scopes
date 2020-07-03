@@ -8,18 +8,21 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups
     {
         public RemoveFromGroup Args { get; set; }
 
-        public RemoveFromGroupEvent(Hub raiseHub, string scopeId, RemoveFromGroup args) : base(raiseHub, scopeId)
+        public RemoveFromGroupEvent(Hub raiseHub, RemoveFromGroup args) : base(raiseHub, args.ScopeId)
         {
             Args = args;
         }
     }
 
-    public class RemoveFromGroup
+    public class RemoveFromGroup : IScopeGroupLocate
     {
         public RemoveFromGroup()
         {
-            Items = new List<ScopeClientGroupLocate>();
+            ClientIds = new List<string>();
         }
-        public IList<ScopeClientGroupLocate> Items { get; set; }
+
+        public string ScopeId { get; set; }
+        public string Group { get; set; }
+        public IList<string> ClientIds { get; set; }
     }
 }
