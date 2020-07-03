@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopedHub.EventBus;
 
-namespace SmartClass.Common.ScopedHub.ClientMonitors.Groups.ClientGroups
+namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups
 {
     public class AddToGroupEvent : BaseHubCrossEvent
     {

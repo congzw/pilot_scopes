@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SmartClass.Common.ScopedHub.ClientMonitors.Groups.ClientGroups
+namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups
 {
     public interface IClientGroupManager
     {

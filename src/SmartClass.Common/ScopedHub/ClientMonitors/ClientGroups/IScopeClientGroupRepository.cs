@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SmartClass.Common.ScopedHub.ClientMonitors.Groups.ClientGroups
+namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups
 {
     public interface IScopeClientGroupRepository
     {

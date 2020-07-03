@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SmartClass.Common.ScopedHub.ClientMonitors.Groups.ClientGroups
+namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups
 {
     public class ScopeClientGroupLocate : IScopeClientGroupLocate
     {
