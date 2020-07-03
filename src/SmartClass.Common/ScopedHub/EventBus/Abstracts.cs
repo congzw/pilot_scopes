@@ -111,8 +111,13 @@ namespace SmartClass.Common.ScopedHub.EventBus
             }
             return Context.Clients;
         }
-    }
 
+        public bool IsCalledFromHub()
+        {
+            return RaiseHub != null;
+        }
+    }
+    
     #endregion
 
     #region event context
