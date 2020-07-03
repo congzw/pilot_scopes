@@ -1,4 +1,4 @@
-﻿namespace SmartClass.Common.SignalR
+﻿namespace SmartClass.Common.ScopedHub
 {
     public interface IScopeKey
     {
