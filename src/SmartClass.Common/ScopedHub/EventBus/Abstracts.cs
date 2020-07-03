@@ -11,6 +11,9 @@ namespace SmartClass.Common.ScopedHub.EventBus
         /// 触发事件的时间
         /// </summary>
         DateTime RaiseAt { get; }
+
+        //todo: use unique HubEvent, remove all impl!
+        //IScopeKey Args { get; set; }
     }
 
     public interface IHubEvent : ISignalREvent

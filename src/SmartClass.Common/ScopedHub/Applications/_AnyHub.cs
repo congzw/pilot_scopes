@@ -46,7 +46,7 @@ namespace SmartClass.Common.ScopedHub.Applications
         //重置Scope
         public Task Reset(ScopeContext args)
         {
-            return Bus.Raise(new ResetEvent(this, args));
+            return Bus.Raise(new ScopeResetEvent(this, args));
         }
 
         //加入组成员
