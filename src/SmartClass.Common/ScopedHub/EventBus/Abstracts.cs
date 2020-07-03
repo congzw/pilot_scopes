@@ -64,6 +64,21 @@ namespace SmartClass.Common.ScopedHub.EventBus
 
     #region base events
     
+    public abstract class BaseHubEvent : IHubEvent
+    {
+        protected BaseHubEvent(Hub raiseHub, string scopeId)
+        {
+            ScopeId = scopeId;
+            RaiseAt = DateHelper.Instance.GetDateNow();
+            RaiseHub = raiseHub;
+        }
+
+        public DateTime RaiseAt { get; private set; }
+        public HubEventHandleContext HandleContext { get; set; } = new HubEventHandleContext();
+        public Hub RaiseHub { get; private set; }
+        public string ScopeId { get; set; }
+    }
+
     public abstract class BaseHubCrossEvent : IHubEvent, IHubContextEvent
     {
         protected BaseHubCrossEvent(Hub raiseHub, string scopeId)

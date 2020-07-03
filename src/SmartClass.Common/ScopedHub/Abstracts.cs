@@ -35,8 +35,7 @@
     public interface IScopeClientGroupLocate : IScopeKey, IClientKey, IGroupKey, IScopeClientLocate, IScopeGroupLocate
     {
     }
-
-
+    
     public interface IConnectionKey
     {
         string ConnectionId { get; set; }
