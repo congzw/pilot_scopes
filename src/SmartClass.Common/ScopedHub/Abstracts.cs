@@ -24,24 +24,32 @@
         string Group { get; set; }
     }
 
-    public interface IScopeClientLocate : IScopeKey, IClientKey
-    {
-    }
-    
-    public interface IScopeGroupLocate : IScopeKey, IGroupKey
-    {
-    }
-
-    public interface IScopeClientGroupLocate : IScopeKey, IClientKey, IGroupKey, IScopeClientLocate, IScopeGroupLocate
-    {
-    }
-    
     public interface IConnectionKey
     {
         string ConnectionId { get; set; }
     }
 
-    public interface IScopeClientConnectionLocate : IScopeClientLocate, IConnectionKey
+    #region locates
+
+    //scope client
+    public interface IScopeClientLocate : IScopeKey, IClientKey
     {
     }
+    
+    //scope group
+    public interface IScopeGroupLocate : IScopeKey, IGroupKey
+    {
+    }
+
+    //scope client group
+    public interface IScopeClientGroupLocate : IScopeKey, IClientKey, IGroupKey, IScopeClientLocate, IScopeGroupLocate
+    {
+    }
+
+    //scope client connection
+    public interface IScopeClientConnectionLocate : IScopeGroupLocate, IConnectionKey
+    {
+    }
+    
+    #endregion
 }

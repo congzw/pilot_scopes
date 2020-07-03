@@ -63,10 +63,13 @@ namespace SmartClass.Common.ScopedHub.EventBus
     {
         protected BaseHubEvent(Hub raiseHub, string scopeId)
         {
+            if (string.IsNullOrWhiteSpace(scopeId))
+            {
+                throw new ArgumentNullException(nameof(scopeId));
+            }
             ScopeId = scopeId;
             RaiseAt = DateHelper.Instance.GetDateNow();
             RaiseHub = raiseHub;
-
         }
 
         public DateTime RaiseAt { get; private set; }
@@ -79,6 +82,10 @@ namespace SmartClass.Common.ScopedHub.EventBus
     {
         protected BaseHubCrossEvent(Hub raiseHub, string scopeId)
         {
+            if (string.IsNullOrWhiteSpace(scopeId))
+            {
+                throw new ArgumentNullException(nameof(scopeId));
+            }
             ScopeId = scopeId;
             RaiseAt = DateHelper.Instance.GetDateNow();
             RaiseHub = raiseHub;

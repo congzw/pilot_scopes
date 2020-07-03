@@ -20,7 +20,7 @@
 
         #region for scope locate
         
-        public static string DefaultScopeId = string.Empty;
+        public static string DefaultScopeId = "default";
         public static string AllGroupId = string.Empty;
 
         #endregion

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections
 {
-    public interface IClientConnection : IScopeClientConnectionLocate
+    public interface IClientConnection : IScopeClientLocate
     {
         string ClientType { get; set; }
     }

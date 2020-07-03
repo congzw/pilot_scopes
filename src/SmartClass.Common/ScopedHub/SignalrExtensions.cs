@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using SmartClass.Common.Http;
 
 namespace SmartClass.Common.ScopedHub
 {
@@ -8,6 +9,11 @@ namespace SmartClass.Common.ScopedHub
         public static HttpContext TryGetHttpContext(this Hub hub)
         {
             return hub?.Context?.GetHttpContext();
+        }
+
+        public static string TryGetScopeId(this Hub hub)
+        {
+            return hub?.Context?.GetHttpContext().TryGetQueryParameterValue("scopeId", HubConst.DefaultScopeId);
         }
     }
 }
