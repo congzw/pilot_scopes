@@ -4,6 +4,7 @@ using SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopedHub.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopedHub.EventBus;
+using SmartClass.Common.ScopedHub.Scopes;
 
 namespace SmartClass.Common.ScopedHub.Applications
 {

@@ -7,6 +7,7 @@ using SmartClass.Common.ScopedHub.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopedHub.ClientMonitors.ClientMethods.Invokes;
 using SmartClass.Common.ScopedHub.ClientMonitors.ClientMethods.Stubs;
 using SmartClass.Common.ScopedHub.EventBus;
+using SmartClass.Common.ScopedHub.Scopes;
 
 namespace SmartClass.Common.ScopedHub.Applications
 {

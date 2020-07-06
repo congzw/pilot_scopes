@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopedHub.EventBus;
+using SmartClass.Common.ScopedHub.Scopes;
 
 namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections
 {
