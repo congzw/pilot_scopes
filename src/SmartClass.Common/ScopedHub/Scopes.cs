@@ -34,6 +34,8 @@ namespace SmartClass.Common.ScopedHub
         #endregion
     }
 
+    #region for extensions
+
     public interface IScopeRepository
     {
         ScopeContext GetScopeContext(string scopeId, bool createIfNotExist);
@@ -84,7 +86,6 @@ namespace SmartClass.Common.ScopedHub
             Contexts.Clear();
         }
     }
-
     public static class ScopeExtensions
     {
         public static T GetItemAs<T>(this ScopeContext ctx, string key, T defaultValue = default(T))
@@ -93,4 +94,7 @@ namespace SmartClass.Common.ScopedHub
             return (T)Convert.ChangeType(value, typeof(T));
         }
     }
+    
+    #endregion
+
 }
