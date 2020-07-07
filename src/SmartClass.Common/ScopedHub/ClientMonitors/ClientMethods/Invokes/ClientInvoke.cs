@@ -10,7 +10,7 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientMethods.Invokes
         Task OnClientInvoke(OnClientInvokeEvent theEvent);
     }
     
-    public class OnClientInvokeEvent : BaseHubCrossEvent
+    public class OnClientInvokeEvent : ScopedHubEvent
     {
         public ClientMethodArgs Args { get; set; }
 

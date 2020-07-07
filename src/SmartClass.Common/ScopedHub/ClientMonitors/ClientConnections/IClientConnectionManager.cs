@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using SmartClass.Common.ScopedHub.Applications;
 using SmartClass.Common.ScopedHub.EventBus;
 
 namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections
@@ -8,21 +9,21 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections
     {
         Task OnConnected(OnConnectedEvent theEvent);
         Task OnDisconnected(OnDisconnectedEvent theEvent);
-        Task OnKick(KickClientEvent theEvent);
-        Task ScopeReset(ScopeResetEvent theEvent);
-        Task ScopeUpdate(ScopeUpdateEvent theEvent);
+        Task KickClient(KickClientEvent theEvent);
+        Task ResetScope(ResetScopeEvent theEvent);
+        Task UpdateScope(UpdateScopeEvent theEvent);
     }
 
     #region events
     
-    public class OnConnectedEvent : BaseHubEvent
+    public class OnConnectedEvent : ScopedHubEvent
     {
         public OnConnectedEvent(Hub raiseHub) : base(raiseHub, raiseHub.TryGetScopeId())
         {
         }
     }
 
-    public class OnDisconnectedEvent : BaseHubEvent
+    public class OnDisconnectedEvent : ScopedHubEvent
     {
         public string Reason { get; set; }
 
@@ -32,9 +33,9 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections
         }
     }
 
-    public class KickClientEvent : BaseHubCrossEvent
+    public class KickClientEvent : ScopedHubEvent
     {
-        public KickClientArgs Args { get; }
+        public KickClientArgs Args { get; set; }
 
         public KickClientEvent(Hub raiseHub, KickClientArgs args) : base(raiseHub, args.ScopeId)
         {
@@ -47,31 +48,31 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections
         }
     }
 
-    public class ScopeResetEvent : BaseHubCrossEvent
+    public class ResetScopeEvent : ScopedHubEvent
     {
-        public ScopeContext Args { get; }
+        public ResetScopeArgs Args { get; }
 
-        public ScopeResetEvent(Hub raiseHub, ScopeContext args) : base(raiseHub, args.ScopeId)
+        public ResetScopeEvent(Hub raiseHub, ResetScopeArgs args) : base(raiseHub, args.ScopeId)
         {
             Args = args;
         }
 
-        public ScopeResetEvent(HubContextWrapper context, ScopeContext args) : base(context, args.ScopeId)
+        public ResetScopeEvent(HubContextWrapper context, ResetScopeArgs args) : base(context, args.ScopeId)
         {
             Args = args;
         }
     }
 
-    public class ScopeUpdateEvent : BaseHubCrossEvent
+    public class UpdateScopeEvent : ScopedHubEvent
     {
-        public ScopeContext Args { get; set; }
+        public UpdateScopeArgs Args { get; set; }
 
-        public ScopeUpdateEvent(Hub raiseHub, ScopeContext args) : base(raiseHub, args.ScopeId)
+        public UpdateScopeEvent(Hub raiseHub, UpdateScopeArgs args) : base(raiseHub, args.ScopeId)
         {
             Args = args;
         }
 
-        public ScopeUpdateEvent(HubContextWrapper context, ScopeContext args) : base(context, args.ScopeId)
+        public UpdateScopeEvent(HubContextWrapper context, UpdateScopeArgs args) : base(context, args.ScopeId)
         {
         }
     }

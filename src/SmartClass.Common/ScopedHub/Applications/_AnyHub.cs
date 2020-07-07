@@ -43,10 +43,16 @@ namespace SmartClass.Common.ScopedHub.Applications
             await base.OnConnectedAsync().ConfigureAwait(false);
         }
 
-        //重置Scope
-        public Task Reset(ScopeContext args)
+        //重置scope
+        public Task ResetScope(ResetScopeArgs args)
         {
-            return Bus.Raise(new ScopeResetEvent(this, args));
+            return Bus.Raise(new ResetScopeEvent(this, args));
+        }
+
+        //更新scope
+        public Task UpdateScope(UpdateScopeArgs args)
+        {
+            return Bus.Raise(new UpdateScopeEvent(this, args));
         }
 
         //加入组成员

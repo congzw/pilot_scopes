@@ -4,7 +4,7 @@ using SmartClass.Common.ScopedHub.EventBus;
 
 namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups
 {
-    public class AddToGroupEvent : BaseHubCrossEvent
+    public class AddToGroupEvent : ScopedHubEvent
     {
         public AddToGroup Args { get; set; }
 

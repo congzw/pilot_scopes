@@ -10,7 +10,7 @@ namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientMethods.Stubs
         Task OnCallClientStub(OnCallClientStubEvent theEvent);
     }
 
-    public class OnCallClientStubEvent : BaseHubCrossEvent
+    public class OnCallClientStubEvent : ScopedHubEvent
     {
         public ClientMethodArgs Args { get; set; }
 

@@ -4,7 +4,7 @@ using SmartClass.Common.ScopedHub.EventBus;
 
 namespace SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups
 {
-    public class RemoveFromGroupEvent : BaseHubCrossEvent
+    public class RemoveFromGroupEvent : ScopedHubEvent
     {
         public RemoveFromGroup Args { get; set; }
 

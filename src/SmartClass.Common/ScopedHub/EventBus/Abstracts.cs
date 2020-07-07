@@ -11,9 +11,6 @@ namespace SmartClass.Common.ScopedHub.EventBus
         /// 触发事件的时间
         /// </summary>
         DateTime RaiseAt { get; }
-
-        //todo: use unique HubEvent, remove all impl!
-        //IScopeKey Args { get; set; }
     }
 
     public interface IHubEvent : ISignalREvent
@@ -29,7 +26,7 @@ namespace SmartClass.Common.ScopedHub.EventBus
     }
 
     #region HubContext Wrapper
-    
+
     public class HubContextWrapper
     {
         public IHubClients<IClientProxy> Clients { get; set; }
@@ -54,17 +51,18 @@ namespace SmartClass.Common.ScopedHub.EventBus
             hubContext.Clients = context.Clients;
             hubContext.Groups = context.Groups;
             hubContext.HubContext = context;
+
             return hubContext;
         }
     }
 
     #endregion
-
-    #region base events
     
-    public abstract class BaseHubEvent : IHubEvent
+    public class ScopedHubEvent : IHubEvent, IHubContextEvent
     {
-        protected BaseHubEvent(Hub raiseHub, string scopeId)
+        #region ctors
+
+        public ScopedHubEvent(Hub raiseHub, string scopeId)
         {
             if (string.IsNullOrWhiteSpace(scopeId))
             {
@@ -75,38 +73,33 @@ namespace SmartClass.Common.ScopedHub.EventBus
             RaiseHub = raiseHub;
         }
 
-        public DateTime RaiseAt { get; private set; }
-        public Hub RaiseHub { get; private set; }
-        public string ScopeId { get; set; }
-        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
-    }
-
-    public abstract class BaseHubCrossEvent : IHubEvent, IHubContextEvent
-    {
-        protected BaseHubCrossEvent(Hub raiseHub, string scopeId)
+        public ScopedHubEvent(HubContextWrapper context, string scopeId)
         {
             if (string.IsNullOrWhiteSpace(scopeId))
             {
                 throw new ArgumentNullException(nameof(scopeId));
             }
-            ScopeId = scopeId;
-            RaiseAt = DateHelper.Instance.GetDateNow();
-            RaiseHub = raiseHub;
-        }
-        protected BaseHubCrossEvent(HubContextWrapper context, string scopeId)
-        {
-            ScopeId = scopeId;
             RaiseAt = DateHelper.Instance.GetDateNow();
             Context = context;
         }
 
-        public string ScopeId { get; set; }
-        public DateTime RaiseAt { get; }
-        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
+        #endregion
 
+        public string ScopeId { get; set; }
+        public IDictionary<string, object> Bags { get; set; }
+        public DateTime RaiseAt { get; }
         public Hub RaiseHub { get; }
         public HubContextWrapper Context { get; }
-        public IHubClients<IClientProxy> TryGetHubCallerClients()
+
+        public bool IsCalledFromHub()
+        {
+            return RaiseHub != null;
+        }
+        public bool IsCalledOutsideHub()
+        {
+            return !IsCalledFromHub();
+        }
+        public IHubClients<IClientProxy> TryGetHubClients()
         {
             if (RaiseHub != null)
             {
@@ -114,17 +107,74 @@ namespace SmartClass.Common.ScopedHub.EventBus
             }
             return Context.Clients;
         }
-
-        public bool IsCalledFromHub()
-        {
-            return RaiseHub != null;
-        }
     }
     
-    #endregion
+    //#region base events
+
+
+    //public abstract class BaseHubEvent : IHubEvent
+    //{
+    //    protected BaseHubEvent(Hub raiseHub, string scopeId)
+    //    {
+    //        if (string.IsNullOrWhiteSpace(scopeId))
+    //        {
+    //            throw new ArgumentNullException(nameof(scopeId));
+    //        }
+    //        ScopeId = scopeId;
+    //        RaiseAt = DateHelper.Instance.GetDateNow();
+    //        RaiseHub = raiseHub;
+    //    }
+
+    //    public DateTime RaiseAt { get; private set; }
+    //    public Hub RaiseHub { get; private set; }
+    //    public string ScopeId { get; set; }
+    //    public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
+    //}
+
+    //public abstract class BaseHubCrossEvent : IHubEvent, IHubContextEvent
+    //{
+    //    protected BaseHubCrossEvent(Hub raiseHub, string scopeId)
+    //    {
+    //        if (string.IsNullOrWhiteSpace(scopeId))
+    //        {
+    //            throw new ArgumentNullException(nameof(scopeId));
+    //        }
+    //        ScopeId = scopeId;
+    //        RaiseAt = DateHelper.Instance.GetDateNow();
+    //        RaiseHub = raiseHub;
+    //    }
+    //    protected BaseHubCrossEvent(HubContextWrapper context, string scopeId)
+    //    {
+    //        ScopeId = scopeId;
+    //        RaiseAt = DateHelper.Instance.GetDateNow();
+    //        Context = context;
+    //    }
+
+    //    public string ScopeId { get; set; }
+    //    public DateTime RaiseAt { get; }
+    //    public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
+
+    //    public Hub RaiseHub { get; }
+    //    public HubContextWrapper Context { get; }
+    //    public IHubClients<IClientProxy> TryGetHubCallerClients()
+    //    {
+    //        if (RaiseHub != null)
+    //        {
+    //            return RaiseHub.Clients;
+    //        }
+    //        return Context.Clients;
+    //    }
+
+    //    public bool IsCalledFromHub()
+    //    {
+    //        return RaiseHub != null;
+    //    }
+    //}
+
+    //#endregion
 
     #region event context
-    
+
     public static class SignalREventExtensions
     {
         public static string ShouldWaitComplete = "ShouldWaitComplete";
@@ -201,7 +251,7 @@ namespace SmartClass.Common.ScopedHub.EventBus
             return (T)Convert.ChangeType(theValue, typeof(T));
         }
     }
-    
+
     #endregion
 
     public interface ISignalREventHandler

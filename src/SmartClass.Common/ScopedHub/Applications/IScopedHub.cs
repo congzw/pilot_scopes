@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using SmartClass.Common.ScopedHub.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopedHub.ClientMonitors.ClientGroups;
@@ -7,16 +8,16 @@ using SmartClass.Common.ScopedHub.EventBus;
 
 namespace SmartClass.Common.ScopedHub.Applications
 {
+    /// <summary>
+    /// ScopedHub interface
+    /// </summary>
     public interface IScopedHub
     {
-        SignalREventBus Bus { get; set; }
-
         /// <summary>
         /// 连接
         /// </summary>
         /// <returns></returns>
         Task OnConnectedAsync();
-
         /// <summary>
         /// 断开
         /// </summary>
@@ -25,26 +26,11 @@ namespace SmartClass.Common.ScopedHub.Applications
         Task OnDisconnectedAsync(Exception exception);
 
         /// <summary>
-        /// 踢掉
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        Task KickClient(KickClientArgs args);
-
-        /// <summary>
-        /// 重置Scope
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        Task Reset(ScopeContext args);
-
-        /// <summary>
         /// 加入组
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
         Task AddToGroup(AddToGroup args);
-
         /// <summary>
         /// 从组移除
         /// </summary>
@@ -64,5 +50,35 @@ namespace SmartClass.Common.ScopedHub.Applications
         /// <param name="args"></param>
         /// <returns></returns>
         Task ClientStub(ClientMethodArgs args);
+
+        /// <summary>
+        /// 踢掉Client
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        Task KickClient(KickClientArgs args);
+        /// <summary>
+        /// 重置Scope
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        Task ResetScope(ResetScopeArgs args);
+        /// <summary>
+        /// 更新Scope
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        Task UpdateScope(UpdateScopeArgs args);
+    }
+
+    public class ResetScopeArgs : IScopeKey, IHaveBags
+    {
+        public string ScopeId { get; set; }
+        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
+    }
+    public class UpdateScopeArgs : IScopeKey, IHaveBags
+    {
+        public string ScopeId { get; set; }
+        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
     }
 }
