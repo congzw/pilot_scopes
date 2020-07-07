@@ -13,7 +13,14 @@ namespace SmartClass.Common.ScopedHub
 
         public static string TryGetScopeId(this Hub hub)
         {
-            return hub?.Context?.GetHttpContext().TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.DefaultScopeId);
+            return hub.TryGetHttpContext().TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.DefaultScopeId);
         }
+
+
+        //public static IScopeClientLocate TryGetScopeId(this Hub hub)
+        //{
+        //    return hub.TryGetHttpContext().TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.DefaultScopeId);
+        //}
+
     }
 }
