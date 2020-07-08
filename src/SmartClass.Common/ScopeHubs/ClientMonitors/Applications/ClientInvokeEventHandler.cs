@@ -2,16 +2,16 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
 {
-    public class ClientStubEventHandler : ISignalREventHandler
+    public class ClientInvokeEventHandler : ISignalREventHandler
     {
         public float HandleOrder { get; set; }
         public bool ShouldHandle(ISignalREvent @event)
         {
-            return @event is ClientStubEvent;
+            return @event is ClientInvokeEvent;
         }
 
         public async Task HandleAsync(ISignalREvent @event)
@@ -20,11 +20,11 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
             {
                 return;
             }
-
-            var theEvent = (ClientStubEvent)@event;
-            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", "ClientStub", JsonConvert.SerializeObject(theEvent.Args, Formatting.None)));
+            //todo: ClientInvoke process bus
+            var theEvent = (ClientInvokeEvent)@event;
+            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", "ClientInvoke", JsonConvert.SerializeObject(theEvent.Args, Formatting.None)));
             var hubClients = theEvent.TryGetHubClients();
-            await hubClients.All.SendAsync("ClientStub", theEvent.Args);
+            await hubClients.All.SendAsync("ClientInvoke", theEvent.Args);
         }
     }
 }

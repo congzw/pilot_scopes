@@ -17,6 +17,7 @@
             <h2>ClientId: <span>  {{ currentClientId }}</span></h2>
             <h2>State: <span>  {{ currentState }}</span></h2>
             <h2>Message: <span>  {{ currentMessage }}</span></h2>
+            <h2>Notify: <span>  {{ currentNotify }}</span></h2>
             <hr />
             <div class="select-bar">
                 <div class="select-label">筛选：</div>
@@ -38,7 +39,7 @@
                     </select>
                 </div>
                 <div>
-                    <input type="button" class="btn btn-primary" id="btnUpdate" value="Update" />
+                    <input type="button" class="btn btn-primary" id="btnUpdateMessage" value="UpdateMessage" />
                     <input type="button" class="btn btn-primary" id="btnUpdateState" value="UpdateState" />
                     <input type="button" class="btn btn-primary" id="btnUpdateConnections" value="UpdateConnections" />
                 </div>
@@ -114,6 +115,7 @@
             clientConnections: [],
             currentMessage: 'Hello',
             currentState: 'Foo',
+            currentNotify: '',
             currentScopeId: '',
             currentClientId: '',
             isTableLayout: true // 默认表格布局
@@ -147,6 +149,10 @@
                     this.clientConnections = args.clientConnections;
                 }
             },
+            notify: function (args) {
+                console.log('call notify', args);
+                this.currentNotify = args.message;
+            },
             connect: function () {
                 var _this = this;
 
@@ -160,18 +166,18 @@
                     .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId)
                     .build();
 
-                var invokeClientStub = "ClientStub";
-                connectionHub.on(invokeClientStub, function (theArgs) {
-                    console.log('callback: ' + invokeClientStub, theArgs);
+                var clientInvoke = "ClientInvoke";
+                connectionHub.on(clientInvoke, function (theArgs) {
+                    console.log('callback: ' + clientInvoke, theArgs);
                     if (theArgs.method) {
                         _this[theArgs.method](theArgs.methodArgs);
                     }
                     //todo more
                 });
 
-                var clientMethodInvoke = "ClientInvoke";
-                connectionHub.on(clientMethodInvoke, function (theArgs) {
-                    console.log('callback: ' + clientMethodInvoke, theArgs);
+                var clientStub = "ClientStub";
+                connectionHub.on(clientStub, function (theArgs) {
+                    console.log('callback: ' + clientStub, theArgs);
                     if (theArgs.method) {
                         _this[theArgs.method](theArgs.methodArgs);
                     }
@@ -181,7 +187,7 @@
                 connectionHub.start()
                     .then(function () {
                         console.log("与服务器连接成功");
-                        document.getElementById('btnUpdate').addEventListener('click', function (event) {
+                        document.getElementById('btnUpdateMessage').addEventListener('click', function (event) {
 
                             var ticks = ((new Date().getTime() * 10000) + 621355968000000000);
                             var theArgs = {
@@ -191,7 +197,7 @@
                                     foo: "foo"
                                 }
                             };
-                            connectionHub.invoke(invokeClientStub, theArgs);
+                            connectionHub.invoke(clientInvoke, theArgs);
                             event.preventDefault();
                         });
                         document.getElementById('btnUpdateState').addEventListener('click', function (event) {
@@ -204,10 +210,9 @@
                                     bar: "bar"
                                 }
                             };
-                            connectionHub.invoke(invokeClientStub, theArgs);
+                            connectionHub.invoke(clientInvoke, theArgs);
                             event.preventDefault();
                         });
-
                         document.getElementById('btnUpdateConnections').addEventListener('click', function (event) {
 
                             var ticks = ((new Date().getTime() * 10000) + 621355968000000000);
@@ -223,8 +228,6 @@
                             connectionHub.invoke("KickClient", theArgs);
                             event.preventDefault();
                         });
-
-
                     })
                     .catch(error => {
                         console.error(error.message);

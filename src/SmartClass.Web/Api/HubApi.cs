@@ -30,6 +30,25 @@ namespace SmartClass.Web.Api
             return DateTime.Now.ToString("s");
         }
         
+        [Route("notify")]
+        [HttpGet]
+        public async Task<string> Notify(string scopeId)
+        {
+            if (string.IsNullOrWhiteSpace(scopeId))
+            {
+                return "BAD SCOPE!";
+            }
+
+            var asHubContextWrapper = _hubContext.AsHubContextWrapper();
+            var stub = new ClientMethodArgs();
+            stub.ScopeId = scopeId;
+            stub.Method = HubConst.ClientMethod_Notify;
+            stub.SetBagValue("bar", "From Server bar");
+            stub.MethodArgs = new { message = "From Server notify "  + DateTime.Now};
+            await _bus.Raise(new ClientStubEvent(asHubContextWrapper, stub));
+            return "Notify OK";
+        }
+
         [Route("ClientStub")]
         [HttpGet]
         public async Task<string> ClientStub([FromQuery]ClientMethodArgs args)
