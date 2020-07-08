@@ -3,7 +3,7 @@ using Common.SignalR.Scoped;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using SmartClass.Common.ScopeHubs.ClientMonitors._Impl;
+using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 
 namespace SmartClass.Web
 {
