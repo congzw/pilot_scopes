@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SmartClass.Common
 {
@@ -19,6 +20,30 @@ namespace SmartClass.Common
             }
 
             return valueFix.Equals(value2Fix, comparison);
+        }
+
+        public static bool MyContains(this IEnumerable<string> values, string toCheck, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            foreach (var value in values)
+            {
+                if (value.MyEquals(toCheck, comparison))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static string MyFind(this IEnumerable<string> values, string toCheck, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            foreach (var value in values)
+            {
+                if (value.MyEquals(toCheck, comparison))
+                {
+                    return value;
+                }
+            }
+            return null;
         }
     }
 }
