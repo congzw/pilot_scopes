@@ -2,10 +2,18 @@
 {
     public class HubConst
     {
+        #region Monitor
+
+        public static string Monitor_ScopeId = "God";
+        public static string Monitor_ClientId = "Monitor";
+        public static string Monitor_MethodInClient_UpdateMonitorInvokeInfo = "UpdateMonitorInvokeInfo";
+        public static string Monitor_MethodInHub_GetClientStates = "GetClientStates";
+
+        #endregion
+
+        public static string ScopeId_Default = "Default";
         public static string Args_ScopeId = "scopeId";
         public static string Args_ClientId = "clientId";
-        public static string ScopeId_Default = "Default";
-        public static string ScopeId_God = "God";
         public static string GroupName_All = string.Empty;
 
         public static string ClientStub = "ClientStub";
