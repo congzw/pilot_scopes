@@ -17,6 +17,8 @@ namespace Common.SignalR.Scoped
     {
         public static IServiceCollection AddClientMonitors(this IServiceCollection services)
         {
+            //todo: 不用第三方的DI工具，如何支持Decorator?
+            services.AddTransient<ISignalREventDispatcher, SignalREventDispatcher>();
             services.AddScoped<SignalREventBus>();
             //services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped, typeof(SignalREventHandlerDecorator));
             services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped);
@@ -37,6 +39,24 @@ namespace Common.SignalR.Scoped
             services.AddSingleton<IClientConnectionRepository, ClientConnectionRepository>();
             services.AddScoped<IClientMonitor, ClientMonitor>();
             return services;
+        }
+
+        public static class QueryHandlerRegistration
+        {
+            //services.AddDecorator<IEmailMessageSender, EmailMessageSenderWithRetryDecorator>(decorateeServices =>
+            //{
+            //    decorateeServices.AddScoped<IEmailMessageSender, SmtpEmailMessageSender>();
+            //});
+
+            //public static IServiceCollection RegisterQueryHandler<TQueryHandler, TQuery, TResult>(this IServiceCollection services)
+            //    where TQuery : IQuery<TResult>
+            //    where TQueryHandler : class, IQueryHandler<TQuery, TResult>
+            //{
+            //    services.AddTransient<TQueryHandler>();
+            //    services.AddTransient<IQueryHandler<TQuery, TResult>>(x =>
+            //        new LoggingDecorator<TQuery, TResult>(x.GetService<ILogger<TQuery>>(), x.GetService<TQueryHandler>()));
+            //    return services;
+            //}
         }
     }
 
