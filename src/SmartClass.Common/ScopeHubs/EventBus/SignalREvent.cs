@@ -11,6 +11,8 @@ namespace SmartClass.Common.ScopeHubs
         /// 触发事件的时间
         /// </summary>
         DateTime RaiseAt { get; }
+
+        //object EventArgs { get; set; }
     }
 
     public interface IHubEvent : ISignalREvent

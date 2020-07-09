@@ -158,7 +158,7 @@
                     .build();
 
                 connectionHub.on("updateMonitorInvokeInfo", function (theArgs) {
-                    updateMonitorInvokeInfo(theArgs);
+                    _this.updateMonitorInvokeInfo(theArgs);
                 });
 
                 connectionHub.start()

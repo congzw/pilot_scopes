@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 
-namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
+namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
 {
     public class ClientStubEventHandler : ISignalREventHandler
     {

@@ -7,6 +7,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
+using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
@@ -25,6 +26,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         //连接
         public override async Task OnConnectedAsync()
         {
+            var locate = this.TryGetClientConnectionLocate();
+            if (locate.ClientId == HubConst.Monitor_ClientId)
+            {
+                var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
+                await this.Groups.AddToGroupAsync(this.Context.ConnectionId, scopeGroup);
+            }
+
             TraceHubContext("OnConnectedAsync");
             await Bus.Raise(new OnConnectedEvent(this)).ConfigureAwait(false);
             await base.OnConnectedAsync().ConfigureAwait(false);

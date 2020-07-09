@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
+using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
@@ -43,48 +44,54 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         public ManageMonitorConfig Config { get; set; } = new ManageMonitorConfig();
 
         public Action<MonitorInvokeInfo> ProcessAction { get; set; }
-
-        public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, IClientConnectionRepository repository, string invokeScopeId, string invokeClientId, string invokeDesc)
+        
+        public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, MonitorInvokeInfo info)
         {
-            var monitorEnabled = Config.UpdateMonitorInfoEnabled;
-            if (!monitorEnabled)
-            {
-                return Task.CompletedTask;
-            }
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
+            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateMonitorInvokeInfo, info);
+        }
 
-            var monitorClientLocate = ClientConnectionLocate.Create()
-                .WithScopeId(HubConst.Monitor_ScopeId)
-                .WithClientId(HubConst.Monitor_ClientId);
+        //public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, IClientConnectionRepository repository, string invokeScopeId, string invokeClientId, string invokeDesc)
+        //{
+        //    var monitorEnabled = Config.UpdateMonitorInfoEnabled;
+        //    if (!monitorEnabled)
+        //    {
+        //        return Task.CompletedTask;
+        //    }
 
-            var manageClientConn = repository.GetConnection(monitorClientLocate);
-            if (manageClientConn == null)
-            {
-                return Task.CompletedTask;
-            }
+        //    var monitorClientLocate = ClientConnectionLocate.Create()
+        //        .WithScopeId(HubConst.Monitor_ScopeId)
+        //        .WithClientId(HubConst.Monitor_ClientId);
 
-            var monitorClientProxy = hubClients.Client(manageClientConn.ConnectionId);
-            if (monitorClientProxy == null)
-            {
-                return Task.CompletedTask;
-            }
+        //    var manageClientConn = repository.GetConnection(monitorClientLocate);
+        //    if (manageClientConn == null)
+        //    {
+        //        return Task.CompletedTask;
+        //    }
 
-            var invokeInfo = new MonitorInvokeInfo();
-            invokeInfo.ScopeId = invokeScopeId;
-            invokeInfo.ClientId = invokeClientId;
-            invokeInfo.Desc = invokeDesc;
-            if (Config.IncludeConnections)
-            {
-                var theConnections = repository
-                    .Query()
-                    .Where(x => x.ScopeId.MyEquals(invokeScopeId))
-                    .OrderBy(x => x.ScopeId)
-                    .ThenBy(x => x.ClientId)
-                    .ThenBy(x => x.CreateAt).ToList();
-                invokeInfo.Connections = theConnections;
-            }
-            ProcessAction?.Invoke(invokeInfo);
-            return monitorClientProxy.SendAsync(HubConst.Monitor_MethodInClient_UpdateMonitorInvokeInfo, invokeInfo);
-        } 
+        //    var monitorClientProxy = hubClients.Client(manageClientConn.ConnectionId);
+        //    if (monitorClientProxy == null)
+        //    {
+        //        return Task.CompletedTask;
+        //    }
+
+        //    var invokeInfo = new MonitorInvokeInfo();
+        //    invokeInfo.ScopeId = invokeScopeId;
+        //    invokeInfo.ClientId = invokeClientId;
+        //    invokeInfo.Desc = invokeDesc;
+        //    if (Config.IncludeConnections)
+        //    {
+        //        var theConnections = repository
+        //            .Query()
+        //            .Where(x => x.ScopeId.MyEquals(invokeScopeId))
+        //            .OrderBy(x => x.ScopeId)
+        //            .ThenBy(x => x.ClientId)
+        //            .ThenBy(x => x.CreateAt).ToList();
+        //        invokeInfo.Connections = theConnections;
+        //    }
+        //    ProcessAction?.Invoke(invokeInfo);
+        //    return monitorClientProxy.SendAsync(HubConst.Monitor_MethodInClient_UpdateMonitorInvokeInfo, invokeInfo);
+        //} 
 
         public static ManageMonitorHelper Instance = new ManageMonitorHelper();
     }

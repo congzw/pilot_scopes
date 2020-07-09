@@ -29,16 +29,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             _repository = connRepos ?? throw new ArgumentNullException(nameof(connRepos));
             _clientInvokeProcessBus = clientInvokeProcessBus ?? throw new ArgumentNullException(nameof(clientInvokeProcessBus));
             _clientStubProcessBus = clientStubProcessBus ?? throw new ArgumentNullException(nameof(clientStubProcessBus));
-
-            //todo with a api
-            ManageMonitorHelper.Instance.Config.UpdateMonitorInfoEnabled = true;
         }
 
-        public IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);
+        public static IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);
 
         public async Task OnConnected(OnConnectedEvent theEvent)
         {
-            return;
             var hub = theEvent?.RaiseHub;
             if (hub == null)
             {
@@ -62,7 +58,14 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             
             var connectionId = locate.ConnectionId;
             HubCallerContexts[connectionId] = hub.Context;
-            
+
+            if (locate.ClientId == HubConst.Monitor_ScopeId)
+            {
+                var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
+                await hub.Groups.AddToGroupAsync(connectionId, scopeGroup);
+            }
+            return;
+
             var theConn = _repository.GetConnection(locate);
             if (theConn != null)
             {
@@ -157,37 +160,37 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var now = DateHelper.Instance.GetDateNow();
             var args = theEvent.Args;
             var hubCallerClients = theEvent.TryGetHubClients();
-            if (args.ToClientIds.Any())
-            {
-                //todo
-                //var locates = new List<IClientConnectionLocate>();
-                //foreach (var toClientId in args.ToClientIds)
-                //{
-                //    var locate = new ClientConnectionLocate()
-                //    {
-                //        ClientId = toClientId,
-                //        ScopeId = args.ScopeId
-                //    };
-                //    locates.Add(locate);
-                //}
+            //if (args.ToClientIds.Any())
+            //{
+            //    //todo
+            //    //var locates = new List<IClientConnectionLocate>();
+            //    //foreach (var toClientId in args.ToClientIds)
+            //    //{
+            //    //    var locate = new ClientConnectionLocate()
+            //    //    {
+            //    //        ClientId = toClientId,
+            //    //        ScopeId = args.ScopeId
+            //    //    };
+            //    //    locates.Add(locate);
+            //    //}
 
-                //var theConnections = _repository.GetConnections(locates).ToList();
-                //foreach (var theConnection in theConnections)
-                //{
-                //    theConnection.LastUpdateAt = now;
-                //}
-                //var connectionIds = theConnections.Select(x => x.ConnectionId).ToList();
-                //await hubCallerClients.Clients(connectionIds).SendAsync(HubConst.ClientInvoke, args);
-            }
-            else
-            {
-                var theConnections = _repository.GetConnections(args).ToList();
-                foreach (var theConnection in theConnections)
-                {
-                    theConnection.LastUpdateAt = now;
-                }
-                await hubCallerClients.All.SendAsync(HubConst.ClientInvoke, args);
-            }
+            //    //var theConnections = _repository.GetConnections(locates).ToList();
+            //    //foreach (var theConnection in theConnections)
+            //    //{
+            //    //    theConnection.LastUpdateAt = now;
+            //    //}
+            //    //var connectionIds = theConnections.Select(x => x.ConnectionId).ToList();
+            //    //await hubCallerClients.Clients(connectionIds).SendAsync(HubConst.ClientInvoke, args);
+            //}
+            //else
+            //{
+            //    var theConnections = _repository.GetConnections(args).ToList();
+            //    foreach (var theConnection in theConnections)
+            //    {
+            //        theConnection.LastUpdateAt = now;
+            //    }
+            //    await hubCallerClients.All.SendAsync(HubConst.ClientInvoke, args);
+            //}
 
             await ReportToManageMonitor(hubCallerClients, _repository, args.ScopeId, args.ClientId, nameof(ClientInvoke)).ConfigureAwait(false);
         }
@@ -210,40 +213,40 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
             var now = DateHelper.Instance.GetDateNow();
             var args = theEvent.Args;
-            if (args.ToClientIds.Any())
-            {
-                //todo
-                //var locates = new List<IClientConnectionLocate>();
-                //foreach (var toClientId in args.ToClientIds)
-                //{
-                //    var locate = new ClientConnectionLocate()
-                //    {
-                //        ClientId = toClientId,
-                //        ScopeId = args.ScopeId
-                //    };
+            //if (args.ToClientIds.Any())
+            //{
+            //    //todo
+            //    //var locates = new List<IClientConnectionLocate>();
+            //    //foreach (var toClientId in args.ToClientIds)
+            //    //{
+            //    //    var locate = new ClientConnectionLocate()
+            //    //    {
+            //    //        ClientId = toClientId,
+            //    //        ScopeId = args.ScopeId
+            //    //    };
 
-                //    locates.Add(locate);
-                //}
+            //    //    locates.Add(locate);
+            //    //}
 
-                //var theConnections = _repository.GetConnections(locates).ToList();
-                //foreach (var theConnection in theConnections)
-                //{
-                //    theConnection.LastUpdateAt = now;
-                //}
+            //    //var theConnections = _repository.GetConnections(locates).ToList();
+            //    //foreach (var theConnection in theConnections)
+            //    //{
+            //    //    theConnection.LastUpdateAt = now;
+            //    //}
 
-                //var connectionIds = theConnections.Select(x => x.ConnectionId).ToList();
-                //await hubContext.Clients.Clients(connectionIds).SendAsync(HubConst.ClientStub, args);
-            }
-            else
-            {
-                //todo: update conn
-                //var theConnections = _repository.Query().ToList();
-                //foreach (var theConnection in theConnections)
-                //{
-                //    theConnection.LastUpdateAt = now;
-                //}
-                await hubContext.Clients.All.SendAsync(HubConst.ClientStub, args);
-            }
+            //    //var connectionIds = theConnections.Select(x => x.ConnectionId).ToList();
+            //    //await hubContext.Clients.Clients(connectionIds).SendAsync(HubConst.ClientStub, args);
+            //}
+            //else
+            //{
+            //    //todo: update conn
+            //    //var theConnections = _repository.Query().ToList();
+            //    //foreach (var theConnection in theConnections)
+            //    //{
+            //    //    theConnection.LastUpdateAt = now;
+            //    //}
+            //    await hubContext.Clients.All.SendAsync(HubConst.ClientStub, args);
+            //}
 
             var hubCallerClients = theEvent.TryGetHubClients();
             await ReportToManageMonitor(hubCallerClients, _repository, args.ScopeId, args.ClientId, nameof(ClientStub)).ConfigureAwait(false);
@@ -341,8 +344,14 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             string invokeClientId,
             string invokeDesc)
         {
+            return Task.CompletedTask;
             //report to monitor, if necessary
-            return ManageMonitorHelper.Instance.UpdateMonitorInfo(hubClients, repository, invokeScopeId, invokeClientId, invokeDesc);
+            var info = new MonitorInvokeInfo();
+            info.ScopeId = invokeScopeId;
+            info.ClientId = invokeClientId;
+            info.Desc = invokeDesc;
+
+            return ManageMonitorHelper.Instance.UpdateMonitorInfo(hubClients, info);
         }
     }
 }
