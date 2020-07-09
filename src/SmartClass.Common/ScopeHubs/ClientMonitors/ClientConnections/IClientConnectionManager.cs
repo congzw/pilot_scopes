@@ -14,7 +14,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
     
     public class OnConnectedEvent : SignalREvent
     {
-        public OnConnectedEvent(Hub raiseHub) : base(raiseHub, raiseHub.TryGetScopeId())
+        public OnConnectedEvent(Hub raiseHub) : base(raiseHub)
         {
         }
     }
@@ -23,7 +23,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
     {
         public string Reason { get; set; }
 
-        public OnDisconnectedEvent(Hub raiseHub, string reason) : base(raiseHub, raiseHub.TryGetScopeId())
+        public OnDisconnectedEvent(Hub raiseHub, string reason) : base(raiseHub)
         {
             Reason = reason;
         }
@@ -33,12 +33,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
     {
         public KickClientArgs Args { get; set; }
 
-        public KickClientEvent(Hub raiseHub, KickClientArgs args) : base(raiseHub, args.ScopeId)
+        public KickClientEvent(Hub raiseHub, KickClientArgs args) : base(raiseHub)
         {
             Args = args;
         }
 
-        public KickClientEvent(HubContextWrapper context, KickClientArgs args) : base(context, args.ScopeId)
+        public KickClientEvent(HubContextWrapper context, KickClientArgs args) : base(context, new SendArgs())
         {
             Args = args;
         }

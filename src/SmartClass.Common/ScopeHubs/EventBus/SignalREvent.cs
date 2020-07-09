@@ -5,14 +5,12 @@ using Microsoft.AspNetCore.SignalR;
 // ReSharper disable once CheckNamespace
 namespace SmartClass.Common.ScopeHubs
 {
-    public interface ISignalREvent : IScopeKey, IHaveBags
+    public interface ISignalREvent : IHaveBags, ISendArgs
     {
         /// <summary>
         /// 触发事件的时间
         /// </summary>
         DateTime RaiseAt { get; }
-
-        //object EventArgs { get; set; }
     }
 
     public interface IHubEvent : ISignalREvent
@@ -58,39 +56,33 @@ namespace SmartClass.Common.ScopeHubs
     }
 
     #endregion
-    
+
     public abstract class SignalREvent : IHubEvent, IHubContextEvent
     {
         #region ctors
 
-        protected SignalREvent(Hub raiseHub, string scopeId)
+        protected SignalREvent(Hub raiseHub)
         {
-            if (string.IsNullOrWhiteSpace(scopeId))
-            {
-                throw new ArgumentNullException(nameof(scopeId));
-            }
-            ScopeId = scopeId;
             RaiseHub = raiseHub ?? throw new ArgumentNullException(nameof(raiseHub));
             RaiseAt = DateHelper.Instance.GetDateNow();
+            var callingContext = raiseHub.GetSignalREventContext();
+            SendArgs = SendArgs.Create().WithSendFrom(callingContext);
         }
 
-        protected SignalREvent(HubContextWrapper context, string scopeId)
+        protected SignalREvent(HubContextWrapper context, SendArgs sendArgs)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
-            if (string.IsNullOrWhiteSpace(scopeId))
-            {
-                throw new ArgumentNullException(nameof(scopeId));
-            }
+            SendArgs = sendArgs ?? throw new ArgumentNullException(nameof(sendArgs));
             RaiseAt = DateHelper.Instance.GetDateNow();
         }
 
         #endregion
 
-        public string ScopeId { get; set; }
         public IDictionary<string, object> Bags { get; set; }
         public DateTime RaiseAt { get; }
         public Hub RaiseHub { get; }
         public HubContextWrapper Context { get; }
+        public SendArgs SendArgs { get; set; }
 
         public bool IsCalledFromHub()
         {
@@ -109,4 +101,70 @@ namespace SmartClass.Common.ScopeHubs
             return Context.Clients;
         }
     }
+
+    public interface ISendArgs
+    {
+        SendArgs SendArgs { get; set; }
+    }
+
+    public class SendArgs
+    {
+        public ScopeClientLocate SendFrom { get; set; } = new ScopeClientLocate();
+        public IList<ScopeClientLocate> SendToScopeClients { get; set; } = new List<ScopeClientLocate>();
+        public IList<ScopeGroupLocate> SendToScopeGroups { get; set; } = new List<ScopeGroupLocate>();
+
+        public bool IsEmptyTarget()
+        {
+            return SendToScopeClients.Count == 0 && SendToScopeGroups.Count == 0;
+        }
+        public bool IsEmptyClient()
+        {
+            return string.IsNullOrWhiteSpace(SendFrom.ClientId);
+        }
+
+        public SendArgs WithSendFrom(IScopeClientLocate locate)
+        {
+            this.SendFrom.CopyFrom(locate);
+            return this;
+        }
+        public SendArgs WithSendToGroups(IScopeClientLocate locate)
+        {
+            this.SendFrom.CopyFrom(locate);
+            return this;
+        }
+        public SendArgs WithSendToClients(params IScopeClientLocate[] locates)
+        {
+            foreach (var locate in locates)
+            {
+                var theOne = SendToScopeClients.Locate(locate);
+                if (theOne != null)
+                {
+                    SendToScopeClients.Add(ScopeClientLocate.Create(locate.ScopeId, locate.ClientId));
+                }
+            }
+            return this;
+        }
+        public SendArgs WithSendToGroups(params IScopeGroupLocate[] locates)
+        {
+            foreach (var locate in locates)
+            {
+                var theOne = SendToScopeGroups.Locate(locate);
+                if (theOne != null)
+                {
+                    SendToScopeGroups.Add(ScopeGroupLocate.Create(locate.ScopeId, locate.Group));
+                }
+            }
+            return this;
+        }
+
+        public static SendArgs Create()
+        {
+            return new SendArgs();
+        }
+        public static SendArgs CreateScopeGroupAll(string scopeId)
+        {
+            return Create().WithSendToGroups(ScopeGroupLocate.CreateScopeGroupAll(scopeId));
+        }
+    }
+
 }

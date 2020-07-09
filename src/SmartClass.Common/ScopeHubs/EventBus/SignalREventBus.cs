@@ -61,7 +61,8 @@ namespace SmartClass.Common.ScopeHubs
             Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", eventName,
                 JsonConvert.SerializeObject(theEvent.Bags, Formatting.None)));
             var info = new MonitorInvokeInfo();
-            info.ScopeId = theEvent.ScopeId;
+            //theEvent.SendArgs;
+            info.ScopeId = theEvent.SendArgs.SendFrom.ScopeId;
             info.ClientId = ""; //todo: read from context claims
             info.Desc = eventName;
             //todo with a api

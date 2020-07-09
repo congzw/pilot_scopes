@@ -7,12 +7,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
     {
         public AddToGroupArgs Args { get; set; }
 
-        public AddToGroupEvent(Hub raiseHub, AddToGroupArgs args) : base(raiseHub, args.ScopeId)
+        public AddToGroupEvent(Hub raiseHub, AddToGroupArgs args) : base(raiseHub)
         {
             Args = args;
         }
 
-        public AddToGroupEvent(HubContextWrapper context, AddToGroupArgs args) : base(context, args.ScopeId)
+        public AddToGroupEvent(HubContextWrapper context, AddToGroupArgs args) : base(context, new SendArgs())
         {
             Args = args;
         }

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 
@@ -34,6 +37,31 @@ namespace SmartClass.Common.ScopeHubs
             return string.Empty;
         }
 
+        public static SignalREventCallingContext GetSignalREventContext(this HttpContext httpContext)
+        {
+            var scopeId = httpContext.TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
+            var clientId = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientId, string.Empty);
+            var userId = string.Empty;
+
+            ////todo: read from claim
+            //var user = httpContext.User;
+            //var scopeId = user.FindFirst("ScopeId").Value;
+            //var clientId = user.FindFirst("ClientId").Value;
+            //var userId = user.Claims.Single(x => x.Type == ClaimTypes.Name).Value;
+
+            var ctx = new SignalREventCallingContext();
+            ctx.ScopeId = scopeId;
+            ctx.ClientId = clientId;
+            ctx.UserId = userId;
+
+            return ctx;
+        }
+
+        public static SignalREventCallingContext GetSignalREventContext(this Hub hub)
+        {
+            return hub.TryGetHttpContext().GetSignalREventContext();
+        }
+        
         public static THub FixScopeIdForArgs<THub>(this THub hub, IScopeKey args) where THub : Hub
         {
             if (string.IsNullOrWhiteSpace(args.ScopeId))
@@ -42,5 +70,12 @@ namespace SmartClass.Common.ScopeHubs
             }
             return hub;
         }
+    }
+
+    public class SignalREventCallingContext : IScopeClientLocate
+    {
+        public string ScopeId { get; set; }
+        public string ClientId { get; set; }
+        public string UserId { get; set; }
     }
 }

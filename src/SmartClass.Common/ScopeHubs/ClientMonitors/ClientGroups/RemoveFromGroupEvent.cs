@@ -7,7 +7,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
     {
         public RemoveFromGroupArgs Args { get; set; }
 
-        public RemoveFromGroupEvent(Hub raiseHub, RemoveFromGroupArgs args) : base(raiseHub, args.ScopeId)
+        public RemoveFromGroupEvent(Hub raiseHub, RemoveFromGroupArgs args) : base(raiseHub)
         {
             Args = args;
         }

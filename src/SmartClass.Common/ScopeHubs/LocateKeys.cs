@@ -66,11 +66,24 @@
     {
         public string ScopeId { get; set; }
         public string ClientId { get; set; }
+        public static ScopeClientLocate Create(string scopeId, string clientId)
+        {
+            return new ScopeClientLocate { ScopeId = scopeId, ClientId = clientId };
+        }
     }
     public class ScopeGroupLocate : IScopeGroupLocate
     {
         public string ScopeId { get; set; }
         public string Group { get; set; }
+
+        public static ScopeGroupLocate Create(string scopeId, string group)
+        {
+            return new ScopeGroupLocate { ScopeId = scopeId, Group = group };
+        }
+        public static ScopeGroupLocate CreateScopeGroupAll(string scopeId)
+        {
+            return Create(scopeId, HubConst.GroupName_All);
+        }
     }
     public class ScopeClientGroupLocate : IScopeClientGroupLocate
     {
@@ -78,6 +91,6 @@
         public string ClientId { get; set; }
         public string Group { get; set; }
     }
-    
+
     #endregion
 }

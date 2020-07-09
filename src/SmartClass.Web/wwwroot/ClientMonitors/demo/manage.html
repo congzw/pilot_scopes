@@ -39,8 +39,6 @@
                     </select>
                 </div>
                 <div>
-                    <input type="button" class="btn btn-primary" id="btnUpdateMessage" value="UpdateMessage" />
-                    <input type="button" class="btn btn-primary" id="btnUpdateState" value="UpdateState" />
                     <input type="button" class="btn btn-primary" id="btnUpdateConnections" value="UpdateConnections" />
                 </div>
             </div>
@@ -164,32 +162,6 @@
                 connectionHub.start()
                     .then(function () {
                         console.log("与服务器连接成功");
-                        document.getElementById('btnUpdateMessage').addEventListener('click', function (event) {
-
-                            var ticks = ((new Date().getTime() * 10000) + 621355968000000000);
-                            var theArgs = {
-                                method: "updateMessage",
-                                methodArgs: { message: '[' + ticks + ']' },
-                                bags: {
-                                    foo: "foo"
-                                }
-                            };
-                            connectionHub.invoke(clientInvoke, theArgs);
-                            event.preventDefault();
-                        });
-                        document.getElementById('btnUpdateState').addEventListener('click', function (event) {
-
-                            var ticks = ((new Date().getTime() * 10000) + 621355968000000000);
-                            var theArgs = {
-                                method: "updateState",
-                                methodArgs: { state: '<' + ticks + '>' },
-                                bags: {
-                                    bar: "bar"
-                                }
-                            };
-                            connectionHub.invoke(clientInvoke, theArgs);
-                            event.preventDefault();
-                        });
                         document.getElementById('btnUpdateConnections').addEventListener('click', function (event) {
 
                             var ticks = ((new Date().getTime() * 10000) + 621355968000000000);

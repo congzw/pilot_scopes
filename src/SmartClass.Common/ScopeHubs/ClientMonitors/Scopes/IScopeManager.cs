@@ -16,12 +16,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
     {
         public ResetScopeArgs Args { get; }
 
-        public ResetScopeEvent(Hub raiseHub, ResetScopeArgs args) : base(raiseHub, args.ScopeId)
+        public ResetScopeEvent(Hub raiseHub, ResetScopeArgs args) : base(raiseHub)
         {
             Args = args;
         }
 
-        public ResetScopeEvent(HubContextWrapper context, ResetScopeArgs args) : base(context, args.ScopeId)
+        public ResetScopeEvent(HubContextWrapper context, ResetScopeArgs args) : base(context, new SendArgs())
         {
             Args = args;
         }
@@ -31,12 +31,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
     {
         public UpdateScopeArgs Args { get; set; }
 
-        public UpdateScopeEvent(Hub raiseHub, UpdateScopeArgs args) : base(raiseHub, args.ScopeId)
+        public UpdateScopeEvent(Hub raiseHub, UpdateScopeArgs args) : base(raiseHub)
         {
             Args = args;
         }
 
-        public UpdateScopeEvent(HubContextWrapper context, UpdateScopeArgs args) : base(context, args.ScopeId)
+        public UpdateScopeEvent(HubContextWrapper context, UpdateScopeArgs args) : base(context, new SendArgs())
         {
         }
     }
