@@ -91,8 +91,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             await theConn.UpdateConnectionGroups(hub);
 
             _repository.AddOrUpdate(theConn);
-
-            await ReportToManageMonitor(hub.Clients, _repository, locate.ScopeId, locate.ClientId, nameof(OnConnected)).ConfigureAwait(false);
         }
 
         public async Task OnDisconnected(OnDisconnectedEvent theEvent)
@@ -117,8 +115,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             conn.ConnectionId = string.Empty;
             conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
             _repository.AddOrUpdate(conn);
-
-            await ReportToManageMonitor(hub.Clients, _repository, conn.ScopeId, conn.ClientId, nameof(OnDisconnected)).ConfigureAwait(false);
         }
 
         public async Task KickClient(KickClientEvent theEvent)
@@ -141,7 +137,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 var wrapper = theEvent.Context;
                 await Kick(wrapper.Clients, wrapper.Groups, HubCallerContexts, _repository, args).ConfigureAwait(false);
             }
-            await ReportToManageMonitor(theEvent.TryGetHubClients(), _repository, args.ScopeId, args.ClientId, "OnKick").ConfigureAwait(false);
         }
 
         public async Task ClientInvoke(ClientInvokeEvent theEvent)
@@ -192,7 +187,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             //    await hubCallerClients.All.SendAsync(HubConst.ClientInvoke, args);
             //}
 
-            await ReportToManageMonitor(hubCallerClients, _repository, args.ScopeId, args.ClientId, nameof(ClientInvoke)).ConfigureAwait(false);
         }
 
         public async Task ClientStub(ClientStubEvent theEvent)
@@ -248,8 +242,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             //    await hubContext.Clients.All.SendAsync(HubConst.ClientStub, args);
             //}
 
-            var hubCallerClients = theEvent.TryGetHubClients();
-            await ReportToManageMonitor(hubCallerClients, _repository, args.ScopeId, args.ClientId, nameof(ClientStub)).ConfigureAwait(false);
         }
 
         public Task<IList<ScopeGroup>> GetGroups(IScopeGroupLocate args)
@@ -335,23 +327,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
             hubCallerContexts.TryGetValue(theConn.ConnectionId, out var oldClientHub);
             oldClientHub?.Abort();
-        }
-
-        private static Task ReportToManageMonitor(
-            IHubClients<IClientProxy> hubClients,
-            IClientConnectionRepository repository,
-            string invokeScopeId,
-            string invokeClientId,
-            string invokeDesc)
-        {
-            return Task.CompletedTask;
-            ////report to monitor, if necessary
-            //var info = new MonitorInvokeInfo();
-            //info.ScopeId = invokeScopeId;
-            //info.ClientId = invokeClientId;
-            //info.Desc = invokeDesc;
-
-            //return ManageMonitorHelper.Instance.UpdateMonitorInfo(hubClients, info);
         }
     }
 }
