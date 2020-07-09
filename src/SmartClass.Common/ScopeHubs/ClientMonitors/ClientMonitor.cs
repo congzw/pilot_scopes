@@ -345,13 +345,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             string invokeDesc)
         {
             return Task.CompletedTask;
-            //report to monitor, if necessary
-            var info = new MonitorInvokeInfo();
-            info.ScopeId = invokeScopeId;
-            info.ClientId = invokeClientId;
-            info.Desc = invokeDesc;
+            ////report to monitor, if necessary
+            //var info = new MonitorInvokeInfo();
+            //info.ScopeId = invokeScopeId;
+            //info.ClientId = invokeClientId;
+            //info.Desc = invokeDesc;
 
-            return ManageMonitorHelper.Instance.UpdateMonitorInfo(hubClients, info);
+            //return ManageMonitorHelper.Instance.UpdateMonitorInfo(hubClients, info);
         }
     }
 }

@@ -94,6 +94,7 @@
         </div>
     </div>
     <script type="text/javascript">
+    var eventInvoked = "eventInvoked";
 
     var app = new Vue({
         el: '#app',
@@ -121,8 +122,8 @@
             }
         },
         methods: {
-            updateMonitorInvokeInfo: function (args) {
-                console.log('updateMonitorInvokeInfo', args);
+            eventInvoked: function (args) {
+                console.log(eventInvoked, args);
             },
             updateMessage: function (args) {
                 console.log('call updateMessage', args);
@@ -155,28 +156,13 @@
                     .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId)
                     .build();
 
-                connectionHub.on("updateMonitorInvokeInfo", function (theArgs) {
-                    _this.updateMonitorInvokeInfo(theArgs);
+                connectionHub.on(eventInvoked, function (theArgs) {
+                    _this[eventInvoked](theArgs);
                 });
 
                 connectionHub.start()
                     .then(function () {
                         console.log("与服务器连接成功");
-                        document.getElementById('btnUpdateConnections').addEventListener('click', function (event) {
-
-                            var ticks = ((new Date().getTime() * 10000) + 621355968000000000);
-                            var theArgs = {
-                                method: "btnUpdateConnections",
-                                methodArgs: { state: '<' + ticks + '>' },
-                                bags: {
-                                    bar: "bar"
-                                }
-                            };
-
-                            //connectionHub.invoke(invokeClientStub, theArgs);
-                            connectionHub.invoke("KickClient", theArgs);
-                            event.preventDefault();
-                        });
                     })
                     .catch(error => {
                         console.error(error.message);

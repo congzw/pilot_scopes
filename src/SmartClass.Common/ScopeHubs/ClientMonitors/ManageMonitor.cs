@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
@@ -8,47 +7,38 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
-    public class MonitorInvokeInfo : IHaveBags
+    public class EventInvokeInfo : ISendArgs
     {
-        public MonitorInvokeInfo()
-        {
-            Bags = BagsHelper.Create();
-            Connections = new List<MyConnection>();
-            InvokeAt = DateHelper.Instance.GetDateNow();
-        }
-
-        /// <summary>
-        /// 当前触发的ScopeId
-        /// </summary>
-        public string ScopeId { get; set; }
-
-        /// <summary>
-        /// 当前触发的ClientId
-        /// </summary>
-        public string ClientId { get; set; }
-
         /// <summary>
         /// 交互分类的描述
         /// </summary>
         public string Desc { get; set; }
-
-        public DateTime InvokeAt { get; set; }
-
-        public IDictionary<string, object> Bags { get; set; }
-
-        public IList<MyConnection> Connections { get; set; }
+        public SendArgs SendArgs { get; set; }
+        public DateTime InvokeAt { get; set; } = DateHelper.Instance.GetDateNow();
+        public IList<MyConnection> Connections { get; set; } = new List<MyConnection>();
     }
 
     public class ManageMonitorHelper
     {
         public ManageMonitorConfig Config { get; set; } = new ManageMonitorConfig();
 
-        public Action<MonitorInvokeInfo> ProcessAction { get; set; }
+        public Action<EventInvokeInfo> ProcessAction { get; set; }
         
-        public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, MonitorInvokeInfo info)
+        //public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, EventInvokeInfo info)
+        //{
+        //    var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
+        //    return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_EventInvoked, info);
+        //}
+
+        public Task EventInvoked(IHubClients<IClientProxy> hubClients, EventInvokeInfo info)
         {
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
-            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateMonitorInvokeInfo, info);
+            if (Config.IncludeConnections)
+            {
+                //todo: add connections
+                //info.Connections = ...
+            }
+            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_EventInvoked, info);
         }
 
         //public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, IClientConnectionRepository repository, string invokeScopeId, string invokeClientId, string invokeDesc)

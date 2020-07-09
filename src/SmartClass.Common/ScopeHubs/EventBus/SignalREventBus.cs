@@ -60,14 +60,13 @@ namespace SmartClass.Common.ScopeHubs
 
             Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", eventName,
                 JsonConvert.SerializeObject(theEvent.Bags, Formatting.None)));
-            var info = new MonitorInvokeInfo();
-            //theEvent.SendArgs;
-            info.ScopeId = theEvent.SendArgs.SendFrom.ScopeId;
-            info.ClientId = ""; //todo: read from context claims
+            var info = new EventInvokeInfo();
+            info.SendArgs = theEvent.SendArgs;
             info.Desc = eventName;
             //todo with a api
             ManageMonitorHelper.Instance.Config.UpdateMonitorInfoEnabled = true;
-            return ManageMonitorHelper.Instance.UpdateMonitorInfo(hubClients, info);
+            ManageMonitorHelper.Instance.Config.IncludeConnections = true;
+            return ManageMonitorHelper.Instance.EventInvoked(hubClients, info);
         }
     }
 }
