@@ -21,17 +21,20 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         private readonly IClientConnectionRepository _repository;
         private readonly ClientInvokeProcessBus _clientInvokeProcessBus;
         private readonly ClientStubProcessBus _clientStubProcessBus;
+        private readonly HubCallerContextCache _hubCallerContextCache;
 
         public ClientMonitor(IClientConnectionRepository connRepos
             , ClientInvokeProcessBus clientInvokeProcessBus
-            , ClientStubProcessBus clientStubProcessBus)
+            , ClientStubProcessBus clientStubProcessBus
+            , HubCallerContextCache hubCallerContextCache)
         {
             _repository = connRepos ?? throw new ArgumentNullException(nameof(connRepos));
             _clientInvokeProcessBus = clientInvokeProcessBus ?? throw new ArgumentNullException(nameof(clientInvokeProcessBus));
             _clientStubProcessBus = clientStubProcessBus ?? throw new ArgumentNullException(nameof(clientStubProcessBus));
+            _hubCallerContextCache = hubCallerContextCache;
         }
 
-        public static IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);
+        //public static IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);
 
         public async Task OnConnected(OnConnectedEvent theEvent)
         {
@@ -57,7 +60,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             }
             
             var connectionId = locate.ConnectionId;
-            HubCallerContexts[connectionId] = hub.Context;
+            _hubCallerContextCache.HubCallerContexts[connectionId] = hub.Context;
 
             if (locate.ClientId == HubConst.Monitor_ScopeId)
             {
@@ -130,12 +133,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var hub = theEvent.RaiseHub;
             if (hub != null)
             {
-                await Kick(hub.Clients, hub.Groups, HubCallerContexts, _repository, args).ConfigureAwait(false);
+                await Kick(hub.Clients, hub.Groups, _hubCallerContextCache.HubCallerContexts, _repository, args).ConfigureAwait(false);
             }
             else
             {
                 var wrapper = theEvent.Context;
-                await Kick(wrapper.Clients, wrapper.Groups, HubCallerContexts, _repository, args).ConfigureAwait(false);
+                await Kick(wrapper.Clients, wrapper.Groups, _hubCallerContextCache.HubCallerContexts, _repository, args).ConfigureAwait(false);
             }
         }
 
@@ -328,5 +331,10 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             hubCallerContexts.TryGetValue(theConn.ConnectionId, out var oldClientHub);
             oldClientHub?.Abort();
         }
+    }
+
+    public class HubCallerContextCache
+    {
+        public IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);
     }
 }

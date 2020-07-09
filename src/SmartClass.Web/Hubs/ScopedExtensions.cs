@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Common.DependencyInjection;
 using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
@@ -36,6 +33,7 @@ namespace Common.SignalR.Scoped
             //    services.Decorate<ISignalREventHandler, SignalREventHandlerDecorator>();
             //}
 
+            services.AddSingleton<HubCallerContextCache>();
             services.AddSingleton<IClientConnectionRepository, ClientConnectionRepository>();
             services.AddScoped<IClientMonitor, ClientMonitor>();
             return services;
