@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
@@ -27,6 +29,9 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             _repository = connRepos ?? throw new ArgumentNullException(nameof(connRepos));
             _clientInvokeProcessBus = clientInvokeProcessBus ?? throw new ArgumentNullException(nameof(clientInvokeProcessBus));
             _clientStubProcessBus = clientStubProcessBus ?? throw new ArgumentNullException(nameof(clientStubProcessBus));
+
+            //todo with a api
+            ManageMonitorHelper.Instance.Config.UpdateMonitorInfoEnabled = true;
         }
 
         public IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);
@@ -195,7 +200,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 throw new ArgumentException("Hub context is null");
             }
             await _clientStubProcessBus.Process(theEvent).ConfigureAwait(false);
-
+            
+            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", "ClientStub", JsonConvert.SerializeObject(theEvent.Args, Formatting.None)));
             ////todo
             //if (theEvent.StopSendToAll)
             //{
@@ -230,11 +236,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             }
             else
             {
-                var theConnections = _repository.Query().ToList();
-                foreach (var theConnection in theConnections)
-                {
-                    theConnection.LastUpdateAt = now;
-                }
+                //todo: update conn
+                //var theConnections = _repository.Query().ToList();
+                //foreach (var theConnection in theConnections)
+                //{
+                //    theConnection.LastUpdateAt = now;
+                //}
                 await hubContext.Clients.All.SendAsync(HubConst.ClientStub, args);
             }
 
@@ -334,10 +341,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             string invokeClientId,
             string invokeDesc)
         {
-            return Task.CompletedTask;
-            //todo
-            ////report to monitor, if necessary
-            //return ManageMonitorHelper.Instance.UpdateMonitorInfo(hubClients, repository, invokeScopeId, invokeClientId, invokeDesc);
+            //report to monitor, if necessary
+            return ManageMonitorHelper.Instance.UpdateMonitorInfo(hubClients, repository, invokeScopeId, invokeClientId, invokeDesc);
         }
     }
 }

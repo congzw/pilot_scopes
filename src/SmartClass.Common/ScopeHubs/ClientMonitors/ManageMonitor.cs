@@ -7,9 +7,9 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
-    public class ClientStateInfo : IHaveBags
+    public class MonitorInvokeInfo : IHaveBags
     {
-        public ClientStateInfo()
+        public MonitorInvokeInfo()
         {
             Bags = BagsHelper.Create();
             Connections = new List<MyConnection>();
@@ -42,7 +42,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
     {
         public ManageMonitorConfig Config { get; set; } = new ManageMonitorConfig();
 
-        public Action<ClientStateInfo> ProcessAction { get; set; }
+        public Action<MonitorInvokeInfo> ProcessAction { get; set; }
 
         public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, IClientConnectionRepository repository, string invokeScopeId, string invokeClientId, string invokeDesc)
         {
@@ -68,7 +68,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 return Task.CompletedTask;
             }
 
-            var invokeInfo = new ClientStateInfo();
+            var invokeInfo = new MonitorInvokeInfo();
             invokeInfo.ScopeId = invokeScopeId;
             invokeInfo.ClientId = invokeClientId;
             invokeInfo.Desc = invokeDesc;

@@ -13,13 +13,11 @@
 <body>
     <div class="wrapper" id="app">
         <div class="container">
-            <a href="/ClientMonitors/demo/manage.html" target="_blank">manage</a>
-            <hr />
-            <h2>ScopeId: <span> {{ currentScopeId }}</span></h2>
-            <h2>ClientId: <span> {{ currentClientId }}</span></h2>
-            <h2>State: <span> {{ currentState }}</span></h2>
-            <h2>Message: <span> {{ currentMessage }}</span></h2>
-            <h2>Notify: <span> {{ currentNotify }}</span></h2>
+            <h2>ScopeId: <span>  {{ currentScopeId }}</span></h2>
+            <h2>ClientId: <span>  {{ currentClientId }}</span></h2>
+            <h2>State: <span>  {{ currentState }}</span></h2>
+            <h2>Message: <span>  {{ currentMessage }}</span></h2>
+            <h2>Notify: <span>  {{ currentNotify }}</span></h2>
             <hr />
             <div class="select-bar">
                 <div class="select-label">筛选：</div>
@@ -99,18 +97,6 @@
     </div>
     <script type="text/javascript">
 
-    function TryGetParams(name, defaultValue) {
-        var sPageURL = window.location.search.substring(1);
-        var sURLVariables = sPageURL.split('&');
-        for (var i = 0; i < sURLVariables.length; i++) {
-            var sParameterName = sURLVariables[i].split('=');
-            if (sParameterName[0] === name) {
-                return sParameterName[1];
-            }
-        }
-        return defaultValue;
-    };
-
     var app = new Vue({
         el: '#app',
         data: {
@@ -137,6 +123,9 @@
             }
         },
         methods: {
+            updateMonitorInvokeInfo: function (args) {
+                console.log('updateMonitorInvokeInfo', args);
+            },
             updateMessage: function (args) {
                 console.log('call updateMessage', args);
                 this.currentMessage = args.message;
@@ -158,8 +147,8 @@
             connect: function () {
                 var _this = this;
 
-                var scopeId = TryGetParams("scopeId", "s1");
-                var clientId = TryGetParams("clientId", "c1");
+                var scopeId = "monitor_scope";
+                var clientId = "monitor_client";
                 this.currentScopeId = scopeId;
                 this.currentClientId = clientId;
 
@@ -168,22 +157,8 @@
                     .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId)
                     .build();
 
-                var clientInvoke = "ClientInvoke";
-                connectionHub.on(clientInvoke, function (theArgs) {
-                    console.log('callback: ' + clientInvoke, theArgs);
-                    if (theArgs.method) {
-                        _this[theArgs.method](theArgs.methodArgs);
-                    }
-                    //todo more
-                });
-
-                var clientStub = "ClientStub";
-                connectionHub.on(clientStub, function (theArgs) {
-                    console.log('callback: ' + clientStub, theArgs);
-                    if (theArgs.method) {
-                        _this[theArgs.method](theArgs.methodArgs);
-                    }
-                    //todo more
+                connectionHub.on("updateMonitorInvokeInfo", function (theArgs) {
+                    updateMonitorInvokeInfo(theArgs);
                 });
 
                 connectionHub.start()
