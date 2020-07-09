@@ -1,20 +1,11 @@
-﻿using System.Diagnostics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
 {
     public class ClientStubEventHandler : ISignalREventHandler
     {
-        //private readonly IClientMonitor _clientMonitor;
-
-        //public ClientStubEventHandler(IClientMonitor clientMonitor)
-        //{
-        //    _clientMonitor = clientMonitor;
-        //}
-
         public float HandleOrder { get; set; }
         public bool ShouldHandle(ISignalREvent @event)
         {
@@ -29,7 +20,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
             }
 
             var theEvent = (ClientStubEvent)@event;
-            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", "ClientStub", JsonConvert.SerializeObject(theEvent.Args, Formatting.None)));
+            EventLogHelper.Resolve().Log(theEvent);
             var hubClients = theEvent.TryGetHubClients();
             await hubClients.All.SendAsync("ClientStub", theEvent.Args);
             //await _clientMonitor.ClientStub(theEvent);

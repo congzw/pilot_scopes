@@ -13,22 +13,18 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         /// 交互分类的描述
         /// </summary>
         public string Desc { get; set; }
+
+        public string ConnectionId { get; set; }
         public SendArgs SendArgs { get; set; }
         public DateTime InvokeAt { get; set; } = DateHelper.Instance.GetDateNow();
         public IList<MyConnection> Connections { get; set; } = new List<MyConnection>();
     }
-
+    
     public class ManageMonitorHelper
     {
         public ManageMonitorConfig Config { get; set; } = new ManageMonitorConfig();
 
         public Action<EventInvokeInfo> ProcessAction { get; set; }
-        
-        //public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, EventInvokeInfo info)
-        //{
-        //    var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
-        //    return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_EventInvoked, info);
-        //}
 
         public Task EventInvoked(IHubClients<IClientProxy> hubClients, EventInvokeInfo info)
         {
@@ -38,7 +34,15 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 //todo: add connections
                 //info.Connections = ...
             }
+
+            //info.Desc += scopeGroup;
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_EventInvoked, info);
+        }
+
+        public Task ServerLog(IHubClients<IClientProxy> hubClients, object logInfo)
+        {
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
+            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_ServerLog, logInfo);
         }
 
         //public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, IClientConnectionRepository repository, string invokeScopeId, string invokeClientId, string invokeDesc)
@@ -98,5 +102,10 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         /// 是否包含连接列表
         /// </summary>
         public bool IncludeConnections { get; set; }
+
+        /// <summary>
+        /// 是否包含服务器端的日志
+        /// </summary>
+        public bool ServerLogEnabled { get; set; }
     }
 }

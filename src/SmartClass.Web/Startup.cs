@@ -24,6 +24,7 @@ namespace SmartClass.Web
             fileServerOptions.DefaultFilesOptions.DefaultFileNames = defaultPages;
 
             app.UseFileServer(fileServerOptions);
+            app.UseClientMonitors();
 
             ////pipeline demo for hub
             //app.Use(async (context, next) =>
@@ -37,7 +38,7 @@ namespace SmartClass.Web
             //        await next.Invoke();
             //    }
             //});
-            
+
             app.UseSignalR(routes =>
             {
                 routes.MapHub<_AnyHub>("/DemoHub");

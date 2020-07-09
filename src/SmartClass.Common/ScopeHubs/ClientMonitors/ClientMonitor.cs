@@ -33,9 +33,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             _clientStubProcessBus = clientStubProcessBus ?? throw new ArgumentNullException(nameof(clientStubProcessBus));
             _hubCallerContextCache = hubCallerContextCache;
         }
-
-        //public static IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);
-
+        
         public async Task OnConnected(OnConnectedEvent theEvent)
         {
             var hub = theEvent?.RaiseHub;
@@ -62,11 +60,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var connectionId = locate.ConnectionId;
             _hubCallerContextCache.HubCallerContexts[connectionId] = hub.Context;
 
-            if (locate.ClientId == HubConst.Monitor_ScopeId)
-            {
-                var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
-                await hub.Groups.AddToGroupAsync(connectionId, scopeGroup);
-            }
             return;
 
             var theConn = _repository.GetConnection(locate);
@@ -200,8 +193,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 throw new ArgumentException("Hub context is null");
             }
             await _clientStubProcessBus.Process(theEvent).ConfigureAwait(false);
-            
-            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", "ClientStub", JsonConvert.SerializeObject(theEvent.Args, Formatting.None)));
+
+            EventLogHelper.Resolve().Log(theEvent);
             ////todo
             //if (theEvent.StopSendToAll)
             //{

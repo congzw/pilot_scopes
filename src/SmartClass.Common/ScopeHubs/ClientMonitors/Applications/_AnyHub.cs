@@ -17,7 +17,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
     {
         public _AnyHub(SignalREventBus hubEventBus)
         {
-            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", "CTOR", string.Empty));
+            EventLogHelper.Resolve().Log(string.Format("[_AnyHub] {0} >>>>>>>> {1}", "CTOR", string.Empty));
             Bus = hubEventBus;
         }
 
@@ -31,17 +31,21 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
             {
                 var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
                 await this.Groups.AddToGroupAsync(this.Context.ConnectionId, scopeGroup);
+                await this.Groups.AddToGroupAsync(this.Context.ConnectionId, scopeGroup);
             }
 
-            TraceHubContext("OnConnectedAsync");
-            await Bus.Raise(new OnConnectedEvent(this)).ConfigureAwait(false);
+            //TraceHubContext("OnConnectedAsync");
+            var onConnectedEvent = new OnConnectedEvent(this);
+            await Bus.Raise(onConnectedEvent).ConfigureAwait(false);
+
+            EventLogHelper.Resolve().Log(onConnectedEvent);
             await base.OnConnectedAsync().ConfigureAwait(false);
         }
 
         //断开
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            TraceHubContext("OnDisconnectedAsync");
+            //TraceHubContext("OnDisconnectedAsync");
             var reason = exception == null ? "" : exception.Message;
             await Bus.Raise(new OnDisconnectedEvent(this, reason)).ConfigureAwait(false);
             await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
@@ -126,7 +130,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
             //[13704] [_AnyHub] OnDisconnectedAsync >>>>>>>> ?scopeId=s1&clientId=c2&id=gMop-YWYX7zbRWdqJOhyig
             //[10664] [_AnyHub] KickClient >>>>>>>> ?scopeId=s1&clientId=c1&id=hB1kQwNfvF9bu-Tp_cSaig
             //[10664] [_AnyHub] InvokeClientStub >>>>>>>> ?scopeId=s1&clientId=c1&id=hB1kQwNfvF9bu-Tp_cSaig
-            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", method, this.TryGetHttpContext().Request.QueryString));
+            EventLogHelper.Resolve().Log(string.Format("[_AnyHub] {0} >>>>>>>> {1}", method, this.TryGetHttpContext().Request.QueryString));
         }
     }
 }

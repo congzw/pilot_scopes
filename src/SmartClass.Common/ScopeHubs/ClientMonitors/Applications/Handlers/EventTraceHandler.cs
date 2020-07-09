@@ -24,7 +24,7 @@
 //            var hubClients = theEvent.TryGetHubClients();
 //            var eventName = theEvent.GetType().Name;
 
-//            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", eventName, JsonConvert.SerializeObject(theEvent.Bags, Formatting.None)));
+//            EventLogHelper.Resolve().Log(string.Format("[_AnyHub] {0} >>>>>>>> {1}", eventName, JsonConvert.SerializeObject(theEvent.Bags, Formatting.None)));
 //            var info = new MonitorInvokeInfo();
 //            info.ScopeId = theEvent.ScopeId;
 //            info.ClientId = ""; //todo: read from context claims

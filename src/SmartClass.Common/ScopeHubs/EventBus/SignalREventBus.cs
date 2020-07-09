@@ -52,20 +52,19 @@ namespace SmartClass.Common.ScopeHubs
             await _dispatcher.Dispatch(@event).ConfigureAwait(false);
         }
 
-        private static Task TraceAsync(ISignalREvent @event)
+        private Task TraceAsync(ISignalREvent @event)
         {
             var theEvent = (SignalREvent) @event;
             var hubClients = theEvent.TryGetHubClients();
             var eventName = theEvent.GetType().Name;
-
-            Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", eventName,
-                JsonConvert.SerializeObject(theEvent.Bags, Formatting.None)));
             var info = new EventInvokeInfo();
             info.SendArgs = theEvent.SendArgs;
             info.Desc = eventName;
             //todo with a api
             ManageMonitorHelper.Instance.Config.UpdateMonitorInfoEnabled = true;
             ManageMonitorHelper.Instance.Config.IncludeConnections = true;
+
+            info.ConnectionId = theEvent.RaiseHub?.Context?.ConnectionId;
             return ManageMonitorHelper.Instance.EventInvoked(hubClients, info);
         }
     }

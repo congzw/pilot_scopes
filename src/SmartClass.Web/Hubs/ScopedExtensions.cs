@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Common.DependencyInjection;
 using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
@@ -33,10 +35,18 @@ namespace Common.SignalR.Scoped
             //    services.Decorate<ISignalREventHandler, SignalREventHandlerDecorator>();
             //}
 
+
+            services.AddSingleton<IEventLogHelper, HubClientLogHelper>();
             services.AddSingleton<HubCallerContextCache>();
             services.AddSingleton<IClientConnectionRepository, ClientConnectionRepository>();
             services.AddScoped<IClientMonitor, ClientMonitor>();
             return services;
+        }
+
+        public static IApplicationBuilder UseClientMonitors(this IApplicationBuilder sp)
+        {
+            EventLogHelper.Resolve = () => sp.ApplicationServices.GetRequiredService<IEventLogHelper>();
+            return sp;
         }
 
         public static class QueryHandlerRegistration
