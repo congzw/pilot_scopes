@@ -22,7 +22,7 @@ namespace SmartClass.Web
         {
             var fileServerOptions = new FileServerOptions();
             var defaultPages = new List<string>();
-            defaultPages.Add("ClientMonitors/demo/SignalrMonitor.html");
+            defaultPages.Add("ClientMonitors/index.html");
             fileServerOptions.DefaultFilesOptions.DefaultFileNames = defaultPages;
 
             app.UseFileServer(fileServerOptions);
