@@ -37,6 +37,7 @@ namespace Common.SignalR.Scoped
 
             
             services.AddSingleton<IEventLogHelper, HubClientLogHelper>();
+            services.AddSingleton<ScopeClientConnectionKeyMaps>();
             services.AddSingleton<HubCallerContextCache>();
             services.AddScoped<IClientConnectionRepository, ClientConnectionRepository>();
             services.AddScoped<IClientMonitor, ClientMonitor>();

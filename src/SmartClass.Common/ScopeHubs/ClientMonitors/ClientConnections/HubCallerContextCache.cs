@@ -16,7 +16,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
             this.HubCallerContexts[hub.Context.ConnectionId] = hub.Context;
             return this;
         }
-        
+
         public HubCallerContext GetCache(Hub hub, string connectionId)
         {
             this.HubCallerContexts.TryGetValue(connectionId, out var value);
