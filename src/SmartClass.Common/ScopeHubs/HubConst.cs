@@ -16,6 +16,7 @@
         public static string ScopeId_Default = "Default";
         public static string Args_ScopeId = "scopeId";
         public static string Args_ClientId = "clientId";
+        public static string Args_ClientType = "clientType";
         public static string GroupName_All = string.Empty;
 
         public static string ClientStub = "ClientStub";
