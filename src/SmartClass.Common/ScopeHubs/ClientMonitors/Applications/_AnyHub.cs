@@ -40,7 +40,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         public async Task KickClient(KickClientArgs args)
         {
             //todo: check auth
-            TraceHubContext("KickClient");
             await Bus.Raise(new KickClientEvent(this, args)).ConfigureAwait(false);
             await base.OnConnectedAsync().ConfigureAwait(false);
         }
