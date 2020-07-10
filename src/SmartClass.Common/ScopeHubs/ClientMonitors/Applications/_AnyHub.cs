@@ -26,24 +26,22 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         //连接
         public override async Task OnConnectedAsync()
         {
-            await base.OnConnectedAsync().ConfigureAwait(false);
             await Bus.Raise(new OnConnectedEvent(this)).ConfigureAwait(false);
+            await base.OnConnectedAsync().ConfigureAwait(false);
         }
 
         //断开
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
             var reason = exception == null ? "" : exception.Message;
             await Bus.Raise(new OnDisconnectedEvent(this, reason)).ConfigureAwait(false);
+            await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
         }
         
         //踢掉（管理场景）
         public async Task KickClient(KickClientArgs args)
         {
             //todo: check auth
-            //god should not use this
-            //this.FixScopeIdForArgs(args);
             TraceHubContext("KickClient");
             await Bus.Raise(new KickClientEvent(this, args)).ConfigureAwait(false);
             await base.OnConnectedAsync().ConfigureAwait(false);
@@ -53,8 +51,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         public Task ResetScope(ResetScopeArgs args)
         {
             //todo: check auth
-            //god should not use this
-            //this.FixScopeIdForArgs(args);
+            this.FixScopeIdForArgs(args);
             TraceHubContext("ResetScope");
             return Bus.Raise(new ResetScopeEvent(this, args));
         }
@@ -63,8 +60,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         public Task UpdateScope(UpdateScopeArgs args)
         {
             //todo: check auth
-            //god should not use this
-            //this.FixScopeIdForArgs(args);
+            this.FixScopeIdForArgs(args);
             TraceHubContext("UpdateScope");
             return Bus.Raise(new UpdateScopeEvent(this, args));
         }
