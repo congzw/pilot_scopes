@@ -50,6 +50,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         /// <returns></returns>
         Task ClientStub(ClientMethodArgs args);
 
+        //Yagni:业务上暂不考虑此场景?
         /// <summary>
         /// 踢掉Client
         /// </summary>

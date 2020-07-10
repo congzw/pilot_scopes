@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
@@ -7,7 +6,6 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
@@ -38,7 +36,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
             await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
         }
         
-        //踢掉（管理场景）
+        //强制断开，踢掉（用于集中控制，或管理场景）
         public async Task KickClient(KickClientArgs args)
         {
             //todo: check auth

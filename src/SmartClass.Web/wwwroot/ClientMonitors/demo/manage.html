@@ -15,9 +15,6 @@
         <div class="container">
             <h2>ScopeId: <span>  {{ currentScopeId }}</span></h2>
             <h2>ClientId: <span>  {{ currentClientId }}</span></h2>
-            <h2>State: <span>  {{ currentState }}</span></h2>
-            <h2>Message: <span>  {{ currentMessage }}</span></h2>
-            <h2>Notify: <span>  {{ currentNotify }}</span></h2>
             <hr />
             <div class="select-bar">
                 <div class="select-label">筛选：</div>
@@ -102,9 +99,6 @@
             el: '#app',
             data: {
                 clientConnections: [],
-                currentMessage: 'Hello',
-                currentState: 'Foo',
-                currentNotify: '',
                 currentScopeId: '',
                 currentClientId: '',
                 isTableLayout: true // 默认表格布局
@@ -135,14 +129,6 @@
                     if (args.clientConnections) {
                         this.clientConnections = args.clientConnections;
                     }
-                },
-                updateMessage: function (args) {
-                    console.log('call updateMessage', args);
-                    this.currentMessage = args.message;
-                },
-                updateState: function (args) {
-                    console.log('call updateState', args);
-                    this.currentState = args.state;
                 },
                 connect: function () {
                     var _this = this;
