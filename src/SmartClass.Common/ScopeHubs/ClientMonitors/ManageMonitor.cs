@@ -9,17 +9,25 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
     public class EventInvokeInfo : ISendArgs
     {
-        /// <summary>
-        /// 交互分类的描述
-        /// </summary>
         public string Desc { get; set; }
-
         public string ConnectionId { get; set; }
         public SendArgs SendArgs { get; set; }
         public DateTime InvokeAt { get; set; } = DateHelper.Instance.GetDateNow();
         public IList<MyConnection> Connections { get; set; } = new List<MyConnection>();
     }
-    
+
+    public class ServerLogInfo
+    {
+        public string Category { get; set; }
+        public string Message { get; set; }
+        public object Details { get; set; }
+
+        public static ServerLogInfo Create(string message, object details = null, string category = "")
+        {
+            return new ServerLogInfo(){Category = "[ServerLog]" + category, Message = message, Details = details};
+        }
+    }
+
     public class ManageMonitorHelper
     {
         public ManageMonitorConfig Config { get; set; } = new ManageMonitorConfig();
@@ -39,7 +47,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_EventInvoked, info);
         }
 
-        public Task ServerLog(IHubClients<IClientProxy> hubClients, object logInfo)
+        public Task ServerLog(IHubClients<IClientProxy> hubClients, ServerLogInfo logInfo)
         {
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_ServerLog, logInfo);

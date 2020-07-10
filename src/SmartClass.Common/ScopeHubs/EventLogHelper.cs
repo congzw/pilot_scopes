@@ -45,7 +45,8 @@ namespace SmartClass.Common.ScopeHubs
                 return;
             }
             var hubClients = theEvent.TryGetHubClients();
-            ManageMonitorHelper.Instance.ServerLog(hubClients, theEvent.SendArgs);
+            
+            ManageMonitorHelper.Instance.ServerLog(hubClients, ServerLogInfo.Create(theEvent.GetType().Name, theEvent.SendArgs));
         }
     }
 }
