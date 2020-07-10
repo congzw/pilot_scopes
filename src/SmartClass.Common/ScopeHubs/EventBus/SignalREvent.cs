@@ -83,6 +83,7 @@ namespace SmartClass.Common.ScopeHubs
         public Hub RaiseHub { get; }
         public HubContextWrapper Context { get; }
         public SendArgs SendArgs { get; set; }
+        public bool StopSend { get; set; } //todo: rename
 
         public bool IsCalledFromHub()
         {
@@ -107,64 +108,47 @@ namespace SmartClass.Common.ScopeHubs
         SendArgs SendArgs { get; set; }
     }
 
+
     public class SendArgs
     {
-        public ScopeClientLocate SendFrom { get; set; } = new ScopeClientLocate();
-        public IList<ScopeClientLocate> SendToScopeClients { get; set; } = new List<ScopeClientLocate>();
-        public IList<ScopeGroupLocate> SendToScopeGroups { get; set; } = new List<ScopeGroupLocate>();
-
-        public bool IsEmptyTarget()
-        {
-            return SendToScopeClients.Count == 0 && SendToScopeGroups.Count == 0;
-        }
-        public bool IsEmptyClient()
-        {
-            return string.IsNullOrWhiteSpace(SendFrom.ClientId);
-        }
+        public SendFromScopeArgs SendFrom { get; set; } = new SendFromScopeArgs();
+        public SendToScopeArgs SendTo { get; set; } = new SendToScopeArgs();
 
         public SendArgs WithSendFrom(IScopeClientLocate locate)
         {
             this.SendFrom.CopyFrom(locate);
             return this;
         }
-        public SendArgs WithSendToGroups(IScopeClientLocate locate)
-        {
-            this.SendFrom.CopyFrom(locate);
-            return this;
-        }
-        public SendArgs WithSendToClients(params IScopeClientLocate[] locates)
-        {
-            foreach (var locate in locates)
-            {
-                var theOne = SendToScopeClients.Locate(locate);
-                if (theOne != null)
-                {
-                    SendToScopeClients.Add(ScopeClientLocate.Create(locate.ScopeId, locate.ClientId));
-                }
-            }
-            return this;
-        }
-        public SendArgs WithSendToGroups(params IScopeGroupLocate[] locates)
-        {
-            foreach (var locate in locates)
-            {
-                var theOne = SendToScopeGroups.Locate(locate);
-                if (theOne != null)
-                {
-                    SendToScopeGroups.Add(ScopeGroupLocate.Create(locate.ScopeId, locate.Group));
-                }
-            }
-            return this;
-        }
-
         public static SendArgs Create()
         {
             return new SendArgs();
         }
-        public static SendArgs CreateScopeGroupAll(string scopeId)
+        public static SendArgs CreateForScopeGroupAll(string scopeId)
         {
-            return Create().WithSendToGroups(ScopeGroupLocate.CreateScopeGroupAll(scopeId));
+            var sendArgs = new SendArgs();
+            sendArgs.SendTo = SendToScopeArgs.CreateForScopeGroupAll(scopeId);
+            return sendArgs;
         }
     }
 
+    public class SendToScopeArgs : IScopeKey
+    {
+        public string ScopeId { get; set; }
+        public IList<string> ClientIds { get; set; } = new List<string>();
+        public IList<string> Groups { get; set; } = new List<string>();
+
+        public static SendToScopeArgs CreateForScopeGroupAll(string scopeId)
+        {
+            var sendToScopeArgs = new SendToScopeArgs();
+            sendToScopeArgs.WithScopeId(scopeId);
+            sendToScopeArgs.Groups.Add(HubConst.GroupName_All);
+            return sendToScopeArgs;
+        }
+    }
+
+    public class SendFromScopeArgs : IScopeClientLocate
+    {
+        public string ScopeId { get; set; }
+        public string ClientId { get; set; }
+    }
 }

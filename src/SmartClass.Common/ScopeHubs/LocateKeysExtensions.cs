@@ -66,7 +66,22 @@ namespace SmartClass.Common.ScopeHubs
         {
             return string.Format("{0}.{1}", locate.ScopeId, locate.Group);
         }
+        public static IReadOnlyList<string> ToScopeGroupFullNames(this IEnumerable<IScopeGroupLocate> locates)
+        {
+            return locates.Select(x => x.ToScopeGroupFullName()).ToList();
+        }
 
+
+        public static string GetScopeClientKey(this IScopeClientLocate locate)
+        {
+            if (locate == null) throw new ArgumentNullException(nameof(locate));
+            return string.Format("{0}.{1}", locate.ScopeId, locate.ClientId);
+        }
+        public static string GetScopeGroupKey(this IScopeGroupLocate locate)
+        {
+            if (locate == null) throw new ArgumentNullException(nameof(locate));
+            return string.Format("{0}.{1}", locate.ScopeId, locate.Group);
+        }
         public static bool SameLocateKey(this IScopeClientLocate locate, IScopeClientLocate locate2)
         {
             if (locate == null || locate2 == null)
@@ -83,7 +98,11 @@ namespace SmartClass.Common.ScopeHubs
             }
             return locate.ScopeId.MyEquals(locate2.ScopeId) && locate.Group.MyEquals(locate2.Group);
         }
-
+        
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> list)
+        {
+            return !list.Any();
+        }
         public static T Locate<T>(this IEnumerable<T> locates, IScopeClientLocate locateArgs) where T : IScopeClientLocate
         {
             return locates.FirstOrDefault(x => x.SameLocateKey(locateArgs));
@@ -91,6 +110,32 @@ namespace SmartClass.Common.ScopeHubs
         public static T Locate<T>(this IEnumerable<T> locates, IScopeGroupLocate locateArgs) where T : IScopeGroupLocate
         {
             return locates.FirstOrDefault(x => x.SameLocateKey(locateArgs));
+        }
+        public static IEnumerable<T> LocateList<T>(this IList<T> locates, IList<IScopeClientLocate> locateArgs) where T : IScopeClientLocate
+        {
+            foreach (var locate in locates)
+            {
+                foreach (var locateArg in locateArgs)
+                {
+                    if (locateArg.SameLocateKey(locate))
+                    {
+                        yield return locate;
+                    }
+                }
+            }
+        }
+        public static IEnumerable<T> LocateList<T>(this IList<T> locates, IList<IScopeGroupLocate> locateArgs) where T : IScopeGroupLocate
+        {
+            foreach (var locate in locates)
+            {
+                foreach (var locateArg in locateArgs)
+                {
+                    if (locateArg.SameLocateKey(locate))
+                    {
+                        yield return locate;
+                    }
+                }
+            }
         }
     }
 }

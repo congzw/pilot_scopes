@@ -1,4 +1,7 @@
-﻿namespace SmartClass.Common.ScopeHubs
+﻿using System;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
+
+namespace SmartClass.Common.ScopeHubs
 {
     public interface IScopeKey
     {
@@ -60,6 +63,17 @@
         public static ClientConnectionLocate Create()
         {
             return new ClientConnectionLocate();
+        }
+        
+        public static ClientConnectionLocate CreateFrom(IClientConnectionLocate locate)
+        {
+            if (locate == null) throw new ArgumentNullException(nameof(locate));
+
+            var newLocate = new ClientConnectionLocate();
+            newLocate.WithScopeId(locate.ScopeId);
+            newLocate.WithClientId(locate.ClientId);
+            newLocate.WithConnectionId(locate.ConnectionId);
+            return newLocate;
         }
     }
     public class ScopeClientLocate : IScopeClientLocate
