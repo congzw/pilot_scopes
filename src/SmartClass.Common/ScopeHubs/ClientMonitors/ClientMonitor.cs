@@ -141,6 +141,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var now = DateHelper.Instance.GetDateNow();
             var args = theEvent.Args;
             var hubCallerClients = theEvent.TryGetHubClients();
+            await hubCallerClients.All.SendAsync(HubConst.ClientInvoke, args);
+
             //if (args.ToClientIds.Any())
             //{
             //    //todo
@@ -193,6 +195,9 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
             var now = DateHelper.Instance.GetDateNow();
             var args = theEvent.Args;
+            var hubCallerClients = theEvent.TryGetHubClients();
+            await hubCallerClients.All.SendAsync(HubConst.ClientStub, args);
+            
             //if (args.ToClientIds.Any())
             //{
             //    //todo
