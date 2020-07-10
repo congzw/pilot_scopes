@@ -125,13 +125,13 @@
             },
             methods: {
                 eventInvoked: function (args) {
-                    console.log("eventInvoked", args);
+                    console.log("[eventInvoked]", args);
                 },
                 serverLog: function (args) {
-                    console.log(">> serverLog", args);
+                    console.log("[serverLog]", args);
                 },
                 updateConnections: function (args) {
-                    console.log('call updateConnections', args);
+                    console.log('[updateConnections]', args);
                     if (args.clientConnections) {
                         this.clientConnections = args.clientConnections;
                     }
@@ -143,10 +143,6 @@
                 updateState: function (args) {
                     console.log('call updateState', args);
                     this.currentState = args.state;
-                },
-                notify: function (args) {
-                    console.log('call notify', args);
-                    this.currentNotify = args.message;
                 },
                 connect: function () {
                     var _this = this;
@@ -174,6 +170,11 @@
                     connectionHub.start()
                         .then(function () {
                             console.log("与服务器连接成功");
+                            
+                            document.getElementById('btnUpdateConnections').addEventListener('click', function (event) {
+                                console.log("todo: ajax get connections");
+                                event.preventDefault();
+                            });
                         })
                         .catch(error => {
                             console.error(error.message);
