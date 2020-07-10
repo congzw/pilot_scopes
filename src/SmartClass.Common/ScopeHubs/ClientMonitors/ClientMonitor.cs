@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -43,60 +42,35 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 throw new ArgumentException("hub should be init first!");
             }
 
+            var callingContext = hub.TryGetHttpContext().GetSignalREventContext();
             var locate = hub.TryGetClientConnectionLocate();
-            if (string.IsNullOrWhiteSpace(locate.ClientId))
-            {
-                throw new ArgumentException("ClientId not find!");
-            }
-            if (string.IsNullOrWhiteSpace(locate.ScopeId))
-            {
-                throw new ArgumentException("ScopeId not find!");
-            }
-            if (string.IsNullOrWhiteSpace(locate.ConnectionId))
-            {
-                throw new ArgumentException("SignalRConnectionId not find!");
-            }
+            AllPropsShouldHasValue(locate);
 
-            var connectionId = locate.ConnectionId;
-            _hubCallerContextCache.HubCallerContexts[connectionId] = hub.Context;
-            
-            //fix scope groups
-            var scopeGroup = ScopeGroupName.GetScopedGroupAll(locate.ScopeId).ToScopeGroupFullName();
-            await hub.Groups.AddToGroupAsync(hub.Context.ConnectionId, scopeGroup);
-            var monitorScopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
-            await hub.Groups.AddToGroupAsync(hub.Context.ConnectionId, monitorScopeGroup);
-
-            //if (locate.ClientId == HubConst.Monitor_ClientId)
-            //{
-            //    var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
-            //    await hub.Groups.AddToGroupAsync(hub.Context.ConnectionId, scopeGroup);
-            //}
-
-            return;
+            _hubCallerContextCache.SetCache(hub);
+            await ScopeGroupFix.OnConnected(hub, locate.ScopeId);
 
             var theConn = _repository.GetConnection(locate);
             if (theConn != null)
             {
                 //找到之前的记录，更新一个新的connectionId
-                theConn.ConnectionId = connectionId;
+                theConn.ConnectionId = locate.ConnectionId;
             }
             else
             {
                 //没有记录，新创建一个
                 theConn = new MyConnection();
                 var now = DateHelper.Instance.GetDateNow();
-                theConn.ConnectionId = connectionId;
-                theConn.CreateAt = now;
-                theConn.LastUpdateAt = now;
                 theConn.ScopeId = locate.ScopeId;
                 theConn.ClientId = locate.ClientId;
-                theConn.ConnectionId = connectionId;
-                theConn.ClientType = hub.TryGetClientType();
-                theConn.Bags.Add("access_token", "todo: refactor");
+                theConn.ConnectionId = locate.ConnectionId;
+                theConn.CreateAt = now;
+                theConn.LastUpdateAt = now;
+                theConn.ClientType = callingContext.ClientType;
+                //theConn.Bags.Add("access_token", "todo: refactor");
+                
+                theConn.AddScopeGroupIfNotExist(ScopeGroupName.GetScopedGroupAll(locate.ScopeId));
+                await theConn.UpdateConnectionGroups(hub);
             }
-
-            theConn.AddScopeGroupIfNotExist(ScopeGroupName.GetScopedGroupAll(locate.ScopeId));
-            await theConn.UpdateConnectionGroups(hub);
 
             _repository.AddOrUpdate(theConn);
         }
@@ -111,44 +85,22 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             }
 
             var locate = hub.TryGetClientConnectionLocate();
-            if (string.IsNullOrWhiteSpace(locate.ClientId))
+            AllPropsShouldHasValue(locate);
+
+            _hubCallerContextCache.GetCache(hub, locate.ConnectionId);
+            await ScopeGroupFix.OnDisconnected(hub, locate.ScopeId);
+
+            var conn = _repository.GetConnection(locate);
+            if (conn == null)
             {
-                throw new ArgumentException("ClientId not find!");
-            }
-            if (string.IsNullOrWhiteSpace(locate.ScopeId))
-            {
-                throw new ArgumentException("ScopeId not find!");
-            }
-            if (string.IsNullOrWhiteSpace(locate.ConnectionId))
-            {
-                throw new ArgumentException("SignalRConnectionId not find!");
+                //find no conn, should never enter here
+                return;
             }
 
-            //fix scope groups
-            var scopeGroup = ScopeGroupName.GetScopedGroupAll(locate.ScopeId).ToScopeGroupFullName();
-            await hub.Groups.RemoveFromGroupAsync(hub.Context.ConnectionId, scopeGroup);
-            var monitorScopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
-            await hub.Groups.RemoveFromGroupAsync(hub.Context.ConnectionId, monitorScopeGroup);
-
-            //var hub = theEvent?.RaiseHub;
-            //if (hub == null)
-            //{
-            //    //should not enter here! 
-            //    throw new InvalidOperationException("hub should be init first!");
-            //}
-
-            //var connectionId = hub.Context.ConnectionId;
-            //var conn = _repository.GetConnection(ClientConnectionLocate.Create().WithConnectionId(connectionId));
-            //if (conn == null)
-            //{
-            //    //find no conn, should never enter here
-            //    return;
-            //}
-
-            ////不删除myConnection数据，仅仅把connectionId设置为string.empty，标识当前为掉线状态
-            //conn.ConnectionId = string.Empty;
-            //conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
-            //_repository.AddOrUpdate(conn);
+            //不删除myConnection数据，仅仅把connectionId设置为string.empty，标识当前为掉线状态
+            conn.ConnectionId = string.Empty;
+            conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
+            _repository.AddOrUpdate(conn);
         }
 
         public async Task KickClient(KickClientEvent theEvent)
@@ -362,10 +314,25 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             hubCallerContexts.TryGetValue(theConn.ConnectionId, out var oldClientHub);
             oldClientHub?.Abort();
         }
-    }
 
-    public class HubCallerContextCache
-    {
-        public IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);
+
+
+        private static IClientConnectionLocate AllPropsShouldHasValue(IClientConnectionLocate locate)
+        {
+            if (string.IsNullOrWhiteSpace(locate.ClientId))
+            {
+                throw new ArgumentException("ClientId not find!");
+            }
+            if (string.IsNullOrWhiteSpace(locate.ScopeId))
+            {
+                throw new ArgumentException("ScopeId not find!");
+            }
+            if (string.IsNullOrWhiteSpace(locate.ConnectionId))
+            {
+                throw new ArgumentException("SignalRConnectionId not find!");
+            }
+
+            return locate;
+        }
     }
 }

@@ -32,7 +32,7 @@ namespace SmartClass.Common.ScopeHubs
             var monitorHelper = ManageMonitorHelper.Instance;
             //todo with a api
             monitorHelper.Config.UpdateMonitorInfoEnabled = true;
-            monitorHelper.Config.IncludeConnections = true;
+            monitorHelper.Config.UpdateConnectionsEnabled = true;
             monitorHelper.Config.ServerLogEnabled = true;
         }
 

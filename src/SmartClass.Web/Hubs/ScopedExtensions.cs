@@ -7,6 +7,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
+using SmartClass.DAL;
 
 // ReSharper disable CheckNamespace
 
@@ -16,9 +17,15 @@ namespace Common.SignalR.Scoped
     {
         public static IServiceCollection AddClientMonitors(this IServiceCollection services)
         {
-            //todo: 不用第三方的DI工具，如何支持Decorator?
             services.AddTransient<ISignalREventDispatcher, SignalREventDispatcher>();
             services.AddScoped<SignalREventBus>();
+            //todo by config
+            //todo: 不用第三方的DI工具，如何支持Decorator?
+            //var traceEventBus = false;
+            //if (traceEventBus)
+            //{
+            //    services.Decorate<ISignalREventHandler, SignalREventHandlerDecorator>();
+            //}
             //services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped, typeof(SignalREventHandlerDecorator));
             services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped);
 
@@ -28,17 +35,10 @@ namespace Common.SignalR.Scoped
             services.AddScoped<ClientStubProcessBus>();
             services.AddAllImpl<IClientStubProcess>(ServiceLifetime.Scoped);
 
-            //todo by config
-            //var traceEventBus = false;
-            //if (traceEventBus)
-            //{
-            //    services.Decorate<ISignalREventHandler, SignalREventHandlerDecorator>();
-            //}
-
-
+            
             services.AddSingleton<IEventLogHelper, HubClientLogHelper>();
             services.AddSingleton<HubCallerContextCache>();
-            services.AddSingleton<IClientConnectionRepository, ClientConnectionRepository>();
+            services.AddScoped<IClientConnectionRepository, ClientConnectionRepository>();
             services.AddScoped<IClientMonitor, ClientMonitor>();
             return services;
         }

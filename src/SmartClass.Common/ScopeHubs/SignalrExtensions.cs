@@ -14,13 +14,13 @@ namespace SmartClass.Common.ScopeHubs
             return hub?.Context?.GetHttpContext();
         }
 
-        public static string TryGetScopeId(this Hub hub)
+        private static string TryGetScopeId(this Hub hub)
         {
             //todo: read from token
             return hub.TryGetHttpContext().TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
         }
 
-        public static string TryGetClientId(this Hub hub)
+        private static string TryGetClientId(this Hub hub)
         {
             //todo: read from token
             ////post args : {"scopeId" : "abc"}
@@ -31,7 +31,7 @@ namespace SmartClass.Common.ScopeHubs
             return clientId;
         }
 
-        public static string TryGetClientType(this Hub hub)
+        private static string TryGetClientType(this Hub hub)
         {
             //todo: read from token
             return string.Empty;
@@ -42,17 +42,20 @@ namespace SmartClass.Common.ScopeHubs
             var scopeId = httpContext.TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
             var clientId = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientId, string.Empty);
             var userId = string.Empty;
+            var clientType = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientType, string.Empty);
 
             ////todo: read from claim
             //var user = httpContext.User;
             //var scopeId = user.FindFirst("ScopeId").Value;
             //var clientId = user.FindFirst("ClientId").Value;
+            //var clientType = user.FindFirst("ClientType").Value;
             //var userId = user.Claims.Single(x => x.Type == ClaimTypes.Name).Value;
 
             var ctx = new SignalREventCallingContext();
             ctx.ScopeId = scopeId;
             ctx.ClientId = clientId;
             ctx.UserId = userId;
+            ctx.ClientType = clientType;
 
             return ctx;
         }
@@ -77,5 +80,6 @@ namespace SmartClass.Common.ScopeHubs
         public string ScopeId { get; set; }
         public string ClientId { get; set; }
         public string UserId { get; set; }
+        public string ClientType { get; set; }
     }
 }
