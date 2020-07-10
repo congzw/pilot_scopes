@@ -66,13 +66,13 @@ namespace SmartClass.Common.ScopeHubs
             RaiseHub = raiseHub ?? throw new ArgumentNullException(nameof(raiseHub));
             RaiseAt = DateHelper.Instance.GetDateNow();
             var callingContext = raiseHub.GetSignalREventContext();
-            SendArgs = SendArgs.Create().WithSendFrom(callingContext);
+            //SendArgs = SendArgs.Create().WithSendFrom(callingContext);
         }
 
         protected SignalREvent(HubContextWrapper context, SendArgs sendArgs)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
-            SendArgs = sendArgs ?? throw new ArgumentNullException(nameof(sendArgs));
+            //SendArgs = sendArgs ?? throw new ArgumentNullException(nameof(sendArgs));
             RaiseAt = DateHelper.Instance.GetDateNow();
         }
 
@@ -102,7 +102,7 @@ namespace SmartClass.Common.ScopeHubs
             return Context.Clients;
         }
     }
-    
+
     public class SendArgs
     {
         public SendFromScopeArgs SendFrom { get; set; } = new SendFromScopeArgs();

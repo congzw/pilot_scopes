@@ -263,7 +263,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 return;
             }
 
-            var eventArgs = clientMethodArgs;
             var sendArgs = theEvent.SendArgs;
 
             var sendTo = sendArgs?.SendTo;
@@ -276,7 +275,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             foreach (var group in sendTo.Groups)
             {
                 var groupFullName = ScopeGroupName.GetScopedGroup(sendTo.ScopeId, @group).ToScopeGroupFullName();
-                await hubCallerClients.Groups(groupFullName).SendAsync(clientMethod, eventArgs);
+                await hubCallerClients.Groups(groupFullName).SendAsync(clientMethod, clientMethodArgs);
             }
 
             var connectionIds = new List<string>();
@@ -291,7 +290,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
             if (!connectionIds.IsNullOrEmpty())
             {
-                await hubCallerClients.Clients(connectionIds).SendAsync(clientMethod, eventArgs);
+                await hubCallerClients.Clients(connectionIds).SendAsync(clientMethod, clientMethodArgs);
             }
         }
     }

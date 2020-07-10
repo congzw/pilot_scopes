@@ -5,6 +5,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
     public interface IClientMethod : IHaveBags
     {
         string Method { get; set; }
+        object MethodArgs { get; set; }
     }
 
     public class ClientMethodArgs : IClientMethod, IScopeClientLocate
@@ -16,13 +17,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
             ToGroups = new List<string>();
         }
         
-        public string ScopeId { get; set; }
         public string Method { get; set; }
         public object MethodArgs { get; set; }
         public IDictionary<string, object> Bags { get; set; }
 
-        public string ClientId { get; set; }
         public string ComponentId { get; set; }
+        public string ScopeId { get; set; }
+        public string ClientId { get; set; }
         public List<string> ToClientIds { get; set; }
         public List<string> ToGroups { get; set; }
 
