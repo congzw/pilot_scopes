@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs
@@ -73,13 +69,5 @@ namespace SmartClass.Common.ScopeHubs
             }
             return hub;
         }
-    }
-
-    public class SignalREventCallingContext : IScopeClientLocate
-    {
-        public string ScopeId { get; set; }
-        public string ClientId { get; set; }
-        public string UserId { get; set; }
-        public string ClientType { get; set; }
     }
 }
