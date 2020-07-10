@@ -56,9 +56,21 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             {
                 throw new ArgumentException("SignalRConnectionId not find!");
             }
-            
+
             var connectionId = locate.ConnectionId;
             _hubCallerContextCache.HubCallerContexts[connectionId] = hub.Context;
+            
+            //fix scope groups
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(locate.ScopeId).ToScopeGroupFullName();
+            await hub.Groups.AddToGroupAsync(hub.Context.ConnectionId, scopeGroup);
+            var monitorScopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
+            await hub.Groups.AddToGroupAsync(hub.Context.ConnectionId, monitorScopeGroup);
+
+            //if (locate.ClientId == HubConst.Monitor_ClientId)
+            //{
+            //    var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
+            //    await hub.Groups.AddToGroupAsync(hub.Context.ConnectionId, scopeGroup);
+            //}
 
             return;
 
@@ -91,7 +103,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
         public async Task OnDisconnected(OnDisconnectedEvent theEvent)
         {
-            return;
             var hub = theEvent?.RaiseHub;
             if (hub == null)
             {
@@ -99,18 +110,45 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 throw new InvalidOperationException("hub should be init first!");
             }
 
-            var connectionId = hub.Context.ConnectionId;
-            var conn = _repository.GetConnection(ClientConnectionLocate.Create().WithConnectionId(connectionId));
-            if (conn == null)
+            var locate = hub.TryGetClientConnectionLocate();
+            if (string.IsNullOrWhiteSpace(locate.ClientId))
             {
-                //find no conn, should never enter here
-                return;
+                throw new ArgumentException("ClientId not find!");
+            }
+            if (string.IsNullOrWhiteSpace(locate.ScopeId))
+            {
+                throw new ArgumentException("ScopeId not find!");
+            }
+            if (string.IsNullOrWhiteSpace(locate.ConnectionId))
+            {
+                throw new ArgumentException("SignalRConnectionId not find!");
             }
 
-            //不删除myConnection数据，仅仅把connectionId设置为string.empty，标识当前为掉线状态
-            conn.ConnectionId = string.Empty;
-            conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
-            _repository.AddOrUpdate(conn);
+            //fix scope groups
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(locate.ScopeId).ToScopeGroupFullName();
+            await hub.Groups.RemoveFromGroupAsync(hub.Context.ConnectionId, scopeGroup);
+            var monitorScopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
+            await hub.Groups.RemoveFromGroupAsync(hub.Context.ConnectionId, monitorScopeGroup);
+
+            //var hub = theEvent?.RaiseHub;
+            //if (hub == null)
+            //{
+            //    //should not enter here! 
+            //    throw new InvalidOperationException("hub should be init first!");
+            //}
+
+            //var connectionId = hub.Context.ConnectionId;
+            //var conn = _repository.GetConnection(ClientConnectionLocate.Create().WithConnectionId(connectionId));
+            //if (conn == null)
+            //{
+            //    //find no conn, should never enter here
+            //    return;
+            //}
+
+            ////不删除myConnection数据，仅仅把connectionId设置为string.empty，标识当前为掉线状态
+            //conn.ConnectionId = string.Empty;
+            //conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
+            //_repository.AddOrUpdate(conn);
         }
 
         public async Task KickClient(KickClientEvent theEvent)

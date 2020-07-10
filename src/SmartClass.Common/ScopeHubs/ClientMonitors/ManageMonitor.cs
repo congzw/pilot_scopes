@@ -28,7 +28,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
         public Task EventInvoked(IHubClients<IClientProxy> hubClients, EventInvokeInfo info)
         {
-            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
             if (Config.IncludeConnections)
             {
                 //todo: add connections
@@ -41,7 +41,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
         public Task ServerLog(IHubClients<IClientProxy> hubClients, object logInfo)
         {
-            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_ServerLog, logInfo);
         }
 

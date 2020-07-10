@@ -44,26 +44,27 @@ namespace SmartClass.Common.ScopeHubs
         public SignalREventBus(ISignalREventDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
+
+            //todo: config with a api
+            ManageMonitorHelper.Instance.Config.UpdateMonitorInfoEnabled = true;
+            ManageMonitorHelper.Instance.Config.IncludeConnections = true;
         }
 
         public async Task Raise(ISignalREvent @event)
         {
-            await TraceAsync(@event).ConfigureAwait(false);
+            await TraceAsync(@event, " handling").ConfigureAwait(false);
             await _dispatcher.Dispatch(@event).ConfigureAwait(false);
+            await TraceAsync(@event, " handled").ConfigureAwait(false);
         }
 
-        private Task TraceAsync(ISignalREvent @event)
+        private Task TraceAsync(ISignalREvent @event, string descAppend)
         {
             var theEvent = (SignalREvent) @event;
             var hubClients = theEvent.TryGetHubClients();
             var eventName = theEvent.GetType().Name;
             var info = new EventInvokeInfo();
             info.SendArgs = theEvent.SendArgs;
-            info.Desc = eventName;
-            //todo with a api
-            ManageMonitorHelper.Instance.Config.UpdateMonitorInfoEnabled = true;
-            ManageMonitorHelper.Instance.Config.IncludeConnections = true;
-
+            info.Desc = eventName + descAppend;
             info.ConnectionId = theEvent.RaiseHub?.Context?.ConnectionId;
             return ManageMonitorHelper.Instance.EventInvoked(hubClients, info);
         }

@@ -26,29 +26,16 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         //连接
         public override async Task OnConnectedAsync()
         {
-            var locate = this.TryGetClientConnectionLocate();
-            if (locate.ClientId == HubConst.Monitor_ClientId)
-            {
-                var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToFullName();
-                await this.Groups.AddToGroupAsync(this.Context.ConnectionId, scopeGroup);
-                await this.Groups.AddToGroupAsync(this.Context.ConnectionId, scopeGroup);
-            }
-
-            //TraceHubContext("OnConnectedAsync");
-            var onConnectedEvent = new OnConnectedEvent(this);
-            await Bus.Raise(onConnectedEvent).ConfigureAwait(false);
-
-            EventLogHelper.Resolve().Log(onConnectedEvent);
             await base.OnConnectedAsync().ConfigureAwait(false);
+            await Bus.Raise(new OnConnectedEvent(this)).ConfigureAwait(false);
         }
 
         //断开
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            //TraceHubContext("OnDisconnectedAsync");
+            await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
             var reason = exception == null ? "" : exception.Message;
             await Bus.Raise(new OnDisconnectedEvent(this, reason)).ConfigureAwait(false);
-            await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
         }
         
         //踢掉（管理场景）

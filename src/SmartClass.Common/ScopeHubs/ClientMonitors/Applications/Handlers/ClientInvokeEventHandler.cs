@@ -26,8 +26,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
             }
             //todo: ClientInvoke process bus
             var theEvent = (ClientInvokeEvent)@event;
-            //var hubClients = theEvent.TryGetHubClients();
-            //await hubClients.All.SendAsync("ClientInvoke", theEvent.Args);
             await _clientMonitor.ClientInvoke(theEvent);
         }
     }

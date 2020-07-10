@@ -35,7 +35,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
         public void CopyTo(MyConnection conn)
         {
             MyModelHelper.TryCopyProperties(conn, this);
-
             conn.Bags = this.Bags;
             conn.Groups = this.Groups;
         }
@@ -43,20 +42,20 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
         #region groups
         
         public IList<string> Groups { get; set; }
-        public void AddScopeGroupIfNotExist(ScopeGroupName scopeGroupName)
+        public void AddScopeGroupIfNotExist(IScopeGroupLocate scopeGroupName)
         {
             if (scopeGroupName == null) throw new ArgumentNullException(nameof(scopeGroupName));
-            var groupName = scopeGroupName.ToFullName();
+            var groupName = scopeGroupName.ToScopeGroupFullName();
             var theOne = Groups.MyFind(groupName);
             if (string.IsNullOrWhiteSpace(theOne))
             {
                 Groups.Add(groupName);
             }
         }
-        public void RemoveScopeGroupIfExist(ScopeGroupName scopeGroupName)
+        public void RemoveScopeGroupIfExist(IScopeGroupLocate scopeGroupName)
         {
             if (scopeGroupName == null) throw new ArgumentNullException(nameof(scopeGroupName));
-            var groupName = scopeGroupName.ToFullName();
+            var groupName = scopeGroupName.ToScopeGroupFullName();
             var theOne = Groups.MyFind(groupName);
             if (!string.IsNullOrWhiteSpace(theOne))
             {
