@@ -96,6 +96,7 @@
     <script type="text/javascript">
         var eventInvoked = "eventInvoked";
         var serverLog = "serverLog";
+        var updateConnections = "updateConnections";
 
         var app = new Vue({
             el: '#app',
@@ -129,6 +130,12 @@
                 serverLog: function (args) {
                     console.log(">> serverLog", args);
                 },
+                updateConnections: function (args) {
+                    console.log('call updateConnections', args);
+                    if (args.clientConnections) {
+                        this.clientConnections = args.clientConnections;
+                    }
+                },
                 updateMessage: function (args) {
                     console.log('call updateMessage', args);
                     this.currentMessage = args.message;
@@ -136,12 +143,6 @@
                 updateState: function (args) {
                     console.log('call updateState', args);
                     this.currentState = args.state;
-                },
-                updateConnections: function (args) {
-                    console.log('call updateConnections', args);
-                    if (args.clientConnections) {
-                        this.clientConnections = args.clientConnections;
-                    }
                 },
                 notify: function (args) {
                     console.log('call notify', args);
@@ -165,6 +166,9 @@
                     });
                     connectionHub.on(serverLog, function (theArgs) {
                         _this.serverLog(theArgs);
+                    });
+                    connectionHub.on(updateConnections, function (theArgs) {
+                        _this.updateConnections(theArgs);
                     });
 
                     connectionHub.start()

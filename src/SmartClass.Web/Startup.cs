@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
+using SmartClass.Web.Boots;
 
 namespace SmartClass.Web
 {
@@ -13,6 +14,7 @@ namespace SmartClass.Web
         {
             services.AddMvc();
             services.AddSignalR();
+            services.AddMyDAL();
             services.AddClientMonitors();
         }
 
@@ -24,6 +26,8 @@ namespace SmartClass.Web
             fileServerOptions.DefaultFilesOptions.DefaultFileNames = defaultPages;
 
             app.UseFileServer(fileServerOptions);
+
+            app.UseMyDAL(env);
             app.UseClientMonitors();
 
             ////pipeline demo for hub

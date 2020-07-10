@@ -42,36 +42,37 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 throw new ArgumentException("hub should be init first!");
             }
 
+            var callingContext = hub.TryGetHttpContext().GetSignalREventContext();
             var locate = hub.TryGetClientConnectionLocate();
             AllPropsShouldHasValue(locate);
 
-            _hubCallerContextCache.AddCurrentConnectionCache(hub);
+            _hubCallerContextCache.SetCache(hub);
             await ScopeGroupFix.OnConnected(hub, locate.ScopeId);
-            
-            //var theConn = _repository.GetConnection(locate);
-            //if (theConn != null)
-            //{
-            //    //找到之前的记录，更新一个新的connectionId
-            //    theConn.ConnectionId = locate.ConnectionId;
-            //}
-            //else
-            //{
-            //    //没有记录，新创建一个
-            //    theConn = new MyConnection();
-            //    var now = DateHelper.Instance.GetDateNow();
-            //    theConn.ScopeId = locate.ScopeId;
-            //    theConn.ClientId = locate.ClientId;
-            //    theConn.ConnectionId = locate.ConnectionId;
-            //    theConn.CreateAt = now;
-            //    theConn.LastUpdateAt = now;
-            //    theConn.ClientType = hub.TryGetClientType();
-            //    //theConn.Bags.Add("access_token", "todo: refactor");
-            //}
 
-            //theConn.AddScopeGroupIfNotExist(ScopeGroupName.GetScopedGroupAll(locate.ScopeId));
-            //await theConn.UpdateConnectionGroups(hub);
+            var theConn = _repository.GetConnection(locate);
+            if (theConn != null)
+            {
+                //找到之前的记录，更新一个新的connectionId
+                theConn.ConnectionId = locate.ConnectionId;
+            }
+            else
+            {
+                //没有记录，新创建一个
+                theConn = new MyConnection();
+                var now = DateHelper.Instance.GetDateNow();
+                theConn.ScopeId = locate.ScopeId;
+                theConn.ClientId = locate.ClientId;
+                theConn.ConnectionId = locate.ConnectionId;
+                theConn.CreateAt = now;
+                theConn.LastUpdateAt = now;
+                theConn.ClientType = callingContext.ClientType;
+                //theConn.Bags.Add("access_token", "todo: refactor");
+                
+                theConn.AddScopeGroupIfNotExist(ScopeGroupName.GetScopedGroupAll(locate.ScopeId));
+                await theConn.UpdateConnectionGroups(hub);
+            }
 
-            //_repository.AddOrUpdate(theConn);
+            _repository.AddOrUpdate(theConn);
         }
 
         public async Task OnDisconnected(OnDisconnectedEvent theEvent)
@@ -86,28 +87,20 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var locate = hub.TryGetClientConnectionLocate();
             AllPropsShouldHasValue(locate);
 
-            //_hubCallerContextCache.RemoveCurrentConnectionCache(hub);
+            _hubCallerContextCache.GetCache(hub, locate.ConnectionId);
             await ScopeGroupFix.OnDisconnected(hub, locate.ScopeId);
 
-            //var hub = theEvent?.RaiseHub;
-            //if (hub == null)
-            //{
-            //    //should not enter here! 
-            //    throw new InvalidOperationException("hub should be init first!");
-            //}
+            var conn = _repository.GetConnection(locate);
+            if (conn == null)
+            {
+                //find no conn, should never enter here
+                return;
+            }
 
-            //var connectionId = hub.Context.ConnectionId;
-            //var conn = _repository.GetConnection(ClientConnectionLocate.Create().WithConnectionId(connectionId));
-            //if (conn == null)
-            //{
-            //    //find no conn, should never enter here
-            //    return;
-            //}
-
-            ////不删除myConnection数据，仅仅把connectionId设置为string.empty，标识当前为掉线状态
-            //conn.ConnectionId = string.Empty;
-            //conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
-            //_repository.AddOrUpdate(conn);
+            //不删除myConnection数据，仅仅把connectionId设置为string.empty，标识当前为掉线状态
+            conn.ConnectionId = string.Empty;
+            conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
+            _repository.AddOrUpdate(conn);
         }
 
         public async Task KickClient(KickClientEvent theEvent)

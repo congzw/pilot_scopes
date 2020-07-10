@@ -14,13 +14,13 @@ namespace SmartClass.Common.ScopeHubs
             return hub?.Context?.GetHttpContext();
         }
 
-        public static string TryGetScopeId(this Hub hub)
+        private static string TryGetScopeId(this Hub hub)
         {
             //todo: read from token
             return hub.TryGetHttpContext().TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
         }
 
-        public static string TryGetClientId(this Hub hub)
+        private static string TryGetClientId(this Hub hub)
         {
             //todo: read from token
             ////post args : {"scopeId" : "abc"}
@@ -31,7 +31,7 @@ namespace SmartClass.Common.ScopeHubs
             return clientId;
         }
 
-        public static string TryGetClientType(this Hub hub)
+        private static string TryGetClientType(this Hub hub)
         {
             //todo: read from token
             return string.Empty;
@@ -55,7 +55,7 @@ namespace SmartClass.Common.ScopeHubs
             ctx.ScopeId = scopeId;
             ctx.ClientId = clientId;
             ctx.UserId = userId;
-            ctx.ClientId = clientType;
+            ctx.ClientType = clientType;
 
             return ctx;
         }

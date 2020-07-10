@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
@@ -13,7 +14,25 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         public string ConnectionId { get; set; }
         public SendArgs SendArgs { get; set; }
         public DateTime InvokeAt { get; set; } = DateHelper.Instance.GetDateNow();
+    }
+
+    public class UpdateConnectionsArgs
+    {
+        public int OnlineCount { get; set; }
+        public int OfflineCount { get; set; }
+        public int TotalCount { get; set; }
         public IList<MyConnection> Connections { get; set; } = new List<MyConnection>();
+
+
+        public static UpdateConnectionsArgs Create(IList<MyConnection> connections)
+        {
+            var updateConnectionsArgs = new UpdateConnectionsArgs();
+            updateConnectionsArgs.Connections = connections;
+            updateConnectionsArgs.TotalCount = connections.Count;
+            updateConnectionsArgs.OnlineCount = connections.Count(x => !string.IsNullOrWhiteSpace(x.ConnectionId));
+            updateConnectionsArgs.OfflineCount = updateConnectionsArgs.TotalCount - updateConnectionsArgs.OnlineCount;
+            return updateConnectionsArgs;
+        }
     }
 
     public class ServerLogInfo
@@ -37,7 +56,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         public Task EventInvoked(IHubClients<IClientProxy> hubClients, EventInvokeInfo info)
         {
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
-            if (Config.IncludeConnections)
+            if (Config.UpdateConnectionsEnabled)
             {
                 //todo: add connections
                 //info.Connections = ...
@@ -52,6 +71,14 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_ServerLog, logInfo);
         }
+        
+        public Task UpdateConnections(IHubClients<IClientProxy> hubClients, UpdateConnectionsArgs args)
+        {
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
+            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateConnections, args);
+        }
+
+
 
         //public Task UpdateMonitorInfo(IHubClients<IClientProxy> hubClients, IClientConnectionRepository repository, string invokeScopeId, string invokeClientId, string invokeDesc)
         //{
@@ -109,7 +136,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         /// <summary>
         /// 是否包含连接列表
         /// </summary>
-        public bool IncludeConnections { get; set; }
+        public bool UpdateConnectionsEnabled { get; set; }
 
         /// <summary>
         /// 是否包含服务器端的日志

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 
 // ReSharper disable once CheckNamespace
 namespace SmartClass.Common.ScopeHubs
@@ -40,32 +41,40 @@ namespace SmartClass.Common.ScopeHubs
     public class SignalREventBus
     {
         private readonly ISignalREventDispatcher _dispatcher;
+        private readonly IClientConnectionRepository _connectionRepository;
 
-        public SignalREventBus(ISignalREventDispatcher dispatcher)
+        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository)
         {
             _dispatcher = dispatcher;
-
-            //todo: config with a api
-            ManageMonitorHelper.Instance.Config.UpdateMonitorInfoEnabled = true;
-            ManageMonitorHelper.Instance.Config.IncludeConnections = true;
+            _connectionRepository = connectionRepository;
         }
 
         public async Task Raise(ISignalREvent @event)
         {
-            await TraceAsync(@event, " handling").ConfigureAwait(false);
+            var theEvent = (SignalREvent)@event;
+            await TraceAsync(theEvent, " handling").ConfigureAwait(false);
             await _dispatcher.Dispatch(@event).ConfigureAwait(false);
-            await TraceAsync(@event, " handled").ConfigureAwait(false);
+            await TraceAsync(theEvent, " handled").ConfigureAwait(false);
+
+            var monitorHelper = ManageMonitorHelper.Instance;
+            if (monitorHelper.Config.UpdateConnectionsEnabled)
+            {
+                var hubClients = theEvent.TryGetHubClients();
+                var connections = _connectionRepository.GetConnections(new GetConnectionsArgs());
+                var updateConnectionsArgs = UpdateConnectionsArgs.Create(connections);
+                await monitorHelper.UpdateConnections(hubClients, updateConnectionsArgs);
+            }
         }
 
-        private Task TraceAsync(ISignalREvent @event, string descAppend)
+        private Task TraceAsync(SignalREvent theEvent, string descAppend)
         {
-            var theEvent = (SignalREvent) @event;
             var hubClients = theEvent.TryGetHubClients();
             var eventName = theEvent.GetType().Name;
             var info = new EventInvokeInfo();
             info.SendArgs = theEvent.SendArgs;
             info.Desc = eventName + descAppend;
             info.ConnectionId = theEvent.RaiseHub?.Context?.ConnectionId;
+
             return ManageMonitorHelper.Instance.EventInvoked(hubClients, info);
         }
     }

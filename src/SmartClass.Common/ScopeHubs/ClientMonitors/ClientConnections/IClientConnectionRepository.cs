@@ -5,37 +5,15 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
     public interface IClientConnectionRepository : IMyScoped
     {
         MyConnection GetConnection(IClientConnectionLocate locate);
-        IList<MyConnection> GetConnections(IScopeKey locate);
+        IList<MyConnection> GetConnections(GetConnectionsArgs args);
         IEnumerable<MyConnection> Query();
         void AddOrUpdate(MyConnection connection);
         void Remove(MyConnection connection);
     }
 
-    public class ClientConnectionRepository : IClientConnectionRepository
+    public class GetConnectionsArgs : IScopeKey
     {
-        public MyConnection GetConnection(IClientConnectionLocate locate)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public IList<MyConnection> GetConnections(IScopeKey locate)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public IEnumerable<MyConnection> Query()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void AddOrUpdate(MyConnection connection)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Remove(MyConnection connection)
-        {
-            throw new System.NotImplementedException();
-        }
+        public string ScopeId { get; set; }
+        public bool? Online { get; set; }
     }
 }
