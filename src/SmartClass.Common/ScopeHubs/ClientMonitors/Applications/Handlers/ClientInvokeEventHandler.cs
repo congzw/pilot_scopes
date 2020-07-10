@@ -13,6 +13,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
         }
 
         public float HandleOrder { get; set; }
+
         public bool ShouldHandle(ISignalREvent @event)
         {
             return @event is ClientInvokeEvent;
@@ -20,11 +21,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
 
         public async Task HandleAsync(ISignalREvent @event)
         {
-            if (!ShouldHandle(@event))
-            {
-                return;
-            }
-            //todo: ClientInvoke process bus
             var theEvent = (ClientInvokeEvent)@event;
             await _clientMonitor.ClientInvoke(theEvent);
         }

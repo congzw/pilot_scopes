@@ -22,79 +22,11 @@
             <h2>Notify: <span> {{ currentNotify }}</span></h2>
             <hr />
             <div class="select-bar">
-                <div class="select-label">筛选：</div>
-                <div class="select-wraper">
-                    <select class="select-item form-control">
-                        <option value="1" selected disabled>教室</option>
-                        <option value="2">教室1</option>
-                        <option value="3">教室2</option>
-                    </select>
-                    <select class="select-item form-control">
-                        <option value="1" selected disabled>名称</option>
-                        <option value="2">pc</option>
-                        <option value="3">ipad</option>
-                    </select>
-                    <select class="select-item form-control">
-                        <option value="1" selected disabled>设备IP</option>
-                        <option value="2">192.168.1.22</option>
-                        <option value="3">192.168.1.23</option>
-                    </select>
-                </div>
                 <div>
                     <input type="button" class="btn btn-primary" id="btnUpdateMessage" value="UpdateMessage" />
                     <input type="button" class="btn btn-primary" id="btnUpdateState" value="UpdateState" />
-                    <input type="button" class="btn btn-primary" id="btnUpdateConnections" value="UpdateConnections" />
                 </div>
             </div>
-
-            <h4 class="head">
-                <span class="title">筛选的内容：</span>
-                <button type="button" class="btn btn-info" @click="changeLayout">{{changeLayoutText}}</button>
-            </h4>
-            <transition name="fade" mode="out-in">
-                <!--table-->
-                <table class="table table-bordered table-striped" v-if="isTableLayout" key="table">
-                    <thead>
-                        <tr>
-                            <th>课程</th>
-                            <th>客户端</th>
-                            <th>连接时间</th>
-                            <th>上次更新状态</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in clientConnections">
-                            <td>
-                                {{item.scopeGroupId}}
-                            </td>
-                            <td>
-                                {{item.clientId}}
-                            </td>
-                            <td>
-                                {{item.createAt}}
-                            </td>
-                            <td>
-                                <span class="label success">{{item.lastUpdateAt}}</span>
-                            </td>
-                        </tr>
-                </table>
-                <!-- panel布局 -->
-                <div v-else="!isTableLayout" class="panel-wrapper" key="poanel">
-                    <div class="panel panel-default" v-for="item in clientConnections">
-                        <div class="panel-heading">
-                            <h3 class="panel-title"> <span class="label success">连接中</span></h3>
-                        </div>
-                        <div class="panel-body">
-                            <h4>大屏设备</h4>
-                            <ul class="list-unstyled">
-                                <li>{{item.scopeGroupId}}</li>
-                                <li>{{item.clientId}}</li>
-                                <li>{{item.createAt}}</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </transition>
         </div>
     </div>
     <script type="text/javascript">
@@ -213,10 +145,6 @@
                                 }
                             };
                             connectionHub.invoke(clientInvoke, theArgs);
-                            event.preventDefault();
-                        });
-                        document.getElementById('btnUpdateConnections').addEventListener('click', function (event) {
-                            console.log("todo: ajax get connections");
                             event.preventDefault();
                         });
                     })
