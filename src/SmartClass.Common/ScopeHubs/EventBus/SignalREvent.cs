@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 // ReSharper disable once CheckNamespace
 namespace SmartClass.Common.ScopeHubs
 {
-    public interface ISignalREvent : IHaveBags, ISendArgs
+    public interface ISignalREvent : IHaveBags
     {
         /// <summary>
         /// 触发事件的时间
@@ -102,13 +102,7 @@ namespace SmartClass.Common.ScopeHubs
             return Context.Clients;
         }
     }
-
-    public interface ISendArgs
-    {
-        SendArgs SendArgs { get; set; }
-    }
-
-
+    
     public class SendArgs
     {
         public SendFromScopeArgs SendFrom { get; set; } = new SendFromScopeArgs();

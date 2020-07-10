@@ -8,7 +8,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
-    public class EventInvokeInfo : ISendArgs
+    public class EventInvokeInfo
     {
         public string Desc { get; set; }
         public string ConnectionId { get; set; }
@@ -22,8 +22,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         public int OfflineCount { get; set; }
         public int TotalCount { get; set; }
         public IList<MyConnection> Connections { get; set; } = new List<MyConnection>();
-
-
+        
         public static UpdateConnectionsArgs Create(IList<MyConnection> connections)
         {
             var updateConnectionsArgs = new UpdateConnectionsArgs();
