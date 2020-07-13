@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>SignalrMonitor</title>
+    <title>客户端</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 </head>
 <body>
@@ -122,23 +122,17 @@
                             console.error(error.message);
                         });
                 },
+                //断开
                 unConnction: function () {
                     connectionHub.stop();
                     console.log(connectionHub);
                 },
+                //重连
                 reConnection: function () {
                     this.connectionStart(this.current.scopeId, this.current.clientId);
                 },
-                updateConnections: function (args) {
-                    this.connectionObj = args;
-                    //this.connectionObj.connections.sort(function (a, b) {
-                    //    console.log(a.createAt > b.createAt);
-                    //    return a.createAt > b.createAt;
-                    //})
-                },
-                mockConnect: function () {
-                    console.log(this.current)
-                },
+
+                //发送消息：api
                 clientStub: function (messageObj) {
                     var url = '/api/hub/ClientStub?scopeId='+ messageObj.scopeId + '&clientId=' + messageObj.clientId;
                     fetch(url)
@@ -146,18 +140,18 @@
                         .then(data => console.log(data))
                     console.log(messageObj);
                 },
-
+                //发送消息：signalr
                 clientInvoke: function (messageObj) {
                     var theArgs = {
                         scopeId: messageObj.scopeId,
                         clientId: messageObj.clientId,
+                        groupId: messageObj.groupId,
                         method: "updateMessage",
                         methodArgs: { message: messageObj.message },
                         bags: {
                             foo: "foo"
                         }
                     };
-                    console.log(theArgs);
                     connectionHub.invoke(clientInvoke, theArgs);
                 }
             },
