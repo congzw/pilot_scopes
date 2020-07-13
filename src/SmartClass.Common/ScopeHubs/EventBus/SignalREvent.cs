@@ -11,6 +11,7 @@ namespace SmartClass.Common.ScopeHubs
         /// 触发事件的时间
         /// </summary>
         DateTime RaiseAt { get; }
+        object EventArgs { get; set; }
     }
 
     public interface IHubEvent : ISignalREvent
@@ -114,6 +115,7 @@ namespace SmartClass.Common.ScopeHubs
 
         public IDictionary<string, object> Bags { get; set; }
         public DateTime RaiseAt { get; }
+        public object EventArgs { get; set; }
         public Hub RaiseHub { get; }
         public HubContextWrapper Context { get; }
         public bool StopSend { get; set; } //todo: rename
