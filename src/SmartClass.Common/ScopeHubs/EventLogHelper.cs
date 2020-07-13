@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using Newtonsoft.Json;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
 
 namespace SmartClass.Common.ScopeHubs
@@ -29,6 +28,7 @@ namespace SmartClass.Common.ScopeHubs
     {
         public void Log(object message, string prefix = "")
         {
+            //todo: use simple logger
             var theEvent = message as SignalREvent;
             if (theEvent == null)
             {
