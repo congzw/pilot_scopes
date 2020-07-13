@@ -11,7 +11,6 @@ namespace SmartClass.Common.ScopeHubs
         /// 触发事件的时间
         /// </summary>
         DateTime RaiseAt { get; }
-        object EventArgs { get; set; }
     }
 
     public interface IHubEvent : ISignalREvent
@@ -62,63 +61,32 @@ namespace SmartClass.Common.ScopeHubs
     {
         #region ctors
 
-        protected SignalREvent(Hub raiseHub, SignalREventCallingContext callingContext = null)
+        protected SignalREvent(Hub raiseHub, SendContext sendContext = null)
         {
             RaiseHub = raiseHub ?? throw new ArgumentNullException(nameof(raiseHub));
+            SendContext = sendContext ?? raiseHub.GetSendFrom().GetSendContext();
+
             RaiseAt = DateHelper.Instance.GetDateNow();
-
-            CallingContext = callingContext ?? raiseHub.GetSignalREventContext();
-            CallingContext.EventName = this.GetType().Name;
-
-            var sendArgs = SendArgs.Create().WithSendFrom(CallingContext);
-            CallingContext.SendTo = sendArgs.SendTo;
-            SendArgs = sendArgs;
         }
-        protected SignalREvent(HubContextWrapper hubContext, SendArgs sendArgs)
+
+        protected SignalREvent(HubContextWrapper hubContextWrapper, SendContext sendContext)
         {
-            if (sendArgs == null) throw new ArgumentNullException(nameof(sendArgs));
-            Context = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
+            Context = hubContextWrapper ?? throw new ArgumentNullException(nameof(hubContextWrapper));
+            SendContext = sendContext ?? throw new ArgumentNullException(nameof(sendContext));
             RaiseAt = DateHelper.Instance.GetDateNow();
-
-
-            CallingContext = new SignalREventCallingContext();
-
-            CallingContext.SendTo = sendArgs.SendTo;
-            CallingContext.EventName = this.GetType().Name;
-
-            var sendFrom = sendArgs.SendFrom;
-            if (sendFrom != null)
-            {
-                CallingContext.WithScopeId(sendFrom.ScopeId);
-                CallingContext.WithClientId(sendFrom.ClientId);
-            }
-            SendArgs = sendArgs;
         }
-        
-        //protected SignalREvent(HubContextWrapper context, SendArgs sendArgs)
-        //{
-        //    Context = context ?? throw new ArgumentNullException(nameof(context));
-        //    SendArgs = sendArgs ?? throw new ArgumentNullException(nameof(sendArgs));
-        //    RaiseAt = DateHelper.Instance.GetDateNow();
-
-
-        //    CallingContext.EventName = this.GetType().Name;
-        //    CallingContext.EventArgs = this.EventArgs;
-        //}
 
         #endregion
 
-        public SignalREventCallingContext CallingContext { get; set; }
 
-
-        public SendArgs SendArgs { get; set; } //todo: delete -> use CallingContext
-
-        public IDictionary<string, object> Bags { get; set; }
-        public DateTime RaiseAt { get; }
-        public object EventArgs { get; set; }
         public Hub RaiseHub { get; }
         public HubContextWrapper Context { get; }
+        public SendContext SendContext { get; set; }
+        public DateTime RaiseAt { get; }
         public bool StopSend { get; set; } //todo: rename
+
+        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
+
 
         public bool IsCalledFromHub()
         {
@@ -138,60 +106,60 @@ namespace SmartClass.Common.ScopeHubs
         }
     }
 
-    public class SignalREventCallingContext : IScopeClientLocate
-    {
-        public string ScopeId { get; set; }
-        public string ClientId { get; set; }
-        public string UserId { get; set; }
-        public string ClientType { get; set; }
+    //public class SignalREventCallingContext : IScopeClientLocate
+    //{
+    //    public string ScopeId { get; set; }
+    //    public string ClientId { get; set; }
+    //    public string UserId { get; set; }
+    //    public string ClientType { get; set; }
 
-        public string EventName { get; set; }
-        public object EventArgs { get; set; }
-        public SendToScopeArgs SendTo { get; set; } = new SendToScopeArgs();
-    }
+    //    public string EventName { get; set; }
+    //    public object EventArgs { get; set; }
+    //    public SendToScopeArgs SendTo { get; set; } = new SendToScopeArgs();
+    //}
 
-    public class SendToScopeArgs : IScopeKey
-    {
-        public string ScopeId { get; set; }
-        public IList<string> ClientIds { get; set; } = new List<string>();
-        public IList<string> Groups { get; set; } = new List<string>();
+    //public class SendToScopeArgs : IScopeKey
+    //{
+    //    public string ScopeId { get; set; }
+    //    public IList<string> ClientIds { get; set; } = new List<string>();
+    //    public IList<string> Groups { get; set; } = new List<string>();
 
-        public static SendToScopeArgs CreateForScopeGroupAll(string scopeId)
-        {
-            var sendToScopeArgs = new SendToScopeArgs();
-            sendToScopeArgs.WithScopeId(scopeId);
-            sendToScopeArgs.Groups.Add(HubConst.GroupName_All);
-            return sendToScopeArgs;
-        }
-    }
+    //    public static SendToScopeArgs CreateForScopeGroupAll(string scopeId)
+    //    {
+    //        var sendToScopeArgs = new SendToScopeArgs();
+    //        sendToScopeArgs.WithScopeId(scopeId);
+    //        sendToScopeArgs.Groups.Add(HubConst.GroupName_All);
+    //        return sendToScopeArgs;
+    //    }
+    //}
 
 
-    //todo move and union to ClientMethod or convert from
-    public class SendArgs
-    {
-        public SendFromScopeArgs SendFrom { get; set; } = new SendFromScopeArgs();
-        public SendToScopeArgs SendTo { get; set; } = new SendToScopeArgs();
+    ////todo move and union to ClientMethod or convert from
+    //public class SendArgs
+    //{
+    //    public SendFromScopeArgs SendFrom { get; set; } = new SendFromScopeArgs();
+    //    public SendToScopeArgs SendTo { get; set; } = new SendToScopeArgs();
 
-        public SendArgs WithSendFrom(IScopeClientLocate locate)
-        {
-            this.SendFrom.CopyFrom(locate);
-            return this;
-        }
-        public static SendArgs Create()
-        {
-            return new SendArgs();
-        }
-        public static SendArgs CreateForScopeGroupAll(string scopeId)
-        {
-            var sendArgs = new SendArgs();
-            sendArgs.SendTo = SendToScopeArgs.CreateForScopeGroupAll(scopeId);
-            return sendArgs;
-        }
-    }
+    //    public SendArgs WithSendFrom(IScopeClientLocate locate)
+    //    {
+    //        this.SendFrom.CopyFrom(locate);
+    //        return this;
+    //    }
+    //    public static SendArgs Create()
+    //    {
+    //        return new SendArgs();
+    //    }
+    //    public static SendArgs CreateForScopeGroupAll(string scopeId)
+    //    {
+    //        var sendArgs = new SendArgs();
+    //        sendArgs.SendTo = SendToScopeArgs.CreateForScopeGroupAll(scopeId);
+    //        return sendArgs;
+    //    }
+    //}
 
-    public class SendFromScopeArgs : IScopeClientLocate
-    {
-        public string ScopeId { get; set; }
-        public string ClientId { get; set; }
-    }
+    //public class SendFromScopeArgs : IScopeClientLocate
+    //{
+    //    public string ScopeId { get; set; }
+    //    public string ClientId { get; set; }
+    //}
 }

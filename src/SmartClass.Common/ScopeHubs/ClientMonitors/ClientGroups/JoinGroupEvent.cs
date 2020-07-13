@@ -12,7 +12,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
             Args = args;
         }
 
-        public JoinGroupEvent(HubContextWrapper context, JoinGroupArgs args) : base(context, new SendArgs())
+        public JoinGroupEvent(HubContextWrapper hubContext, SendContext sendContext, JoinGroupArgs args) : base(hubContext, sendContext)
         {
             Args = args;
         }

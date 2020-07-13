@@ -9,7 +9,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
         public static ClientConnectionLocate TryGetClientConnectionLocate(this Hub hub)
         {
             var locate = new ClientConnectionLocate();
-            var callingContext = hub.TryGetHttpContext().GetSignalREventContext();
+            var callingContext = hub.TryGetHttpContext().GetSendFrom();
             locate.ScopeId = callingContext.ScopeId;
             locate.ClientId = callingContext.ClientId;
             locate.ConnectionId = hub.Context.ConnectionId;

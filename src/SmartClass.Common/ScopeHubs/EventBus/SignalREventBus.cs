@@ -69,7 +69,7 @@ namespace SmartClass.Common.ScopeHubs
             var hubClients = theEvent.TryGetHubClients();
             var eventName = theEvent.GetType().Name;
             var info = new EventInvokeInfo();
-            info.SendArgs = theEvent.SendArgs;
+            info.SendContext = theEvent.SendContext;
             info.Desc = eventName + descAppend;
             info.ConnectionId = theEvent.RaiseHub?.Context?.ConnectionId;
 

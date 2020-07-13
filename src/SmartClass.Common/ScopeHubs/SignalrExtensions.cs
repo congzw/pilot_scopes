@@ -33,33 +33,33 @@ namespace SmartClass.Common.ScopeHubs
             return string.Empty;
         }
 
-        public static SignalREventCallingContext GetSignalREventContext(this HttpContext httpContext)
-        {
-            var scopeId = httpContext.TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
-            var clientId = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientId, string.Empty);
-            var userId = string.Empty;
-            var clientType = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientType, string.Empty);
+        //public static SignalREventCallingContext GetSignalREventContext(this HttpContext httpContext)
+        //{
+        //    var scopeId = httpContext.TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
+        //    var clientId = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientId, string.Empty);
+        //    var userId = string.Empty;
+        //    var clientType = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientType, string.Empty);
 
-            ////todo: read from claim
-            //var user = httpContext.User;
-            //var scopeId = user.FindFirst("ScopeId").Value;
-            //var clientId = user.FindFirst("ClientId").Value;
-            //var clientType = user.FindFirst("ClientType").Value;
-            //var userId = user.Claims.Single(x => x.Type == ClaimTypes.Name).Value;
+        //    ////todo: read from claim
+        //    //var user = httpContext.User;
+        //    //var scopeId = user.FindFirst("ScopeId").Value;
+        //    //var clientId = user.FindFirst("ClientId").Value;
+        //    //var clientType = user.FindFirst("ClientType").Value;
+        //    //var userId = user.Claims.Single(x => x.Type == ClaimTypes.Name).Value;
 
-            var ctx = new SignalREventCallingContext();
-            ctx.ScopeId = scopeId;
-            ctx.ClientId = clientId;
-            ctx.UserId = userId;
-            ctx.ClientType = clientType;
+        //    var ctx = new SignalREventCallingContext();
+        //    ctx.ScopeId = scopeId;
+        //    ctx.ClientId = clientId;
+        //    ctx.UserId = userId;
+        //    ctx.ClientType = clientType;
 
-            return ctx;
-        }
+        //    return ctx;
+        //}
 
-        public static SignalREventCallingContext GetSignalREventContext(this Hub hub)
-        {
-            return hub.TryGetHttpContext().GetSignalREventContext();
-        }
+        //public static SignalREventCallingContext GetSignalREventContext(this Hub hub)
+        //{
+        //    return hub.TryGetHttpContext().GetSignalREventContext();
+        //}
         
         public static THub FixScopeIdForArgs<THub>(this THub hub, IScopeKey args) where THub : Hub
         {

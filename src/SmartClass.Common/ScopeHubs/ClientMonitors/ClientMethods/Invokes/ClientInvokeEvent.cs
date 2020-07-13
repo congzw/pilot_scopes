@@ -6,12 +6,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes
     {
         public ClientMethodArgs Args { get; set; }
 
-        public ClientInvokeEvent(HubContextWrapper hubContext, ClientMethodArgs args) : base(hubContext, new SendArgs())
+        public ClientInvokeEvent(Hub raiseHub, ClientMethodArgs args) : base(raiseHub, raiseHub.GetSendFrom().GetSendContext())
         {
             Args = args;
         }
 
-        public ClientInvokeEvent(Hub raiseHub, ClientMethodArgs args) : base(raiseHub)
+        public ClientInvokeEvent(HubContextWrapper hubContextWrapper, SendContext sendContext, ClientMethodArgs args) : base(hubContextWrapper, sendContext)
         {
             Args = args;
         }

@@ -45,7 +45,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 throw new ArgumentException("hub should be init first!");
             }
 
-            var callingContext = hub.TryGetHttpContext().GetSignalREventContext();
+            var sendFrom = hub.TryGetHttpContext().GetSendFrom();
             var locate = hub.TryGetClientConnectionLocate();
             AllPropsShouldHasValue(locate);
 
@@ -69,7 +69,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 theConn.ConnectionId = locate.ConnectionId;
                 theConn.CreateAt = now;
                 theConn.LastUpdateAt = now;
-                theConn.ClientType = callingContext.ClientType;
+                theConn.ClientType = sendFrom.ClientType;
                 //theConn.Bags.Add("access_token", "todo: refactor");
                 
                 theConn.AddScopeGroupIfNotExist(ScopeGroupName.GetScopedGroupAll(locate.ScopeId));
@@ -135,11 +135,11 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             //来自Hub的请求
             if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
             var raiseHub = theEvent.RaiseHub ?? throw new ArgumentException("ClientInvoke方法只能用于基于Hub连接的客户端请求");
-            var callingContext = raiseHub.GetSignalREventContext();
+            var sendFrom = raiseHub.GetSendFrom();
             //基于hub的invoke，默认在自身连接的ScopeId内广播
-            if (string.IsNullOrWhiteSpace(theEvent.SendArgs.SendTo.ScopeId))
+            if (string.IsNullOrWhiteSpace(theEvent.SendContext.To.ScopeId))
             {
-                theEvent.SendArgs.SendTo = SendToScopeArgs.CreateForScopeGroupAll(callingContext.ScopeId);
+                theEvent.SendContext.To = SendTo.CreateForScopeGroupAll(sendFrom.ScopeId);
             }
 
             await _clientInvokeProcessBus.Process(theEvent).ConfigureAwait(false);
@@ -263,9 +263,9 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 return;
             }
 
-            var sendArgs = theEvent.SendArgs;
+            var sendArgs = theEvent.SendContext;
 
-            var sendTo = sendArgs?.SendTo;
+            var sendTo = sendArgs?.To;
             if (sendTo == null)
             {
                 return;

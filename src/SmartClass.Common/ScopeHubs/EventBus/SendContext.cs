@@ -7,8 +7,8 @@ namespace SmartClass.Common.ScopeHubs
 {
     public class SendContext
     {
-        public SendFrom From { get; set; }
-        public SendTo To { get; set; }
+        public SendFrom From { get; set; } = new SendFrom();
+        public SendTo To { get; set; } = new SendTo();
     }
 
     public class SendFrom : IScopeClientLocate

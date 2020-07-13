@@ -30,84 +30,26 @@ namespace SmartClass.Web.Api
             return DateTime.Now.ToString("s");
         }
         
-        [Route("notify")]
-        [HttpGet]
-        public async Task<string> Notify(string scopeId)
-        {
-            if (string.IsNullOrWhiteSpace(scopeId))
-            {
-                return "BAD SCOPE!";
-            }
-
-            var asHubContextWrapper = _hubContext.AsHubContextWrapper();
-            var stub = new ClientMethodArgs();
-            stub.ScopeId = scopeId;
-            stub.Method = HubConst.ClientMethod_Notify;
-            stub.SetBagValue("bar", "From Server bar");
-            stub.MethodArgs = new { message = "From Server notify "  + DateTime.Now};
-            await _bus.Raise(new ClientStubEvent(asHubContextWrapper, stub));
-            return "Notify OK";
-        }
-
         [Route("ClientStub")]
         [HttpGet]
-        public async Task<string> ClientStub([FromQuery]ClientMethodArgs args)
+        public async Task<string> ClientStub(string scopeId)
         {
-            if (string.IsNullOrWhiteSpace(args.ScopeId))
+            if (string.IsNullOrWhiteSpace(scopeId))
             {
                 return "BAD SCOPE!";
             }
 
             //for demo!
+            var args = new ClientMethodArgs();
+            args.ScopeId = scopeId;
             args.Method = "updateMessage";
             args.SetBagValue("foo", "From Server foo");
             args.MethodArgs = new { message = "From Server message" };
 
-            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
+            //todo: read SendFrom from token
+            var sendContext = new SendFrom().WithScopeId(args.ScopeId).GetSendContext();
+            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), sendContext, args));
             return "OK";
-        }
-        
-        [Route("raise1")]
-        [HttpGet]
-        public async Task<string> Raise1([FromServices] SignalREventBus bus, [FromServices] IHubContext<_AnyHub> hubContext, string scopeId)
-        {
-            var asHubContextWrapper = hubContext.AsHubContextWrapper();
-            if (string.IsNullOrWhiteSpace(scopeId))
-            {
-                return "BAD SCOPE!";
-            }
-
-            var stub = new ClientMethodArgs();
-            stub.ScopeId = scopeId;
-            stub.Method = "updateState";
-            stub.SetBagValue("bar", "From Server bar");
-            stub.MethodArgs = new { state = "From Server State" };
-            //[1240] [_AnyHub] InvokeClientStub >>>>>>>> {"Method":"updateState","MethodArgs":{"state":"<637296097161340000>"},"Bags":{"bar":"bar"}} 
-            await bus.Raise(new ClientStubEvent(asHubContextWrapper, stub));
-            return "updateState OK";
-        }
-
-        [Route("raise2")]
-        [HttpGet]
-        public async Task<string> Raise2([FromServices] SignalREventBus bus, [FromServices] IHubContext<_AnyHub> hubContext, string scopeId)
-        {
-            var asHubContextWrapper = hubContext.AsHubContextWrapper();
-            if (string.IsNullOrWhiteSpace(scopeId))
-            {
-                return "BAD SCOPE!";
-            }
-
-            //[14040] [_AnyHub] InvokeClientStub >>>>>>>> {"ScopeId":"s1","Method":"updateMessage","MethodArgs":{"message":"[637296272749570000]"},"Bags":{"foo":"foo"}} 
-            //[14040] [_AnyHub] InvokeClientStub >>>>>>>> {"ScopeId":"s1","Method":"updateMessage","MethodArgs":{"message":"[637296272764020000]"},"Bags":{"foo":"foo"}} 
-            //[14040] [_AnyHub] InvokeClientStub >>>>>>>> {"ScopeId":"s1","Method":"updateMessage","MethodArgs":{"message":"From Server message"},"Bags":{"bar":"From Server bar"}} 
-
-            var stub = new ClientMethodArgs();
-            stub.ScopeId = scopeId;
-            stub.Method = "updateMessage";
-            stub.SetBagValue("bar", "From Server bar");
-            stub.MethodArgs = new { message = "From Server message" };
-            await bus.Raise(new ClientStubEvent(asHubContextWrapper, stub));
-            return "updateMessage OK";
         }
     }
 }

@@ -38,7 +38,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
             Args = args;
         }
 
-        public KickClientEvent(HubContextWrapper context, KickClientArgs args) : base(context, new SendArgs())
+        public KickClientEvent(HubContextWrapper hubContextWrapper, SendContext sendContext, KickClientArgs args) : base(hubContextWrapper, sendContext)
         {
             Args = args;
         }

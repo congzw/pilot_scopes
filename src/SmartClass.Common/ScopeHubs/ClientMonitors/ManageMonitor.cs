@@ -12,7 +12,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
     {
         public string Desc { get; set; }
         public string ConnectionId { get; set; }
-        public SendArgs SendArgs { get; set; }
+        public SendContext SendContext { get; set; }
         public DateTime InvokeAt { get; set; } = DateHelper.Instance.GetDateNow();
     }
 
