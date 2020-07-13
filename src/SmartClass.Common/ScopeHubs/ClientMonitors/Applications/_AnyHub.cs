@@ -63,19 +63,19 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         }
 
         //加入组成员
-        public Task AddToGroup(AddToGroupArgs args)
+        public Task JoinGroup(JoinGroupArgs args)
         {
             this.FixScopeIdForArgs(args);
-            TraceHubContext("AddToGroup");
-            return Bus.Raise(new AddToGroupEvent(this, args));
+            TraceHubContext("JoinGroup");
+            return Bus.Raise(new JoinGroupEvent(this, args));
         }
 
         //移除组成员
-        public Task RemoveFromGroup(RemoveFromGroupArgs args)
+        public Task LeaveGroup(LeaveGroupArgs args)
         {
             this.FixScopeIdForArgs(args);
-            TraceHubContext("RemoveFromGroup");
-            return Bus.Raise(new RemoveFromGroupEvent(this, args));
+            TraceHubContext("LeaveGroup");
+            return Bus.Raise(new LeaveGroupEvent(this, args));
         }
 
         //代表客户端的方法调用，供同步页面等场景使用

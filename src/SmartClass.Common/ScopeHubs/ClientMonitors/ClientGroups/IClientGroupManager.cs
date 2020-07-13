@@ -5,9 +5,14 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
 {
     public interface IClientGroupManager
     {
-        Task AddToGroup(AddToGroupArgs args);
-        Task RemoveFromGroup(RemoveFromGroupArgs args);
-        Task<IList<ScopeClientGroup>> GetGroups(IScopeKey args);
+        Task JoinGroup(JoinGroupArgs args);
+        Task LeaveGroup(LeaveGroupArgs args);
+        Task<IList<ScopeClientGroup>> GetClientGroups(GetClientGroupsArgs args);
+    }
+
+    public class GetClientGroupsArgs : IScopeKey
+    {
+        public string ScopeId { get; set; }
     }
 
     public class ScopeClientGroup : IScopeClientGroupLocate

@@ -3,24 +3,24 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
 {
-    public class AddToGroupEvent : SignalREvent
+    public class JoinGroupEvent : SignalREvent
     {
-        public AddToGroupArgs Args { get; set; }
+        public JoinGroupArgs Args { get; set; }
 
-        public AddToGroupEvent(Hub raiseHub, AddToGroupArgs args) : base(raiseHub)
+        public JoinGroupEvent(Hub raiseHub, JoinGroupArgs args) : base(raiseHub)
         {
             Args = args;
         }
 
-        public AddToGroupEvent(HubContextWrapper context, AddToGroupArgs args) : base(context, new SendArgs())
+        public JoinGroupEvent(HubContextWrapper context, JoinGroupArgs args) : base(context, new SendArgs())
         {
             Args = args;
         }
     }
 
-    public class AddToGroupArgs : IScopeGroupLocate
+    public class JoinGroupArgs : IScopeGroupLocate
     {
-        public AddToGroupArgs()
+        public JoinGroupArgs()
         {
             ClientIds = new List<string>();
         }

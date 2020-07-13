@@ -174,18 +174,18 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             throw new System.NotImplementedException();
         }
 
-        public Task AddToGroup(AddToGroupArgs args)
+        public Task JoinGroup(JoinGroupArgs args)
         {
             var theConn = _repository.GetConnection(new ClientConnectionLocate());
             throw new System.NotImplementedException();
         }
 
-        public Task RemoveFromGroup(RemoveFromGroupArgs args)
+        public Task LeaveGroup(LeaveGroupArgs args)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<IList<ScopeClientGroup>> GetGroups(IScopeKey args)
+        public Task<IList<ScopeClientGroup>> GetClientGroups(GetClientGroupsArgs args)
         {
             throw new System.NotImplementedException();
         }

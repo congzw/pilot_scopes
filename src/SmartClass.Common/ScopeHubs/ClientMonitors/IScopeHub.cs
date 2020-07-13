@@ -29,13 +29,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        Task AddToGroup(AddToGroupArgs args);
+        Task JoinGroup(JoinGroupArgs args);
         /// <summary>
         /// 从组移除
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        Task RemoveFromGroup(RemoveFromGroupArgs args);
+        Task LeaveGroup(LeaveGroupArgs args);
 
         /// <summary>
         /// 客户端方法自主调用后广播

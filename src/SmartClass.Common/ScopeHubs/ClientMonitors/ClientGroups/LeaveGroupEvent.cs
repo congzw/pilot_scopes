@@ -3,19 +3,19 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
 {
-    public class RemoveFromGroupEvent : SignalREvent
+    public class LeaveGroupEvent : SignalREvent
     {
-        public RemoveFromGroupArgs Args { get; set; }
+        public LeaveGroupArgs Args { get; set; }
 
-        public RemoveFromGroupEvent(Hub raiseHub, RemoveFromGroupArgs args) : base(raiseHub)
+        public LeaveGroupEvent(Hub raiseHub, LeaveGroupArgs args) : base(raiseHub)
         {
             Args = args;
         }
     }
 
-    public class RemoveFromGroupArgs : IScopeGroupLocate
+    public class LeaveGroupArgs : IScopeGroupLocate
     {
-        public RemoveFromGroupArgs()
+        public LeaveGroupArgs()
         {
             ClientIds = new List<string>();
         }
