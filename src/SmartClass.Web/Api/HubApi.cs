@@ -32,7 +32,7 @@ namespace SmartClass.Web.Api
         
         [Route("ClientStub")]
         [HttpGet]
-        public async Task<string> ClientStub(string scopeId)
+        public async Task<string> ClientStub(string scopeId,string groupId,string clientId,string message)
         {
             if (string.IsNullOrWhiteSpace(scopeId))
             {
@@ -41,6 +41,14 @@ namespace SmartClass.Web.Api
 
             //for demo!
             var args = new ClientMethodArgs();
+            if (!string.IsNullOrEmpty(groupId))
+            {
+                args.ToGroups.Add(groupId);
+            }
+            if (!string.IsNullOrEmpty(clientId))
+            {
+                args.ToClientIds.Add(clientId);
+            }
             args.ScopeId = scopeId;
             args.Method = "updateMessage";
             args.SetBagValue("foo", "From Server foo");

@@ -3,30 +3,37 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>SignalrMonitor</title>
+    <title>连接监控</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <style>
+        .toast {
+            opacity: 1;
+            position: relative;
+            float: left
+        }
+    </style>
 </head>
 <body>
     <div class="container" id="app">
-        <div>
+        <div class="pt-md-3">
             <h4>连接模拟：</h4>
             <div>
                 <form>
                     <div class="form-row">
                         <div class="col">
                             <!--<label for="scopeId">ScopeId</label>-->
-                            <input type="text" class="form-control" v-model ="current.scopeId" id="scopeId" placeholder="ScopeId">
+                            <input type="text" class="form-control" v-model="current.scopeId" id="scopeId" placeholder="ScopeId">
                         </div>
                         <div class="col">
                             <!--<label for="ClientId">ClientId</label>-->
-                            <input type="text" class="form-control" v-model ="current.clientId" id="ClientId" placeholder="ClientId">
+                            <input type="text" class="form-control" v-model="current.clientId" id="ClientId" placeholder="ClientId">
                         </div>
                         <div class="col">
                             <!--<label for="UserId">UserId</label>-->
-                            <input type="text" class="form-control" v-model ="current.userId" id="UserId" placeholder="UserId">
+                            <input type="text" class="form-control" v-model="current.userId" id="UserId" placeholder="UserId">
                         </div>
 
-                        <button type="button" @click="connectionHub(current.scopeId,current.clientId,current.userId)" class="btn btn-primary pull-right">进行连接</button>
+                        <button type="button" @click="mockConnect" class="btn btn-primary pull-right">进行连接</button>
                     </div>
 
                 </form>
@@ -34,10 +41,10 @@
 
         </div>
         <hr />
-        <div class="row">
+        <div>
             <h4>
-                <span>连接列表：</span>  
-                <button disabled type="button" class="btn btn-info">在线人数：{{connectionObj.onlineCount}}</button> 
+                <span>连接列表：</span>
+                <button disabled type="button" class="btn btn-info">在线人数：{{connectionObj.onlineCount}}</button>
                 <button disabled type="button" class="btn btn-info">总人数：{{connectionObj.totalCount}}</button>
             </h4>
             <table class="table">
@@ -59,14 +66,27 @@
                         <td>{{item.connectionId || "null"}}</td>
                         <td>{{item.lastUpdateAt | formatDate }}</td>
                         <td>
-                             <a class="btn btn-link" :href="'clientmock.html?clientId='+ item.clientId + '&scopeId='+ item.scopeId" target="_blank" v-if="item.connectionId">进入客户端</a><button disabled v-else type="button" class="btn btn-danger">已下线</button>
-                            
+                            <button type="button" @click="openToast">加入组</button>
+                            <a class="btn btn-link" :href="'clientmock.html?clientId='+ item.clientId + '&scopeId='+ item.scopeId" target="_blank" v-if="item.connectionId">进入客户端</a><button disabled v-else type="button" class="btn btn-danger">已下线</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
+        <div class="toast" v-if="toast.show" role="alert" aria-live="assertive" aria-atomic="true" ref="toast1">
+            <div class="toast-header">
+                <strong class="mr-auto">加入组</strong>
+                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="toast-body">
+                <label>groupId</label>
+                <input v-model="toast.groupId" />
+                <button type="button" @click="addToGroup">提交</button>
+            </div>
+        </div>
     </div>
     <script src="/lib/vue.js" type="text/javascript"></script>
     <script src="/lib/signalr.js" type="text/javascript"></script>
@@ -85,6 +105,10 @@
                     scopeId: '',
                     clientId: '',
                     userId: ''
+                },
+                toast: {
+                    show: false,
+                    groupId:''
                 }
             },
             methods: {
@@ -119,13 +143,26 @@
 
                 mockConnect: function () {
                     console.log(this.current)
+                    this.connectionHub(this.current.scopeId, this.current.clientId, this.current.userId);
+                    this.current = { ...this.current, scopeId:'',clientId:'',userId:'' }
                 },
-                goto: function (scopeId, clientId) {
-                    console.log(scopeId, clientId);
+                openToast: function () {
+                    this.toast.show = true;
+                },
+                addToGroup: function () {
+                    //todo
+                    //var url = '/api/hub/ClientStub?scopeId=' + messageObj.scopeId + '&clientId=' + messageObj.clientId;
+                    //fetch(url)
+                    //    .then(response => response)
+                    //    .then(data => console.log(data))
+                    this.toast.show = false;
+                    this.toast.groupId = '';
 
-                    window.location.href = '/ClientMock.html';
-                    console.log()
+                    //this.$refs.toast1.toast("show");
                 }
+                //goto: function (scopeId, clientId) {
+                //    window.location.href = '/ClientMock.html';
+                //},
             },
             created() {
                 var scopeId = "monitor_scope";
