@@ -49,12 +49,13 @@ namespace SmartClass.Common.ScopeHubs
 
         public async Task Raise(ISignalREvent @event)
         {
+            var monitorHelper = ManageMonitorHelper.Instance;
+
             var theEvent = (SignalREvent)@event;
             await TraceAsync(theEvent, " handling").ConfigureAwait(false);
             await _dispatcher.Dispatch(@event).ConfigureAwait(false);
             await TraceAsync(theEvent, " handled").ConfigureAwait(false);
 
-            var monitorHelper = ManageMonitorHelper.Instance;
             if (monitorHelper.Config.UpdateConnectionsEnabled)
             {
                 var hubClients = theEvent.TryGetHubClients();

@@ -27,15 +27,6 @@ namespace SmartClass.Common.ScopeHubs
 
     public class HubClientLogHelper : IEventLogHelper
     {
-        public HubClientLogHelper()
-        {
-            var monitorHelper = ManageMonitorHelper.Instance;
-            //todo with a api
-            monitorHelper.Config.UpdateMonitorInfoEnabled = true;
-            monitorHelper.Config.UpdateConnectionsEnabled = true;
-            monitorHelper.Config.ServerLogEnabled = true;
-        }
-
         public void Log(object message, string prefix = "")
         {
             var theEvent = message as SignalREvent;
