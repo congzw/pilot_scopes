@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common;
 using SmartClass.Common.ScopeHubs;
+using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
+using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 
 namespace SmartClass.Web.Api
 {
@@ -16,11 +19,13 @@ namespace SmartClass.Web.Api
     {
         private readonly SignalREventBus _bus;
         private readonly IHubContext<_AnyHub> _hubContext;
+        private readonly IClientMonitor _clientMonitor;
 
-        public HubApiController(SignalREventBus bus, IHubContext<_AnyHub> hubContext)
+        public HubApiController(SignalREventBus bus, IHubContext<_AnyHub> hubContext,IClientMonitor clientMonitor)
         {
             _bus = bus;
             _hubContext = hubContext;
+            _clientMonitor = clientMonitor;
         }
 
         [Route("getDate")]
@@ -59,5 +64,22 @@ namespace SmartClass.Web.Api
             await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), sendContext, args));
             return "OK";
         }
+
+        public Task<bool> AddToGroup(string scopeId,string groupId,string clientId)
+        {
+            var addGroup = new AddGroup();
+            addGroup.Items.Add(new ScopeGroup() { });
+            var task = _clientMonitor.AddGroup(addGroup);
+            if (task.IsCompleted)
+            {
+
+            };
+            var joinGroupArgs = new JoinGroupArgs()
+            {
+
+            };
+            _clientMonitor.JoinGroup(joinGroupArgs);
+            return Task.FromResult(true);
+        } 
     }
 }
