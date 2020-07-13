@@ -12,7 +12,7 @@ namespace SmartClass.DAL
         }
 
         public DbSet<MyConnection> MyConnections { get; set; }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

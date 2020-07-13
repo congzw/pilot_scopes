@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Web.Boots;
+using SmartClass.Web.Chats;
 
 namespace SmartClass.Web
 {
@@ -16,6 +17,7 @@ namespace SmartClass.Web
             services.AddSignalR();
             services.AddMyDAL();
             services.AddClientMonitors();
+            services.AddChats();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -29,6 +31,7 @@ namespace SmartClass.Web
 
             app.UseMyDAL(env);
             app.UseClientMonitors();
+            app.UseChats();
 
             ////pipeline demo for hub
             //app.Use(async (context, next) =>
