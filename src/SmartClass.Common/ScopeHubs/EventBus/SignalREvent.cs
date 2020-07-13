@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
 // ReSharper disable once CheckNamespace
@@ -46,7 +47,6 @@ namespace SmartClass.Common.ScopeHubs
             {
                 throw new ArgumentNullException(nameof(context));
             }
-
             var hubContext = new HubContextWrapper<THub>();
             hubContext.Clients = context.Clients;
             hubContext.Groups = context.Groups;
@@ -77,8 +77,7 @@ namespace SmartClass.Common.ScopeHubs
         }
 
         #endregion
-
-
+        
         public Hub RaiseHub { get; }
         public HubContextWrapper Context { get; }
         public SendContext SendContext { get; set; }
@@ -106,60 +105,10 @@ namespace SmartClass.Common.ScopeHubs
         }
     }
 
-    //public class SignalREventCallingContext : IScopeClientLocate
-    //{
-    //    public string ScopeId { get; set; }
-    //    public string ClientId { get; set; }
-    //    public string UserId { get; set; }
-    //    public string ClientType { get; set; }
-
-    //    public string EventName { get; set; }
-    //    public object EventArgs { get; set; }
-    //    public SendToScopeArgs SendTo { get; set; } = new SendToScopeArgs();
-    //}
-
-    //public class SendToScopeArgs : IScopeKey
-    //{
-    //    public string ScopeId { get; set; }
-    //    public IList<string> ClientIds { get; set; } = new List<string>();
-    //    public IList<string> Groups { get; set; } = new List<string>();
-
-    //    public static SendToScopeArgs CreateForScopeGroupAll(string scopeId)
-    //    {
-    //        var sendToScopeArgs = new SendToScopeArgs();
-    //        sendToScopeArgs.WithScopeId(scopeId);
-    //        sendToScopeArgs.Groups.Add(HubConst.GroupName_All);
-    //        return sendToScopeArgs;
-    //    }
-    //}
-
-
-    ////todo move and union to ClientMethod or convert from
-    //public class SendArgs
-    //{
-    //    public SendFromScopeArgs SendFrom { get; set; } = new SendFromScopeArgs();
-    //    public SendToScopeArgs SendTo { get; set; } = new SendToScopeArgs();
-
-    //    public SendArgs WithSendFrom(IScopeClientLocate locate)
-    //    {
-    //        this.SendFrom.CopyFrom(locate);
-    //        return this;
-    //    }
-    //    public static SendArgs Create()
-    //    {
-    //        return new SendArgs();
-    //    }
-    //    public static SendArgs CreateForScopeGroupAll(string scopeId)
-    //    {
-    //        var sendArgs = new SendArgs();
-    //        sendArgs.SendTo = SendToScopeArgs.CreateForScopeGroupAll(scopeId);
-    //        return sendArgs;
-    //    }
-    //}
-
-    //public class SendFromScopeArgs : IScopeClientLocate
-    //{
-    //    public string ScopeId { get; set; }
-    //    public string ClientId { get; set; }
-    //}
+    public interface ISignalREventHandler
+    {
+        float HandleOrder { set; get; }
+        bool ShouldHandle(ISignalREvent @event);
+        Task HandleAsync(ISignalREvent @event);
+    }
 }
