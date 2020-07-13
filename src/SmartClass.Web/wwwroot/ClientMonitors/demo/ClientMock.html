@@ -8,20 +8,19 @@
 </head>
 <body>
     <div class="container" id="app">
-        <div>
-            <h4>我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}</h4>
+        <div class="pt-md-3">
             <div>
-                <span>
-                    客户端操作：
-
-                </span>
-                <button type="button" @click="unConnction()" class="btn btn-primary pull-right">断开</button>
-                <button type="button" @click="reConnection()" class="btn btn-primary pull-right">重连</button>
+                <h5 class="form-inline">
+                    我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}
+                    &nbsp;&nbsp;
+                    <button type="button" @click="unConnction()" class="btn btn-primary pull-right">断开</button>
+                    <button type="button" @click="reConnection()" class="btn btn-primary pull-right">重连</button>
+                </h5>
             </div>
         </div>
         <hr />
         <div>
-            <h4>发送消息：</h4>
+            <h5>发送消息：</h5>
             <div>
                 <form>
                     <div class="form-row">
@@ -32,7 +31,7 @@
                             <input type="text" class="form-control" v-model="messageObj.clientId" id="ClientId" placeholder="ClientId">
                         </div>
                         <div class="col">
-                            <input type="text" class="form-control" v-model="messageObj.userId" id="UserId" placeholder="UserId">
+                            <input type="text" class="form-control" v-model="messageObj.groupId" id="GroupId" placeholder="GroupId">
                         </div>
                         <div class="col">
                             <input type="text" class="form-control" v-model="messageObj.message" id="Message" placeholder="消息体">
@@ -45,10 +44,10 @@
             </div>
         </div>
         <hr />
-        <div class="row">
-            <h4>
+        <div>
+            <h5>
                 <span>接收消息：</span>
-            </h4>
+            </h5>
             <table class="table">
                 <thead>
                     <tr>
@@ -95,7 +94,7 @@
                 messageObj: {
                     scopeId: '',
                     clientId: '',
-                    userId: '',
+                    groupId: '',
                     message: ''
                 },
                 myMesssages:[]
@@ -122,6 +121,13 @@
                         .catch(error => {
                             console.error(error.message);
                         });
+                },
+                unConnction: function () {
+                    connectionHub.stop();
+                    console.log(connectionHub);
+                },
+                reConnection: function () {
+                    this.connectionStart(this.current.scopeId, this.current.clientId);
                 },
                 updateConnections: function (args) {
                     this.connectionObj = args;
