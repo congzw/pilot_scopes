@@ -36,6 +36,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             _scopeClientConnectionKeyMaps = scopeClientConnectionKeyMaps;
         }
         
+        private static object _lock = new object();
+
         public async Task OnConnected(OnConnectedEvent theEvent)
         {
             var hub = theEvent?.RaiseHub;
@@ -48,8 +50,26 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var sendFrom = hub.TryGetHttpContext().GetSendFrom();
             var locate = hub.TryGetClientConnectionLocate();
             AllPropsShouldHasValue(locate);
+            
+            var theCallerContext = TryGetHubCallerContext(locate);
+            if (theCallerContext != null)
+            {
+                //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
+                //theCallerContext.Abort();
+                var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_Kicked);
+                clientMethodArgs.MethodArgs = new { Reason = "Same Scope Client Connected: " + locate.GetScopeClientKey()};
+                await hub.Clients.Client(theCallerContext.ConnectionId).SendAsync(HubConst.ClientStub, clientMethodArgs);
 
-            _hubCallerContextCache.SetCache(hub);
+                var hubClients = theEvent.TryGetHubClients();
+                var eventName = theEvent.GetType().Name;
+                var info = new EventInvokeInfo();
+                info.SendContext = theEvent.SendContext;
+                info.Desc = eventName + " same client kick";
+                info.ConnectionId = theCallerContext.ConnectionId;
+                await ManageMonitorHelper.Instance.EventInvoked(hubClients, info);
+            }
+
+            _hubCallerContextCache.SetCache(locate.ConnectionId, hub.Context);
             _scopeClientConnectionKeyMaps.SetCache(locate);
             await ScopeGroupFix.OnConnected(hub, locate.ScopeId);
 
@@ -90,11 +110,14 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
             var locate = hub.TryGetClientConnectionLocate();
             AllPropsShouldHasValue(locate);
+            
+            var theCallerContext = TryGetHubCallerContext(locate);
+            if (theCallerContext != null)
+            {
+                _hubCallerContextCache.RemoveCache(locate.ConnectionId);
+            }
 
-            _hubCallerContextCache.RemoveCache(hub);
-            _scopeClientConnectionKeyMaps.RemoveCache(locate);
             await ScopeGroupFix.OnDisconnected(hub, locate.ScopeId);
-
             var conn = _repository.GetConnection(locate);
             if (conn == null)
             {
@@ -106,6 +129,19 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             conn.ConnectionId = string.Empty;
             conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
             _repository.AddOrUpdate(conn);
+        }
+
+        private HubCallerContext TryGetHubCallerContext(ClientConnectionLocate locate)
+        {
+            //是否已经建立了通道
+            var theClientConnection = _scopeClientConnectionKeyMaps.TryGetByScopeClientKey(locate.ScopeId, locate.ClientId);
+            if (theClientConnection == null)
+            {
+                return null;
+            }
+
+            var theCallerContext = _hubCallerContextCache.GetCache(theClientConnection.ConnectionId);
+            return theCallerContext;
         }
 
         public async Task KickClient(KickClientEvent theEvent)
