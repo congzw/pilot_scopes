@@ -9,6 +9,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
+using SmartClass.Common.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
@@ -29,11 +30,11 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             , ScopeClientConnectionKeyMaps scopeClientConnectionKeyMaps)
         {
             _repository = connRepos ?? throw new ArgumentNullException(nameof(connRepos));
-            _clientGroupRepos = clientGroupRepos;
+            _clientGroupRepos = clientGroupRepos ?? throw new ArgumentNullException(nameof(clientGroupRepos));
             _clientInvokeProcessBus = clientInvokeProcessBus ?? throw new ArgumentNullException(nameof(clientInvokeProcessBus));
             _clientStubProcessBus = clientStubProcessBus ?? throw new ArgumentNullException(nameof(clientStubProcessBus));
-            _hubCallerContextCache = hubCallerContextCache;
-            _scopeClientConnectionKeyMaps = scopeClientConnectionKeyMaps;
+            _hubCallerContextCache = hubCallerContextCache ?? throw new ArgumentNullException(nameof(hubCallerContextCache));
+            _scopeClientConnectionKeyMaps = scopeClientConnectionKeyMaps ?? throw new ArgumentNullException(nameof(scopeClientConnectionKeyMaps));
         }
         
         public async Task OnConnected(OnConnectedEvent theEvent)
@@ -213,16 +214,70 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             return Task.FromResult(scopeClientGroups);
         }
 
-        public Task ResetScope(ResetScopeEvent theEvent)
+        public async Task ResetScope(ResetScopeEvent theEvent)
         {
-            throw new System.NotImplementedException();
+            if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
+
+            var resetScopeArgs = theEvent.Args;
+            if (resetScopeArgs == null || string.IsNullOrWhiteSpace(resetScopeArgs.ScopeId))
+            {
+                throw new ArgumentException("scopeId should have value!");
+            }
+
+            //clear all cache, remove all group relation, empty all connId, clear scope context
+            var scopeClientGroups = _clientGroupRepos.GetScopeClientGroups(new ScopeClientGroupLocate().WithScopeId(resetScopeArgs.ScopeId));
+            foreach (var scopeClientGroup in scopeClientGroups)
+            {
+                var locate = _scopeClientConnectionKeyMaps.TryGetByScopeClientKey(scopeClientGroup.ScopeId,
+                    scopeClientGroup.ClientId);
+                if (locate != null)
+                {
+                    var groupManager = theEvent.TryGetGroupManager();
+                    var groupFullName = ScopeGroupName.GetScopedGroup(scopeClientGroup.ScopeId, scopeClientGroup.Group)
+                        .ToScopeGroupFullName();
+                    await groupManager.RemoveFromGroupAsync(locate.ConnectionId, groupFullName);
+                    _scopeClientConnectionKeyMaps.RemoveCache(locate);
+                }
+
+                _clientGroupRepos.Remove(scopeClientGroup);
+            }
+
+            var connections = _repository.GetConnections(new GetConnectionsArgs().WithScopeId(resetScopeArgs.ScopeId));
+            foreach (var myConnection in connections)
+            {
+                myConnection.ConnectionId = string.Empty;
+                _repository.AddOrUpdate(myConnection);
+            }
+
+            var scopeContext = ScopeContext.GetScopeContext(resetScopeArgs.ScopeId, true);
+            scopeContext.Bags.Clear();
         }
 
         public Task UpdateScope(UpdateScopeEvent theEvent)
         {
-            throw new System.NotImplementedException();
+            if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
+
+            var resetScopeArgs = theEvent.Args;
+            if (resetScopeArgs == null || string.IsNullOrWhiteSpace(resetScopeArgs.ScopeId))
+            {
+                throw new ArgumentException("scopeId should have value!");
+            }
+
+            var scopeContext = ScopeContext.GetScopeContext(resetScopeArgs.ScopeId, true);
+            foreach (var bag in resetScopeArgs.Bags)
+            {
+                scopeContext.SetBagValue(bag.Key, bag.Value);
+            }
+            return Task.CompletedTask;
         }
-        
+
+        public Task<IList<ScopeContext>> GetScopeContexts()
+        {
+            var scopeRepository = ScopeContext.Resolve();
+            var scopeContexts = scopeRepository.GetScopeContexts();
+            return Task.FromResult(scopeContexts);
+        }
+
         //helpers
         private static IClientConnectionLocate AllPropsShouldHasValue(IClientConnectionLocate locate)
         {
