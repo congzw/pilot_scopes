@@ -73,16 +73,16 @@
                         <th scope="col">来自scopeId</th>
                         <th scope="col">来自clientId</th>
                         <th scope="col">method</th>
-                        <th scope="col">bags</th>
+                        <th scope="col">sendContext</th>
                         <th scope="col">methodArgs</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="item in myMesssages" :key="item.id">
-                        <th scope="row">{{item.bags.sendContext.from.scopeId}}</th>
-                        <td>{{item.bags.sendContext.from.clientId}}</td>
+                        <th scope="row">{{item.sendContext.from.scopeId}}</th>
+                        <td>{{item.sendContext.from.clientId}}</td>
                         <td>{{item.method}}</td>
-                        <td>{{item.bags}}</td>
+                        <td>{{item.sendContext}}</td>
                         <td>{{item.methodArgs }}</td>
                     </tr>
                 </tbody>
@@ -131,27 +131,25 @@
                         .build();
 
                     connectionHub.on(clientInvoke, function (theArgs) {
-                        //theArgs: {
-                        //    bags: {
-                        //        sendContext: {
-                        //            from: {
-                        //                clientId: "c3"
-                        //                clientType: ""
-                        //                scopeId: "s1"
-                        //                userId: ""
-                        //            };
-                        //            to: {
-                        //                clientIds:[]
-                        //                groups:[]
-                        //                scopeId: 's1'
-                        //            };
-                        //        }
-                        //    };
-                        //    method: "updateMessage";
-                        //    methodArgs: {
-                        //        message: ""
-                        //    }
-                        //}
+                        theArgs: {
+                            sendContext: {
+                                from: {
+                                    clientId: "c3"
+                                    clientType: ""
+                                    scopeId: "s1"
+                                    userId: ""
+                                };
+                                to: {
+                                    clientIds: []
+                                    groups: []
+                                    scopeId: 's1'
+                                };
+                            }
+                            method: "updateMessage";
+                            methodArgs: {
+                                message: ""
+                            }
+                        }
                         _this.myMesssages.push(theArgs);
                         console.log('callback: ' + clientInvoke, theArgs);
                     });
@@ -188,14 +186,21 @@
                 //发送消息：signalr
                 clientInvoke: function (messageObj) {
                     var theArgs = {
-                        scopeId: messageObj.scopeId,
-                        clientId: messageObj.clientId,
-                        groupId: messageObj.groupId,
+                        sendContext: {
+                            from: {
+                                scopeId: this.current.scopeId,
+                                clientId: this.current.clientId,
+                                userId: this.current.userId,
+                                clientType: ''
+                            },
+                            to: {
+                                scopeId: messageObj.scopeId,
+                                clientIds: messageObj.clientId?[ messageObj.clientId ]: [],
+                                groups: messageObj.groupId?[ messageObj.groupId ]: []
+                            }
+                        },
                         method: "updateMessage",
-                        methodArgs: { message: messageObj.message },
-                        bags: {
-                            foo: "foo"
-                        }
+                        methodArgs: { message: messageObj.message }
                     };
                     connectionHub.invoke(clientInvoke, theArgs);
                 },
