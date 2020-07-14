@@ -5,6 +5,7 @@ using SmartClass.Common.DependencyInjection;
 using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 using SmartClass.DAL;
@@ -40,6 +41,8 @@ namespace Common.SignalR.Scoped
             services.AddSingleton<ScopeClientConnectionKeyMaps>();
             services.AddSingleton<HubCallerContextCache>();
             services.AddScoped<IClientConnectionRepository, ClientConnectionRepository>();
+            //services.AddScoped<IScopeClientGroupRepository, ClientConnectionRepository>();
+            services.AddScoped<IScopeClientGroupRepository>(sp => sp.GetRequiredService<IClientConnectionRepository>() as IScopeClientGroupRepository);
             services.AddScoped<IClientMonitor, ClientMonitor>();
             return services;
         }

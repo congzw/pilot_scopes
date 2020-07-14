@@ -20,12 +20,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
 
     public class JoinGroupArgs : IScopeGroupLocate
     {
-        public JoinGroupArgs()
-        {
-            ClientIds = new List<string>();
-        }
         public string ScopeId { get; set; }
         public string Group { get; set; }
-        public IList<string> ClientIds { get; set; }
+        public IList<string> ClientIds { get; set; } = new List<string>();
     }
 }

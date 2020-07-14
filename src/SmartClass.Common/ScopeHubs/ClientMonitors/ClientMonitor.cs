@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
@@ -18,26 +19,27 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
     public class ClientMonitor : IClientMonitor
     {
         private readonly IClientConnectionRepository _repository;
+        private readonly IScopeClientGroupRepository _clientGroupRepos;
         private readonly ClientInvokeProcessBus _clientInvokeProcessBus;
         private readonly ClientStubProcessBus _clientStubProcessBus;
         private readonly HubCallerContextCache _hubCallerContextCache;
         private readonly ScopeClientConnectionKeyMaps _scopeClientConnectionKeyMaps;
 
         public ClientMonitor(IClientConnectionRepository connRepos
+            , IScopeClientGroupRepository clientGroupRepos
             , ClientInvokeProcessBus clientInvokeProcessBus
             , ClientStubProcessBus clientStubProcessBus
             , HubCallerContextCache hubCallerContextCache
             , ScopeClientConnectionKeyMaps scopeClientConnectionKeyMaps)
         {
             _repository = connRepos ?? throw new ArgumentNullException(nameof(connRepos));
+            _clientGroupRepos = clientGroupRepos;
             _clientInvokeProcessBus = clientInvokeProcessBus ?? throw new ArgumentNullException(nameof(clientInvokeProcessBus));
             _clientStubProcessBus = clientStubProcessBus ?? throw new ArgumentNullException(nameof(clientStubProcessBus));
             _hubCallerContextCache = hubCallerContextCache;
             _scopeClientConnectionKeyMaps = scopeClientConnectionKeyMaps;
         }
         
-        private static object _lock = new object();
-
         public async Task OnConnected(OnConnectedEvent theEvent)
         {
             var hub = theEvent?.RaiseHub;
@@ -77,6 +79,18 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var theConn = _repository.GetConnection(locate);
             if (theConn != null)
             {
+                //var oldConnId = theConn.ConnectionId;
+                //todo: 老的连接是暂不处理
+                //保证原有的连接组，使用新的ConnectionId被重建一遍
+                var getClientGroupsArgs = new GetClientGroupsArgs().WithScopeId(locate.ScopeId).WithClientId(locate.ClientId);
+                var scopeClientGroups = _clientGroupRepos.GetScopeClientGroups(getClientGroupsArgs);
+                foreach (var scopeClientGroup in scopeClientGroups)
+                {
+                    var groupManager = hub.Groups;
+                    var scopeGroupFullName = ScopeGroupName.GetScopedGroup(scopeClientGroup.ScopeId, scopeClientGroup.Group).ToScopeGroupFullName();
+                    await groupManager.AddToGroupAsync(locate.ConnectionId, scopeGroupFullName).ConfigureAwait(false);
+                }
+
                 //找到之前的记录，更新一个新的connectionId
                 theConn.ConnectionId = locate.ConnectionId;
             }
@@ -91,10 +105,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 theConn.CreateAt = now;
                 theConn.LastUpdateAt = now;
                 theConn.ClientType = sendFrom.ClientType;
-                //theConn.Bags.Add("access_token", "todo: refactor");
-                
-                theConn.AddScopeGroupIfNotExist(ScopeGroupName.GetScopedGroupAll(locate.ScopeId));
-                await theConn.UpdateConnectionGroups(hub);
             }
 
             _repository.AddOrUpdate(theConn);
@@ -178,20 +188,55 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             await SendClientMethod(theEvent, theEvent.Args, HubConst.ClientStub).ConfigureAwait(false);
         }
 
-        public Task JoinGroup(JoinGroupArgs args)
+        public async Task JoinGroup(JoinGroupEvent theEvent)
         {
-            var theConn = _repository.GetConnection(new ClientConnectionLocate());
-            throw new System.NotImplementedException();
+            if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
+            var args = theEvent.Args;
+            if (args == null) throw new ArgumentNullException(nameof(args));
+            
+            foreach (var clientId in args.ClientIds)
+            {
+                var connectionLocate = ClientConnectionLocate.Create().WithScopeId(args.ScopeId).WithClientId(clientId);
+                var theConn = _repository.GetConnection(connectionLocate);
+                if (theConn != null)
+                {
+                    //theConn.AddScopeGroupIfNotExist(args);
+                    var groupManager = theEvent.TryGetGroupManager();
+                    var groupName = args.ToScopeGroupFullName();
+                    await groupManager.AddToGroupAsync(theConn.ConnectionId, groupName).ConfigureAwait(false);
+                }
+                
+                var scopeClientGroup = new ScopeClientGroup().WithScopeId(args.ScopeId).WithGroup(args.Group).WithClientId(clientId);
+                _clientGroupRepos.Add(scopeClientGroup);
+            }
         }
 
-        public Task LeaveGroup(LeaveGroupArgs args)
+        public async Task LeaveGroup(LeaveGroupEvent theEvent)
         {
-            throw new System.NotImplementedException();
+            if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
+            var args = theEvent.Args;
+            if (args == null) throw new ArgumentNullException(nameof(args));
+
+            foreach (var clientId in args.ClientIds)
+            {
+                var connectionLocate = ClientConnectionLocate.Create().WithScopeId(args.ScopeId).WithClientId(clientId);
+                var theConn = _repository.GetConnection(connectionLocate);
+                if (theConn != null)
+                {
+                    var groupManager = theEvent.TryGetGroupManager();
+                    var groupName = args.ToScopeGroupFullName();
+                    await groupManager.RemoveFromGroupAsync(theConn.ConnectionId, groupName).ConfigureAwait(false);
+                }
+                
+                var locate = new ScopeClientGroup().WithScopeId(args.ScopeId).WithGroup(args.Group).WithClientId(clientId);
+                _clientGroupRepos.Remove(locate);
+            }
         }
 
         public Task<IList<ScopeClientGroup>> GetClientGroups(GetClientGroupsArgs args)
         {
-            throw new System.NotImplementedException();
+            var scopeClientGroups = _clientGroupRepos.GetScopeClientGroups(args);
+            return Task.FromResult(scopeClientGroups);
         }
 
         public Task ResetScope(ResetScopeEvent theEvent)

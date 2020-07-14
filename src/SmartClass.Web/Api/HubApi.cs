@@ -77,9 +77,11 @@ namespace SmartClass.Web.Api
             //};
             var joinGroupArgs = new JoinGroupArgs()
             {
-
+                //todo
             };
-            _clientMonitor.JoinGroup(joinGroupArgs);
+            //todo: read SendFrom from token
+            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+            _clientMonitor.JoinGroup(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext,  joinGroupArgs));
             return Task.FromResult(true);
         }
     }

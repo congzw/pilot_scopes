@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs
@@ -16,6 +19,22 @@ namespace SmartClass.Common.ScopeHubs
                 args.ScopeId = hub.GetSendFrom().ScopeId;
             }
             return hub;
+        }
+
+        public static async Task AddToGroupsAsync(this IGroupManager groupManager, string connectionId, IEnumerable<string> groupNames, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            foreach (var groupName in groupNames)
+            {
+                await groupManager.AddToGroupAsync(connectionId, groupName, cancellationToken);
+            }
+        }
+
+        public static async Task RemoveFromGroupsAsync(this IGroupManager groupManager, string connectionId, IEnumerable<string> groupNames, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            foreach (var groupName in groupNames)
+            {
+                await groupManager.RemoveFromGroupAsync(connectionId, groupName, cancellationToken);
+            }
         }
     }
 }

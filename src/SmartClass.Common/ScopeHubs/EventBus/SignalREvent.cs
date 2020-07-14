@@ -104,6 +104,14 @@ namespace SmartClass.Common.ScopeHubs
             }
             return Context.Clients;
         }
+        public IGroupManager TryGetGroupManager()
+        {
+            if (RaiseHub != null)
+            {
+                return RaiseHub.Groups;
+            }
+            return Context.Groups;
+        }
     }
 
     public interface ISignalREventHandler

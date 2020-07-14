@@ -2,9 +2,9 @@
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
 {
-    public interface IScopeClientGroupRepository
+    public interface IScopeClientGroupRepository : IMyScoped
     {
-        IEnumerable<ScopeClientGroupLocate> QueryScopeClientGroups(IScopeClientGroupLocate args);
+        IList<ScopeClientGroup> GetScopeClientGroups(IScopeClientGroupLocate args);
         ScopeClientGroup GetScopeClientGroup(IScopeClientGroupLocate args);
         void Add(ScopeClientGroup scopeClientGroup);
         void Remove(ScopeClientGroup scopeClientGroup);

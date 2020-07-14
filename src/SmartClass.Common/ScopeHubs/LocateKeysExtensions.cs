@@ -43,24 +43,44 @@ namespace SmartClass.Common.ScopeHubs
             return theObject;
         }
 
-        public static T CopyFrom<T>(this T updateObject, IScopeClientLocate fromObject) where T : IScopeClientLocate
-        {
-            if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
-            if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
+        //public static T CopyFrom<T>(this T updateObject, IScopeClientLocate fromObject) where T : IScopeClientLocate
+        //{
+        //    if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
+        //    if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
 
-            updateObject.WithScopeId(fromObject.ScopeId);
-            updateObject.WithClientId(fromObject.ClientId);
-            return updateObject;
-        }
-        public static T CopyFrom<T>(this T updateObject, IScopeGroupLocate fromObject) where T : IScopeGroupLocate
-        {
-            if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
-            if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
+        //    updateObject.WithScopeId(fromObject.ScopeId);
+        //    updateObject.WithClientId(fromObject.ClientId);
+        //    return updateObject;
+        //}
+        //public static T CopyFrom<T>(this T updateObject, IScopeGroupLocate fromObject) where T : IScopeGroupLocate
+        //{
+        //    if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
+        //    if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
 
-            updateObject.WithScopeId(fromObject.ScopeId);
-            updateObject.WithGroup(fromObject.Group);
-            return updateObject;
-        }
+        //    updateObject.WithScopeId(fromObject.ScopeId);
+        //    updateObject.WithGroup(fromObject.Group);
+        //    return updateObject;
+        //}
+        //public static T CopyFrom<T>(this T updateObject, IScopeClientGroupLocate fromObject) where T : IScopeClientGroupLocate
+        //{
+        //    if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
+        //    if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
+
+        //    updateObject.WithScopeId(fromObject.ScopeId);
+        //    updateObject.WithClientId(fromObject.ClientId);
+        //    updateObject.WithGroup(fromObject.Group);
+        //    return updateObject;
+        //}
+        //public static T CopyFrom<T>(this T updateObject, IClientConnectionLocate fromObject) where T : IClientConnectionLocate
+        //{
+        //    if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
+        //    if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
+
+        //    updateObject.WithScopeId(fromObject.ScopeId);
+        //    updateObject.WithClientId(fromObject.ClientId);
+        //    updateObject.WithConnectionId(fromObject.ConnectionId);
+        //    return updateObject;
+        //}
 
         public static string ToScopeGroupFullName(this IScopeGroupLocate locate)
         {
@@ -136,6 +156,39 @@ namespace SmartClass.Common.ScopeHubs
                     }
                 }
             }
+        }
+        
+        public static bool AllLocateKeysHasValue<T>(this T locate, out string msg) where T : IScopeKey
+        {
+            if (locate == null) throw new ArgumentNullException(nameof(locate));
+
+            //IScopeKey, IClientKey, IGroupKey, ISignalRConnectionKey      
+            msg = "";
+            if (locate is IScopeKey theScope && string.IsNullOrWhiteSpace(theScope.ScopeId))
+            {
+                msg = string.Format("{0} has not no value", nameof(theScope.ScopeId));
+                return false;
+            }
+
+            if (locate is IGroupKey theGroup && string.IsNullOrWhiteSpace(theGroup.Group))
+            {
+                msg = string.Format("{0} has not no value", nameof(theGroup.Group));
+                return false;
+            }
+
+            if (locate is IClientKey theClient && string.IsNullOrWhiteSpace(theClient.ClientId))
+            {
+                msg = string.Format("{0} has not no value", nameof(theClient.ClientId));
+                return false;
+            }
+
+            if (locate is ISignalRConnectionKey theConn && string.IsNullOrWhiteSpace(theConn.ConnectionId))
+            {
+                msg = string.Format("{0} has not no value", nameof(theConn.ConnectionId));
+                return false;
+            }
+
+            return true;
         }
     }
 }
