@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
@@ -142,28 +138,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             _repository.AddOrUpdate(conn);
         }
 
-        public async Task KickClient(KickClientEvent theEvent)
-        {
-            return;
-            if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
-            var args = theEvent.Args;
-            if (args == null)
-            {
-                return;
-            }
-
-            var hub = theEvent.RaiseHub;
-            if (hub != null)
-            {
-                await Kick(hub.Clients, hub.Groups, _hubCallerContextCache.HubCallerContexts, _repository, args).ConfigureAwait(false);
-            }
-            else
-            {
-                var wrapper = theEvent.Context;
-                await Kick(wrapper.Clients, wrapper.Groups, _hubCallerContextCache.HubCallerContexts, _repository, args).ConfigureAwait(false);
-            }
-        }
-
         public async Task ClientInvoke(ClientInvokeEvent theEvent)
         {
             //来自Hub的请求
@@ -250,44 +224,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         }
         
         //helpers
-        private static async Task Kick(IHubClients<IClientProxy> hubClients,
-            IGroupManager groupManager,
-            IDictionary<string, HubCallerContext> hubCallerContexts,
-            IClientConnectionRepository repository,
-            KickClientArgs args)
-        {
-            var theConn = repository.GetConnection(args);
-            if (theConn == null)
-            {
-                return;
-            }
-            theConn.LastUpdateAt = DateHelper.Instance.GetDateNow();
-
-            var clientProxy = hubClients.Client(theConn.ConnectionId);
-            if (clientProxy == null)
-            {
-                return;
-            }
-
-            //notify kick!
-            var clientMethodArgs = ClientMethodArgs
-                .Create(HubConst.ClientMethod_Notify)
-                .SetBagValue("args", args);
-
-            await clientProxy.SendAsync(HubConst.ClientStub, clientMethodArgs).ConfigureAwait(false);
-
-            //todo
-            ////kick old connectionId
-            //foreach (var scopedGroup in theConn.Groups)
-            //{
-            //    await groupManager.RemoveFromGroupAsync(theConn.ConnectionId, scopedGroup).ConfigureAwait(false);
-            //    await hubClients.Group(scopedGroup).SendAsync(HubConst.ClientStub_RemoveFromGroupStubInvoke, string.Format("{0}离开了本小组", theConn.ToLocateDesc()));
-            //}
-            repository.Remove(theConn);
-
-            hubCallerContexts.TryGetValue(theConn.ConnectionId, out var oldClientHub);
-            oldClientHub?.Abort();
-        }
         private static IClientConnectionLocate AllPropsShouldHasValue(IClientConnectionLocate locate)
         {
             if (string.IsNullOrWhiteSpace(locate.ClientId))

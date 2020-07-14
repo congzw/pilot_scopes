@@ -7,7 +7,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
     {
         Task OnConnected(OnConnectedEvent theEvent);
         Task OnDisconnected(OnDisconnectedEvent theEvent);
-        Task KickClient(KickClientEvent theEvent);
     }
 
     #region events
@@ -27,29 +26,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
         {
             Reason = reason;
         }
-    }
-
-    public class KickClientEvent : SignalREvent
-    {
-        public KickClientArgs Args { get; set; }
-
-        public KickClientEvent(Hub raiseHub, KickClientArgs args) : base(raiseHub)
-        {
-            Args = args;
-        }
-
-        public KickClientEvent(HubContextWrapper hubContextWrapper, SendContext sendContext, KickClientArgs args) : base(hubContextWrapper, sendContext)
-        {
-            Args = args;
-        }
-    }
-
-    public class KickClientArgs : IClientConnectionLocate
-    {
-        public string ScopeId { get; set; }
-        public string ClientId { get; set; }
-        public string ConnectionId { get; set; }
-        public string Reason { get; set; }
     }
 
     #endregion

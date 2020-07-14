@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
@@ -50,13 +49,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         /// <returns></returns>
         Task ClientStub(ClientMethodArgs args);
 
-        //Yagni:业务上暂不考虑此场景?
-        /// <summary>
-        /// 踢掉Client
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        Task KickClient(KickClientArgs args);
         /// <summary>
         /// 重置Scope
         /// </summary>
