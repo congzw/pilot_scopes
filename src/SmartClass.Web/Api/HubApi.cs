@@ -66,20 +66,18 @@ namespace SmartClass.Web.Api
             return "OK";
         }
 
+
+        [Route("AddToGroup")]
+        [HttpGet]
         public Task<bool> AddToGroup(string scopeId, string groupId, string clientId)
         {
-            //var addGroup = new AddGroup();
-            //addGroup.Items.Add(new ScopeGroup() { });
-            //var task = _clientMonitor.JoinGroup(addGroup);
-            //if (task.IsCompleted)
-            //{
-
-            //};
             var joinGroupArgs = new JoinGroupArgs()
             {
-                //todo
+                ScopeId = scopeId,
+                Group = groupId
             };
-            //todo: read SendFrom from token
+            joinGroupArgs.ClientIds.Add(clientId);
+
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
             _clientMonitor.JoinGroup(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext,  joinGroupArgs));
             return Task.FromResult(true);

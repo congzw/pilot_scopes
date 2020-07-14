@@ -70,8 +70,8 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col">scopeId</th>
-                        <th scope="col">clientId</th>
+                        <th scope="col">来自scopeId</th>
+                        <th scope="col">来自clientId</th>
                         <th scope="col">method</th>
                         <th scope="col">bags</th>
                         <th scope="col">methodArgs</th>
@@ -79,8 +79,8 @@
                 </thead>
                 <tbody>
                     <tr v-for="item in myMesssages" :key="item.id">
-                        <th scope="row">{{item.scopeId}}</th>
-                        <td>{{item.clientId}}</td>
+                        <th scope="row">{{item.bags.sendContext.from.scopeId}}</th>
+                        <td>{{item.bags.sendContext.from.clientId}}</td>
                         <td>{{item.method}}</td>
                         <td>{{item.bags}}</td>
                         <td>{{item.methodArgs }}</td>
@@ -131,6 +131,27 @@
                         .build();
 
                     connectionHub.on(clientInvoke, function (theArgs) {
+                        theArgs: {
+                            bags: {
+                                sendContext: {
+                                    from: {
+                                        clientId: "c3"
+                                        clientType: ""
+                                        scopeId: "s1"
+                                        userId: ""
+                                    };
+                                    to: {
+                                        clientIds:[]
+                                        groups:[]
+                                        scopeId: 's1'
+                                    };
+                                }
+                            };
+                            method: "updateMessage";
+                            methodArgs: {
+                                message: ""
+                            }
+                        }
                         _this.myMesssages.push(theArgs);
                         console.log('callback: ' + clientInvoke, theArgs);
                     });
@@ -157,7 +178,7 @@
 
                 //发送消息：api
                 clientStub: function (messageObj) {
-                    var url = '/api/hub/ClientStub?scopeId='+ messageObj.scopeId + '&clientId=' + messageObj.clientId;
+                    var url = '/api/hub/ClientStub?scopeId=' + messageObj.scopeId + '&groupId=' + messageObj.groupId + '&clientId=' + messageObj.clientId + '&message=' + messageObj.message;
                     fetch(url)
                         .then(response => response) //定义返回的类型和数据格式
                         .then(data => console.log(data))
@@ -179,19 +200,16 @@
                 },
 
                 //加入组
-                openToast: function () {
-                    this.toast.show = true;
-                },
                 addToGroup: function () {
-                    //todo
-                    //var url = '/api/hub/ClientStub?scopeId=' + messageObj.scopeId + '&clientId=' + messageObj.clientId;
-                    //fetch(url)
-                    //    .then(response => response)
-                    //    .then(data => console.log(data))
                     console.log(this.toast.groupId);
-                    //this.toast.groupId = '';
-
-                    //this.$refs.toast1.toast("show");
+                    if (!this.toast.groupId) {
+                        alert("请填写组名");
+                        return;
+                    }
+                    var url = '/api/hub/AddToGroup?scopeId=' + this.current.scopeId + '&groupId=' + this.toast.groupId + '&clientId=' + this.current.clientId;
+                    fetch(url)
+                        .then(response => response)
+                        .then(data => console.log(data));
                 }
             },
             created() {

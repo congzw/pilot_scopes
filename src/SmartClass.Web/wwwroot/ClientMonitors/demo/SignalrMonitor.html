@@ -35,33 +35,20 @@
         <hr />
         <div>
             <form class="form-inline">
-                <div class="form-group col-md-6">
+                <div class="form-group col-md-9">
                     <h4>
                         <span>连接列表：</span>
+                        <button disabled type="button" class="btn btn-info">{{filterObj.scopeId}}在线人数：{{computedConnections.filter(item=>item.connectionId).length}}</button>
+                        <button disabled type="button" class="btn btn-info">{{filterObj.scopeId}}总人数：{{computedConnections.length}}</button>
                         <button disabled type="button" class="btn btn-info">在线人数：{{connectionObj.onlineCount}}</button>
                         <button disabled type="button" class="btn btn-info">总人数：{{connectionObj.totalCount}}</button>
-
                     </h4>
                 </div>
-                
                 <div class="form-group col-md-3">
                     <label>scope选择：</label>
-                    <select class="form-control" id="exampleFormControlSelect1">
+                    <select class="form-control" id="exampleFormControlSelect1" v-model="filterObj.scopeId" @change="onChangeScopeId(filterObj.scopeId)">
                         <option value="">全部</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
-                    </select>
-                </div>
-                <div class="form-group col-md-3">
-                    <label>组选择：</label>
-                    <select class="form-control" id="exampleFormControlSelect1">
-                        <option value="">全部</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                        <option>5</option>
+                        <option :value="scope" v-for="scope in scopes">{{scope}}</option>
                     </select>
                 </div>
             </form>
@@ -70,17 +57,17 @@
                     <tr>
                         <th scope="col">scopeId </th>
                         <th scope="col">clientId</th>
-                        <th scope="col">groups</th>
+                        <!--<th scope="col">groups</th>-->
                         <th scope="col">connectionId</th>
                         <th scope="col">最新连接时间</th>
                         <th scope="col">操作</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="item in connectionObj.connections" :key="item.id">
+                    <tr v-for="item in computedConnections" :key="item.id">
                         <th scope="row">{{item.scopeId}}</th>
                         <td>{{item.clientId}}</td>
-                        <td>{{item.groups}}</td>
+                        <!--<td>{{item.groups}}</td>-->
                         <td>{{item.connectionId || "null"}}</td>
                         <td>{{item.lastUpdateAt | formatDate }}</td>
                         <td>
@@ -110,6 +97,9 @@
                     scopeId: '',
                     clientId: '',
                     userId: ''
+                },
+                filterObj: {
+                    scopeId: ''
                 }
             },
             methods: {
@@ -149,16 +139,37 @@
                     this.current = { ...this.current, scopeId: '', clientId: '', userId: '' }
                     window.open('clientmock.html?clientId=' + clientId + '&scopeId=' + scopeId);
                 },
-                //goto: function (scopeId, clientId) {
-                //    window.location.href = '/ClientMock.html';
-                //},
+                onChangeScopeId: function (value) {
+                    console.log(value);
+                }
             },
             created() {
                 var scopeId = "monitor_scope";
                 var clientId = "monitor_client";
                 this.connectionHub(scopeId, clientId);
             },
+            computed: {
+                scopes: function () {
+                    let scopes = this.connectionObj.connections.map(function (item) {
+                        return item["scopeId"];
+                    });
+                    //去重
+                    return [...new Set(scopes)];
+                },
+                computedConnections: function () {
+                    if (!this.filterObj.scopeId) {
+                        return this.connectionObj.connections;
+                    }
+                    return this.connectionObj.connections.filter(item => item.scopeId == this.filterObj.scopeId);
+                }
+            },
             filters: {
+                scopeFilter(connections, filterObj) {
+                    for (var key in filterObj) {
+                        console.log(key);
+                    }
+                    return connections.filters(item => item.scopeId);
+                },
                 formatDate(time) {
                     let date = new Date(time);
                     return formatDate(date, 'yyyy-MM-dd hh:mm')
