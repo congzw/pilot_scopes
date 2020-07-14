@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SmartClass.Common.Scopes
 {
@@ -8,17 +9,6 @@ namespace SmartClass.Common.Scopes
     {
         public string ScopeId { get; set; }
         public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
-
-        public object GetItem(string key, object defaultValue = null)
-        {
-            return !this.Bags.ContainsKey(key) ? defaultValue : this.Bags[key];
-        }
-
-        public ScopeContext SetItem(string key, object value)
-        {
-            this.Bags[key] = value;
-            return this;
-        }
 
         #region for ut & di extensions
 
@@ -38,6 +28,7 @@ namespace SmartClass.Common.Scopes
 
     public interface IScopeRepository
     {
+        IList<ScopeContext> GetScopeContexts();
         ScopeContext GetScopeContext(string scopeId, bool createIfNotExist);
         void SetScopeContext(ScopeContext scopeContext);
         void RemoveScopeContext(string scopeId);
@@ -47,6 +38,11 @@ namespace SmartClass.Common.Scopes
     {
         //default use memory dictionary impl, can also be replaced by other impl such as database source...
         public IDictionary<string, ScopeContext> Contexts { get; set; } = new ConcurrentDictionary<string, ScopeContext>(StringComparer.OrdinalIgnoreCase);
+
+        public IList<ScopeContext> GetScopeContexts()
+        {
+            return Contexts.Values.ToList();
+        }
 
         public ScopeContext GetScopeContext(string scopeId, bool createIfNotExist)
         {
@@ -90,7 +86,7 @@ namespace SmartClass.Common.Scopes
     {
         public static T GetItemAs<T>(this ScopeContext ctx, string key, T defaultValue = default(T))
         {
-            var value = ctx.GetItem(key, defaultValue);
+            var value = ctx.GetBagValue(key, defaultValue);
             return (T)Convert.ChangeType(value, typeof(T));
         }
     }

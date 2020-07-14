@@ -1,13 +1,13 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 
-namespace SignalrDemo.Api
+namespace SmartClass.Web.Api
 {
     [Route("api/test")]
     [ApiController]
     public class TestApiController : ControllerBase
     {
-        [Route("getDate")]
+        [Route("GetDate")]
         [HttpGet]
         public string GetDate()
         {

@@ -10,14 +10,15 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
 
     public class ClientMethodArgs : IClientMethod
     {
-        public ClientMethodArgs()
-        {
-            Bags = BagsHelper.Create();
-        }
         
         public string Method { get; set; }
         public object MethodArgs { get; set; }
-        public IDictionary<string, object> Bags { get; set; }
+        public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
+
+        public static ClientMethodArgs Create()
+        {
+            return new ClientMethodArgs();
+        }
 
         public static ClientMethodArgs Create(string method)
         {
@@ -30,6 +31,27 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
         public static void WithSendContext<T>(this T args, SendContext sendContext) where T : IClientMethod
         {
             args.SetBagValue("SendContext", sendContext);
+        }
+
+        public static ClientMethodArgs ForLogMessage(this ClientMethodArgs self, object methodArgs)
+        {
+            self.Method = HubConst.ClientMethod_LogMessage;
+            self.MethodArgs = methodArgs;
+            return self;
+        }
+
+        public static ClientMethodArgs ForNotify(this ClientMethodArgs self, object methodArgs)
+        {
+            self.Method = HubConst.ClientMethod_Notify;
+            self.MethodArgs = methodArgs;
+            return self;
+        }
+
+        public static ClientMethodArgs ForKicked(this ClientMethodArgs self, object methodArgs)
+        {
+            self.Method = HubConst.ClientMethod_Kicked;
+            self.MethodArgs = methodArgs;
+            return self;
         }
     }
 }

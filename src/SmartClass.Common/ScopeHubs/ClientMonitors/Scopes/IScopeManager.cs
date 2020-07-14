@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using SmartClass.Common.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
 {
@@ -8,6 +9,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
     {
         Task ResetScope(ResetScopeEvent theEvent);
         Task UpdateScope(UpdateScopeEvent theEvent);
+        Task<IList<ScopeContext>> GetScopeContexts();
     }
 
     #region events

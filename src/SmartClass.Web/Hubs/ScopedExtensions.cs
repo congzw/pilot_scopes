@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Common.DependencyInjection;
 using SmartClass.Common.ScopeHubs;
@@ -41,8 +40,7 @@ namespace Common.SignalR.Scoped
             services.AddSingleton<ScopeClientConnectionKeyMaps>();
             services.AddSingleton<HubCallerContextCache>();
             services.AddScoped<IClientConnectionRepository, ClientConnectionRepository>();
-            //services.AddScoped<IScopeClientGroupRepository, ClientConnectionRepository>();
-            services.AddScoped<IScopeClientGroupRepository>(sp => sp.GetRequiredService<IClientConnectionRepository>() as IScopeClientGroupRepository);
+            services.AddScoped<IScopeClientGroupRepository, ScopeClientGroupRepository>();
             services.AddScoped<IClientMonitor, ClientMonitor>();
             return services;
         }
