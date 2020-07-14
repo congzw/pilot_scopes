@@ -81,7 +81,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         //代表客户端的方法调用，供同步页面等场景使用
         public Task ClientInvoke(ClientMethodArgs args)
         {
-            this.FixScopeIdForArgs(args);
             TraceHubContext("ClientInvoke");
             return Bus.Raise(new ClientInvokeEvent(this, args));
         }
@@ -89,7 +88,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
         //代表从服务器端的方法调用，供数据通知等场景使用
         public Task ClientStub(ClientMethodArgs args)
         {
-            this.FixScopeIdForArgs(args);
             TraceHubContext("ClientStub");
             return Bus.Raise(new ClientStubEvent(this, args));
         }

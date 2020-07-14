@@ -65,6 +65,7 @@ namespace SmartClass.Common.ScopeHubs
         {
             RaiseHub = raiseHub ?? throw new ArgumentNullException(nameof(raiseHub));
             SendContext = sendContext ?? raiseHub.GetSendFrom().GetSendContext();
+            SendContext.SendConnectionId = raiseHub.Context.ConnectionId;
 
             RaiseAt = DateHelper.Instance.GetDateNow();
         }

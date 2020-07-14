@@ -60,6 +60,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 clientMethodArgs.MethodArgs = new { Reason = "Same Scope Client Connected: " + locate.GetScopeClientKey()};
                 await hub.Clients.Client(theCallerContext.ConnectionId).SendAsync(HubConst.ClientStub, clientMethodArgs);
 
+                //trace for manage
                 var hubClients = theEvent.TryGetHubClients();
                 var eventName = theEvent.GetType().Name;
                 var info = new EventInvokeInfo();

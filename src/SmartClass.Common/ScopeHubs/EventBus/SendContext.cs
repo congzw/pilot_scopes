@@ -7,6 +7,10 @@ namespace SmartClass.Common.ScopeHubs
 {
     public class SendContext
     {
+        /// <summary>
+        /// 如果不是从Hub连接发送的，则此字段为空
+        /// </summary>
+        public string SendConnectionId { get; set; }
         public SendFrom From { get; set; } = new SendFrom();
         public SendTo To { get; set; } = new SendTo();
     }

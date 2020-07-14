@@ -8,11 +8,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs
 
         public ClientStubEvent(Hub raiseHub, ClientMethodArgs args) : base(raiseHub)
         {
+            args.WithSendContext(SendContext);
             Args = args;
         }
 
         public ClientStubEvent(HubContextWrapper hubContextWrapper, SendContext sendContext, ClientMethodArgs args) : base(hubContextWrapper, sendContext)
         {
+            args.WithSendContext(SendContext);
             Args = args;
         }
     }

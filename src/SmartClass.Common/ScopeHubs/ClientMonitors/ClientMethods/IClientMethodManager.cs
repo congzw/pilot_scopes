@@ -6,10 +6,18 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
 {
     public interface IClientMethodManager
     {
-        //客户端方法的主动调用事件
+        /// <summary>
+        /// 客户端方法的主动调用事件: Client -> Server -> Client
+        /// </summary>
+        /// <param name="theEvent"></param>
+        /// <returns></returns>
         Task ClientInvoke(ClientInvokeEvent theEvent);
 
-        //客户端桩子方法的被动调用事件
+        /// <summary>
+        /// 客户端桩子方法的被动调用事件: ? -> Client
+        /// </summary>
+        /// <param name="theEvent"></param>
+        /// <returns></returns>
         Task ClientStub(ClientStubEvent theEvent);
     }
 }
