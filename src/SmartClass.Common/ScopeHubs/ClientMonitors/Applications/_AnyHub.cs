@@ -36,14 +36,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
             await base.OnDisconnectedAsync(exception).ConfigureAwait(false);
         }
         
-        ////强制断开，踢掉（用于集中控制，或管理场景）
-        //public async Task KickClient(KickClientArgs args)
-        //{
-        //    //todo: check auth
-        //    await Bus.Raise(new KickClientEvent(this, args)).ConfigureAwait(false);
-        //    await base.OnConnectedAsync().ConfigureAwait(false);
-        //}
-
         //重置scope
         public Task ResetScope(ResetScopeArgs args)
         {

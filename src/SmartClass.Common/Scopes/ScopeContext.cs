@@ -10,17 +10,6 @@ namespace SmartClass.Common.Scopes
         public string ScopeId { get; set; }
         public IDictionary<string, object> Bags { get; set; } = BagsHelper.Create();
 
-        public object GetItem(string key, object defaultValue = null)
-        {
-            return !this.Bags.ContainsKey(key) ? defaultValue : this.Bags[key];
-        }
-
-        public ScopeContext SetItem(string key, object value)
-        {
-            this.Bags[key] = value;
-            return this;
-        }
-
         #region for ut & di extensions
 
         public static ScopeContext GetScopeContext(string scopeId, bool createIfNotExist = true)
@@ -97,7 +86,7 @@ namespace SmartClass.Common.Scopes
     {
         public static T GetItemAs<T>(this ScopeContext ctx, string key, T defaultValue = default(T))
         {
-            var value = ctx.GetItem(key, defaultValue);
+            var value = ctx.GetBagValue(key, defaultValue);
             return (T)Convert.ChangeType(value, typeof(T));
         }
     }

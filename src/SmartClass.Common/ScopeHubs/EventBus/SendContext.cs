@@ -13,6 +13,11 @@ namespace SmartClass.Common.ScopeHubs
         public string SendConnectionId { get; set; }
         public SendFrom From { get; set; } = new SendFrom();
         public SendTo To { get; set; } = new SendTo();
+
+        public static SendContext Create()
+        {
+            return new SendContext();
+        }
     }
 
     public class SendFrom : IScopeClientLocate
@@ -70,6 +75,26 @@ namespace SmartClass.Common.ScopeHubs
         public static SendContext GetSendContext(this SendFrom sendFrom)
         {
             return new SendContext { From = sendFrom };
+        }
+
+        //public static IList<string> AddIfNotExist(this IList<string> list, string value)
+        //{
+        //    if (!list.MyContains(value))
+        //    {
+        //        list.Add(value);
+        //    }
+        //    return list;
+        //}
+
+        public static SendContext WithSendFrom(this SendContext sendContext, SendFrom sendFrom)
+        {
+            sendContext.From = sendFrom;
+            return sendContext;
+        }
+        public static SendContext WithSendTo(this SendContext sendContext, SendTo sendTo)
+        {
+            sendContext.To = sendTo;
+            return sendContext;
         }
     }
 }

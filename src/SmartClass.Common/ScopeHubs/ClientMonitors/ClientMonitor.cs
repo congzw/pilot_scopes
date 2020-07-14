@@ -49,7 +49,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var sendFrom = hub.TryGetHttpContext().GetSendFrom();
             var locate = hub.TryGetClientConnectionLocate();
             AllPropsShouldHasValue(locate);
-            
+
             var theCallerContext = TryGetHubCallerContext(locate);
             if (theCallerContext != null)
             {
@@ -105,6 +105,10 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             }
 
             _repository.AddOrUpdate(theConn);
+
+            //set scopeContext
+            var scopeContext = ScopeContext.GetScopeContext(locate.ScopeId);
+            scopeContext.OnConnected(locate);
         }
 
         public async Task OnDisconnected(OnDisconnectedEvent theEvent)
@@ -137,6 +141,10 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             conn.ConnectionId = string.Empty;
             conn.LastUpdateAt = DateHelper.Instance.GetDateNow();
             _repository.AddOrUpdate(conn);
+
+            //set scopeContext
+            var scopeContext = ScopeContext.GetScopeContext(locate.ScopeId);
+            scopeContext.OnDisconnected(locate);
         }
 
         public async Task ClientInvoke(ClientInvokeEvent theEvent)

@@ -42,46 +42,6 @@ namespace SmartClass.Common.ScopeHubs
             theObject.ConnectionId = connId;
             return theObject;
         }
-
-        //public static T CopyFrom<T>(this T updateObject, IScopeClientLocate fromObject) where T : IScopeClientLocate
-        //{
-        //    if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
-        //    if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
-
-        //    updateObject.WithScopeId(fromObject.ScopeId);
-        //    updateObject.WithClientId(fromObject.ClientId);
-        //    return updateObject;
-        //}
-        //public static T CopyFrom<T>(this T updateObject, IScopeGroupLocate fromObject) where T : IScopeGroupLocate
-        //{
-        //    if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
-        //    if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
-
-        //    updateObject.WithScopeId(fromObject.ScopeId);
-        //    updateObject.WithGroup(fromObject.Group);
-        //    return updateObject;
-        //}
-        //public static T CopyFrom<T>(this T updateObject, IScopeClientGroupLocate fromObject) where T : IScopeClientGroupLocate
-        //{
-        //    if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
-        //    if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
-
-        //    updateObject.WithScopeId(fromObject.ScopeId);
-        //    updateObject.WithClientId(fromObject.ClientId);
-        //    updateObject.WithGroup(fromObject.Group);
-        //    return updateObject;
-        //}
-        //public static T CopyFrom<T>(this T updateObject, IClientConnectionLocate fromObject) where T : IClientConnectionLocate
-        //{
-        //    if (updateObject == null) throw new ArgumentNullException(nameof(updateObject));
-        //    if (fromObject == null) throw new ArgumentNullException(nameof(fromObject));
-
-        //    updateObject.WithScopeId(fromObject.ScopeId);
-        //    updateObject.WithClientId(fromObject.ClientId);
-        //    updateObject.WithConnectionId(fromObject.ConnectionId);
-        //    return updateObject;
-        //}
-
         public static string ToScopeGroupFullName(this IScopeGroupLocate locate)
         {
             return string.Format("{0}.{1}", locate.ScopeId, locate.Group);
@@ -90,8 +50,7 @@ namespace SmartClass.Common.ScopeHubs
         {
             return locates.Select(x => x.ToScopeGroupFullName()).ToList();
         }
-
-
+        
         public static string GetScopeClientKey(this IScopeClientLocate locate)
         {
             if (locate == null) throw new ArgumentNullException(nameof(locate));
@@ -189,6 +148,36 @@ namespace SmartClass.Common.ScopeHubs
             }
 
             return true;
+        }
+
+        public static string CreateCompareLocateValue<T>(this T locate) where T : IScopeKey
+        {
+            if (locate == null) throw new ArgumentNullException(nameof(locate));
+            //IScopeKey, IClientKey, IGroupKey, ISignalRConnectionKey
+            string desc = locate.ScopeId;
+
+            if (locate is IGroupKey theGroup)
+            {
+                desc += ",";
+                desc += theGroup.Group;
+            }
+
+            if (locate is IClientKey theClient)
+            {
+                desc += ",";
+                desc += theClient.ClientId;
+            }
+
+            if (locate is ISignalRConnectionKey theConn)
+            {
+                desc += ",";
+                desc += theConn.ConnectionId;
+            }
+            return desc;
+        }
+        public static bool SameLocateValue<T>(this T locate, T locate2) where T : IScopeKey
+        {
+            return locate.CreateCompareLocateValue().MyEquals(locate2.CreateCompareLocateValue());
         }
     }
 }

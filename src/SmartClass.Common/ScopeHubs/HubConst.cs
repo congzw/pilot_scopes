@@ -21,7 +21,9 @@
 
         public static string ClientStub = "ClientStub";
         public static string ClientInvoke = "ClientInvoke";
+
         public static string ClientMethod_Notify = "notify";
+        public static string ClientMethod_LogMessage = "logMessage";
         public static string ClientMethod_Kicked = "kicked";
 
         public static HubConst Ext = new HubConst();
