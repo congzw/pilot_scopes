@@ -132,19 +132,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             _repository.AddOrUpdate(conn);
         }
 
-        private HubCallerContext TryGetHubCallerContext(ClientConnectionLocate locate)
-        {
-            //是否已经建立了通道
-            var theClientConnection = _scopeClientConnectionKeyMaps.TryGetByScopeClientKey(locate.ScopeId, locate.ClientId);
-            if (theClientConnection == null)
-            {
-                return null;
-            }
-
-            var theCallerContext = _hubCallerContextCache.GetCache(theClientConnection.ConnectionId);
-            return theCallerContext;
-        }
-
         public async Task KickClient(KickClientEvent theEvent)
         {
             return;
@@ -189,26 +176,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
             await _clientStubProcessBus.Process(theEvent).ConfigureAwait(false);
             await SendClientMethod(theEvent, theEvent.Args, HubConst.ClientStub).ConfigureAwait(false);
-        }
-
-        public Task<IList<ScopeGroup>> GetGroups(IScopeGroupLocate args)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<ScopeGroup> GetGroup(IScopeGroupLocate args)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task AddGroup(AddGroup args)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task RemoveGroup(RemoveGroup args)
-        {
-            throw new System.NotImplementedException();
         }
 
         public Task JoinGroup(JoinGroupArgs args)
@@ -329,6 +296,18 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             {
                 await hubCallerClients.Clients(connectionIds).SendAsync(clientMethod, clientMethodArgs);
             }
+        }
+        private HubCallerContext TryGetHubCallerContext(ClientConnectionLocate locate)
+        {
+            //是否已经建立了通道
+            var theClientConnection = _scopeClientConnectionKeyMaps.TryGetByScopeClientKey(locate.ScopeId, locate.ClientId);
+            if (theClientConnection == null)
+            {
+                return null;
+            }
+
+            var theCallerContext = _hubCallerContextCache.GetCache(theClientConnection.ConnectionId);
+            return theCallerContext;
         }
     }
 }

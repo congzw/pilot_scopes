@@ -68,13 +68,13 @@ namespace SmartClass.Web.Api
 
         public Task<bool> AddToGroup(string scopeId, string groupId, string clientId)
         {
-            var addGroup = new AddGroup();
-            addGroup.Items.Add(new ScopeGroup() { });
-            var task = _clientMonitor.AddGroup(addGroup);
-            if (task.IsCompleted)
-            {
+            //var addGroup = new AddGroup();
+            //addGroup.Items.Add(new ScopeGroup() { });
+            //var task = _clientMonitor.JoinGroup(addGroup);
+            //if (task.IsCompleted)
+            //{
 
-            };
+            //};
             var joinGroupArgs = new JoinGroupArgs()
             {
 
