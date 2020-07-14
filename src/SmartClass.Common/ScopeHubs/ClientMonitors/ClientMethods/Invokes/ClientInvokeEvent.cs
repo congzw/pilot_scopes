@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System;
+using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes
 {
@@ -6,15 +7,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes
     {
         public ClientMethodArgs Args { get; set; }
 
-        public ClientInvokeEvent(Hub raiseHub, ClientMethodArgs args) : base(raiseHub, raiseHub.GetSendFrom().GetSendContext())
+        public ClientInvokeEvent(Hub raiseHub, ClientMethodArgs args) : base(raiseHub, args.SendContext)
         {
-            args.WithSendContext(SendContext);
             Args = args;
         }
 
-        public ClientInvokeEvent(HubContextWrapper hubContextWrapper, SendContext sendContext, ClientMethodArgs args) : base(hubContextWrapper, sendContext)
+        public ClientInvokeEvent(HubContextWrapper hubContextWrapper, ClientMethodArgs args) : base(hubContextWrapper, args.SendContext)
         {
-            args.WithSendContext(SendContext);
             Args = args;
         }
     }

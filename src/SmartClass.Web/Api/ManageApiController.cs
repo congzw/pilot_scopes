@@ -79,7 +79,9 @@ namespace SmartClass.Web.Api
             }
 
             var args = ClientMethodArgs.Create().ForLogMessage(new { message = "From Server ClientStub" });
-            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), sendContext, args));
+            args.SendContext = sendContext;
+
+            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(),  args));
             return "OK";
         }
 

@@ -58,11 +58,13 @@ namespace SmartClass.Web.Api
             {
                 sendContext.To.ClientIds.Add(clientId);
             }
+
+            args.SendContext = sendContext;
             args.Method = "updateMessage";
-            args.SetBagValue("foo", "From Server foo");
+            //args.SetBagValue("foo", "From Server foo");
             args.MethodArgs = new { message = "From Server message" };
 
-            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), sendContext, args));
+            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(),  args));
             return "OK";
         }
 
