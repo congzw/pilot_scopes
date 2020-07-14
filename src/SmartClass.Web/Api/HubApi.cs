@@ -47,7 +47,7 @@ namespace SmartClass.Web.Api
             //todo: read SendFrom from token
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
             sendContext.To.ScopeId = scopeId;
-
+            sendContext.From.ClientId = "default";
             //for demo!
             var args = new ClientMethodArgs();
             if (!string.IsNullOrEmpty(groupId))

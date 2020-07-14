@@ -131,31 +131,32 @@
                         .build();
 
                     connectionHub.on(clientInvoke, function (theArgs) {
-                        theArgs: {
-                            bags: {
-                                sendContext: {
-                                    from: {
-                                        clientId: "c3"
-                                        clientType: ""
-                                        scopeId: "s1"
-                                        userId: ""
-                                    };
-                                    to: {
-                                        clientIds:[]
-                                        groups:[]
-                                        scopeId: 's1'
-                                    };
-                                }
-                            };
-                            method: "updateMessage";
-                            methodArgs: {
-                                message: ""
-                            }
-                        }
+                        //theArgs: {
+                        //    bags: {
+                        //        sendContext: {
+                        //            from: {
+                        //                clientId: "c3"
+                        //                clientType: ""
+                        //                scopeId: "s1"
+                        //                userId: ""
+                        //            };
+                        //            to: {
+                        //                clientIds:[]
+                        //                groups:[]
+                        //                scopeId: 's1'
+                        //            };
+                        //        }
+                        //    };
+                        //    method: "updateMessage";
+                        //    methodArgs: {
+                        //        message: ""
+                        //    }
+                        //}
                         _this.myMesssages.push(theArgs);
                         console.log('callback: ' + clientInvoke, theArgs);
                     });
                     connectionHub.on(clientStub, function (theArgs) {
+                        _this.myMesssages.push(theArgs);
                         console.log('callback: ' + clientStub, theArgs);
                     });
                     connectionHub.start()
