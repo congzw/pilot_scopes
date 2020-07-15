@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
@@ -22,7 +23,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         public int OfflineCount { get; set; }
         public int TotalCount { get; set; }
         public IList<MyConnection> Connections { get; set; } = new List<MyConnection>();
-        
+
         public static UpdateConnectionsArgs Create(IList<MyConnection> connections)
         {
             var updateConnectionsArgs = new UpdateConnectionsArgs();
@@ -34,6 +35,57 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         }
     }
 
+    public class UpdateClientTreeArgs
+    {
+        public string Type { get; set; }
+        public string Name { get; set; }
+        public int Value { get; set; }
+
+        public List<UpdateClientTreeArgs> Children { get; set; } = new List<UpdateClientTreeArgs>();
+
+        public static UpdateClientTreeArgs Create(string type, string name, int value)
+        {
+            return new UpdateClientTreeArgs { Type = type, Name = name, Value = value };
+        }
+
+        public static UpdateClientTreeArgs Create(IList<ScopeClientGroup> list, IList<MyConnection> connections)
+        {
+            var scopes = list.GroupBy(x => x.ScopeId).ToList();
+            var rootNode = Create("Root", "PV100", scopes.Count);
+            
+            foreach (var scope in scopes)
+            {
+                var groups = scope.GroupBy(x => x.Group).ToList();
+                var scopeNode = Create("Classroom", scope.Key, groups.Count);
+                rootNode.Children.Add(scopeNode);
+                foreach (var @group in groups)
+                {
+                    var clients = @group.GroupBy(x => x.ClientId).ToList();
+                    var groupNode = Create("Group", group.Key, clients.Count);
+                    scopeNode.Children.Add(groupNode);
+                    foreach (var client in clients)
+                    {
+                        var clientNode = Create("Client", client.Key, 1);
+                        var scopeClientGroup = client.FirstOrDefault();
+                        if (scopeClientGroup != null)
+                        {
+                            var theOne = connections.SingleOrDefault(x =>
+                                x.GetScopeClientKey().MyEquals(scopeClientGroup.GetScopeClientKey()));
+                            if (theOne != null)
+                            {
+                                var connNode = Create("Conn", theOne.ConnectionId, 0);
+                                clientNode.Children.Add(connNode);
+                            }
+                        }
+                        groupNode.Children.Add(clientNode);
+                    }
+                }
+            }
+
+            return rootNode;
+        }
+    }
+
     public class ServerLogInfo
     {
         public string Category { get; set; }
@@ -42,7 +94,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
         public static ServerLogInfo Create(string message, object details = null, string category = "")
         {
-            return new ServerLogInfo(){Category = "[ServerLog]" + category, Message = message, Details = details};
+            return new ServerLogInfo() { Category = "[ServerLog]" + category, Message = message, Details = details };
         }
     }
 
@@ -78,11 +130,17 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_ServerLog, logInfo);
         }
-        
+
         public Task UpdateConnections(IHubClients<IClientProxy> hubClients, UpdateConnectionsArgs args)
         {
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateConnections, args);
+        }
+
+        public Task UpdateClientTree(IHubClients<IClientProxy> hubClients, UpdateClientTreeArgs args)
+        {
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
+            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateClientTree, args);
         }
 
         public static ManageMonitorHelper Instance = new ManageMonitorHelper();

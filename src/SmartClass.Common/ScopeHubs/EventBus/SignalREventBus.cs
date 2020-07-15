@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 
 // ReSharper disable once CheckNamespace
 namespace SmartClass.Common.ScopeHubs
@@ -40,11 +41,13 @@ namespace SmartClass.Common.ScopeHubs
     {
         private readonly ISignalREventDispatcher _dispatcher;
         private readonly IClientConnectionRepository _connectionRepository;
+        private readonly IScopeClientGroupRepository _scopeClientGroupRepository;
 
-        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository)
+        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository, IScopeClientGroupRepository scopeClientGroupRepository)
         {
             _dispatcher = dispatcher;
             _connectionRepository = connectionRepository;
+            _scopeClientGroupRepository = scopeClientGroupRepository;
         }
 
         public async Task Raise(ISignalREvent @event)
@@ -62,6 +65,10 @@ namespace SmartClass.Common.ScopeHubs
                 var connections = _connectionRepository.GetConnections(new GetConnectionsArgs());
                 var updateConnectionsArgs = UpdateConnectionsArgs.Create(connections);
                 await monitorHelper.UpdateConnections(hubClients, updateConnectionsArgs);
+
+                var scopeClientGroups = _scopeClientGroupRepository.GetScopeClientGroups(new ScopeClientGroupLocate());
+                var updateClientTreeArgs = UpdateClientTreeArgs.Create(scopeClientGroups, connections);
+                await monitorHelper.UpdateClientTree(hubClients, updateClientTreeArgs);
             }
         }
 

@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <link href="../../css/bootstrap/bootstrap.css" rel="stylesheet" />
+    <link href="../../css/index.css" rel="stylesheet" />
+    <script src="../../lib/signalr.js"></script>
+    <script src="../../lib/vue.js"></script>
+    <script src="../../lib/jquery-3.2.1.js"></script>
+    <script src="../../lib/echarts.min.js"></script>
+</head>
+<body>
+
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <div class="wrapper" id="app">
+        <div class="container">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        var myChart = echarts.init(document.getElementById('main'));
+        
+        var refreshChart = function (treeData) {
+
+            console.log('[refreshChart]', treeData);
+            myChart.clear();
+            
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    triggerOn: 'mousemove'
+                },
+                series: [
+                    {
+                        type: 'tree',
+
+                        data: [treeData],
+
+                        top: '1%',
+                        left: '7%',
+                        bottom: '1%',
+                        right: '20%',
+
+                        symbolSize: 7,
+                        initialTreeDepth: 5,
+
+                        label: {
+                            position: 'left',
+                            verticalAlign: 'middle',
+                            align: 'right',
+                            fontSize: 9
+                        },
+
+                        leaves: {
+                            label: {
+                                position: 'right',
+                                verticalAlign: 'middle',
+                                align: 'left'
+                            }
+                        },
+
+                        expandAndCollapse: true,
+                        animationDuration: 550,
+                        animationDurationUpdate: 750
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+        }
+        refreshChart({});
+
+        var eventInvoked = "eventInvoked";
+        var serverLog = "serverLog";
+        var updateConnections = "updateConnections";
+        var updateClientTree = "updateClientTree";
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                clientTree: {}
+            },
+            created: function () {
+                this.connect();
+            },
+            mounted: function () {
+            },
+            computed: {
+            },
+            methods: {
+                eventInvoked: function (args) {
+                    console.log("[eventInvoked]", args);
+                },
+                serverLog: function (args) {
+                    console.log("[serverLog]", args);
+                },
+                updateConnections: function (args) {
+                    console.log('[updateConnections]', args);
+                    if (args.clientConnections) {
+                        this.clientConnections = args.clientConnections;
+                    }
+                },
+                updateClientTree: function (args) {
+                    //console.log('[updateClientTree]', args);
+                    if (args) {
+                        //this.clientTree = args;
+                        refreshChart(args);
+                    }
+                },
+                connect: function () {
+                    var _this = this;
+
+                    var scopeId = "monitor_scope";
+                    var clientId = "monitor_client";
+                    this.currentScopeId = scopeId;
+                    this.currentClientId = clientId;
+
+                    var hubName = "DemoHub";
+                    var connectionHub = new signalR.HubConnectionBuilder()
+                        .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId)
+                        .build();
+
+                    connectionHub.on(eventInvoked,
+                        function (theArgs) {
+                            _this.eventInvoked(theArgs);
+                        });
+                    connectionHub.on(serverLog,
+                        function (theArgs) {
+                            _this.serverLog(theArgs);
+                        });
+                    connectionHub.on(updateConnections,
+                        function (theArgs) {
+                            _this.updateConnections(theArgs);
+                        });
+                    connectionHub.on(updateClientTree,
+                        function (theArgs) {
+                            _this.updateClientTree(theArgs);
+                        });
+
+                    connectionHub.start()
+                        .then(function () {
+                            console.log("与服务器连接成功");
+                        })
+                        .catch(error => {
+                            console.error(error.message);
+                        });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
