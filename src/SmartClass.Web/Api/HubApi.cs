@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -34,6 +35,57 @@ namespace SmartClass.Web.Api
         {
             return DateTime.Now.ToString("s");
         }
+        [Route("ClientStub")]
+        [HttpPost]
+        public async Task<string> ClientStub(SendContext sendContext)
+        {
+            var args = new ClientMethodArgs();
+            args.SendContext = sendContext;
+            args.Method = "updateMessage";
+            args.MethodArgs = new { message = "From Server message" };
+
+            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
+            return "OK";
+        }
+
+        [Route("GetClientGroups")]
+        [HttpGet]
+        public Task<IList<ScopeClientGroup>> GetClientGroups([FromQuery]GetClientGroupsArgs args)
+        {
+            return _clientMonitor.GetClientGroups(args);
+        }
+
+        [Route("AddToGroup")]
+        [HttpGet]
+        public Task<bool> AddToGroup(string scopeId, string groupId, string clientId)
+        {
+            var joinGroupArgs = new JoinGroupArgs()
+            {
+                ScopeId = scopeId,
+                Group = groupId
+            };
+            joinGroupArgs.ClientIds.Add(clientId);
+
+            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+            _clientMonitor.JoinGroup(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext,  joinGroupArgs));
+            return Task.FromResult(true);
+        }
+
+        [Route("LeaveGroup")]
+        [HttpPost]
+        public Task<bool> LeaveGroup(string scopeId, string groupId, string clientId)
+        {
+            var leaveGroupArgs = new LeaveGroupArgs()
+            {
+                ScopeId = scopeId,
+                Group = groupId
+            };
+            leaveGroupArgs.ClientIds.Add(clientId);
+
+            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+            //_clientMonitor.LeaveGroup(new LeaveGroupEvent(_scopeHub, leaveGroupArgs));
+            return Task.FromResult(true);
+        }
 
         //[Route("ClientStub")]
         //[HttpGet]
@@ -68,33 +120,33 @@ namespace SmartClass.Web.Api
         //    return "OK";
         //}
 
-        [Route("ClientStub")]
-        [HttpPost]
-        public async Task<SendContext> ClientStub(SendContext sendContext)
-        {
-            var args = new ClientMethodArgs();
-            args.SendContext = sendContext;
-            args.Method = "updateMessage";
-            args.MethodArgs = new { message = "From Server message" };
+        //[Route("ClientStub")]
+        //[HttpPost]
+        //public async Task<string> ClientStub(SendContext sendContext)
+        //{
+        //    var args = new ClientMethodArgs();
+        //    args.SendContext = sendContext;
+        //    args.Method = "updateMessage";
+        //    args.MethodArgs = new { message = "From Server message" };
 
-            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
-            return sendContext;
-        }
+        //    await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
+        //    return "OK";
+        //}
 
-        [Route("AddToGroup")]
-        [HttpGet]
-        public Task<bool> AddToGroup(string scopeId, string groupId, string clientId)
-        {
-            var joinGroupArgs = new JoinGroupArgs()
-            {
-                ScopeId = scopeId,
-                Group = groupId
-            };
-            joinGroupArgs.ClientIds.Add(clientId);
+        //[Route("AddToGroup")]
+        //[HttpGet]
+        //public Task<bool> AddToGroup(string scopeId, string groupId, string clientId)
+        //{
+        //    var joinGroupArgs = new JoinGroupArgs()
+        //    {
+        //        ScopeId = scopeId,
+        //        Group = groupId
+        //    };
+        //    joinGroupArgs.ClientIds.Add(clientId);
 
-            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            _clientMonitor.JoinGroup(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext,  joinGroupArgs));
-            return Task.FromResult(true);
-        }
+        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+        //    _clientMonitor.JoinGroup(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext,  joinGroupArgs));
+        //    return Task.FromResult(true);
+        //}
     }
 }
