@@ -119,5 +119,34 @@ namespace SmartClass.Web.Api
         //    await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(),  args));
         //    return "OK";
         //}
+
+        //[Route("ClientStub")]
+        //[HttpPost]
+        //public async Task<string> ClientStub(SendContext sendContext)
+        //{
+        //    var args = new ClientMethodArgs();
+        //    args.SendContext = sendContext;
+        //    args.Method = "updateMessage";
+        //    args.MethodArgs = new { message = "From Server message" };
+
+        //    await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
+        //    return "OK";
+        //}
+
+        //[Route("AddToGroup")]
+        //[HttpGet]
+        //public Task<bool> AddToGroup(string scopeId, string groupId, string clientId)
+        //{
+        //    var joinGroupArgs = new JoinGroupArgs()
+        //    {
+        //        ScopeId = scopeId,
+        //        Group = groupId
+        //    };
+        //    joinGroupArgs.ClientIds.Add(clientId);
+
+        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+        //    _clientMonitor.JoinGroup(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext,  joinGroupArgs));
+        //    return Task.FromResult(true);
+        //}
     }
 }

@@ -149,15 +149,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
         public async Task ClientInvoke(ClientInvokeEvent theEvent)
         {
-            //来自Hub的请求
+            //可能来自Hub的请求
             if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
-            var raiseHub = theEvent.RaiseHub ?? throw new ArgumentException("ClientInvoke方法只能用于基于Hub连接的客户端请求");
-            var sendFrom = raiseHub.GetSendFrom();
-            //基于hub的invoke，默认在自身连接的ScopeId内广播
-            if (string.IsNullOrWhiteSpace(theEvent.SendContext.To.ScopeId))
-            {
-                theEvent.SendContext.To = SendTo.CreateForScopeGroupAll(sendFrom.ScopeId);
-            }
+            if (theEvent.RaiseHub == null) throw new ArgumentException("ClientInvoke方法只能用于基于Hub连接的客户端请求");
+            
+            //默认在自身连接的ScopeId内广播
+            theEvent.SendContext.AutoFixToGroupAllIfEmpty();
 
             await _clientInvokeProcessBus.Process(theEvent).ConfigureAwait(false);
             await SendClientMethod(theEvent, theEvent.Args, HubConst.ClientInvoke).ConfigureAwait(false);
@@ -165,8 +162,9 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
         public async Task ClientStub(ClientStubEvent theEvent)
         {
-            //来自API的请求
+            //可能来自API或Hub的请求
             if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
+            theEvent.SendContext.AutoFixToGroupAllIfEmpty();
             await _clientStubProcessBus.Process(theEvent).ConfigureAwait(false);
             await SendClientMethod(theEvent, theEvent.Args, HubConst.ClientStub).ConfigureAwait(false);
         }
