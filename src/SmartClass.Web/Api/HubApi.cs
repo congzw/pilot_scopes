@@ -35,39 +35,51 @@ namespace SmartClass.Web.Api
             return DateTime.Now.ToString("s");
         }
 
+        //[Route("ClientStub")]
+        //[HttpGet]
+        //public async Task<string> ClientStub(string scopeId, string groupId, string clientId, string message)
+        //{
+        //    if (string.IsNullOrWhiteSpace(scopeId))
+        //    {
+        //        return "BAD SCOPE!";
+        //    }
+
+        //    //todo: read SendFrom from token
+        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+        //    sendContext.To.ScopeId = scopeId;
+        //    sendContext.From.ClientId = "default";
+        //    //for demo!
+        //    var args = new ClientMethodArgs();
+        //    if (!string.IsNullOrEmpty(groupId))
+        //    {
+        //        sendContext.To.Groups.Add(groupId);
+        //    }
+        //    if (!string.IsNullOrEmpty(clientId))
+        //    {
+        //        sendContext.To.ClientIds.Add(clientId);
+        //    }
+
+        //    args.SendContext = sendContext;
+        //    args.Method = "updateMessage";
+        //    //args.SetBagValue("foo", "From Server foo");
+        //    args.MethodArgs = new { message = "From Server message" };
+
+        //    await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(),  args));
+        //    return "OK";
+        //}
+
         [Route("ClientStub")]
-        [HttpGet]
-        public async Task<string> ClientStub(string scopeId, string groupId, string clientId, string message)
+        [HttpPost]
+        public async Task<string> ClientStub(SendContext sendContext)
         {
-            if (string.IsNullOrWhiteSpace(scopeId))
-            {
-                return "BAD SCOPE!";
-            }
-
-            //todo: read SendFrom from token
-            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            sendContext.To.ScopeId = scopeId;
-            sendContext.From.ClientId = "default";
-            //for demo!
             var args = new ClientMethodArgs();
-            if (!string.IsNullOrEmpty(groupId))
-            {
-                sendContext.To.Groups.Add(groupId);
-            }
-            if (!string.IsNullOrEmpty(clientId))
-            {
-                sendContext.To.ClientIds.Add(clientId);
-            }
-
             args.SendContext = sendContext;
             args.Method = "updateMessage";
-            //args.SetBagValue("foo", "From Server foo");
             args.MethodArgs = new { message = "From Server message" };
 
-            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(),  args));
+            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
             return "OK";
         }
-
 
         [Route("AddToGroup")]
         [HttpGet]
