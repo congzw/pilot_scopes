@@ -40,6 +40,11 @@ namespace SmartClass.Common.ScopeHubs
             args.Groups.Add(HubConst.GroupName_All);
             return args;
         }
+
+        public bool IsEmptyClientsAndGroups()
+        {
+            return ClientIds.Count == 0 && Groups.Count == 0;
+        }
     }
 
     public static class SendContextExtensions
@@ -94,6 +99,33 @@ namespace SmartClass.Common.ScopeHubs
         public static SendContext WithSendTo(this SendContext sendContext, SendTo sendTo)
         {
             sendContext.To = sendTo;
+            return sendContext;
+        }
+        public static SendContext AutoFixToGroupAllIfEmpty(this SendContext sendContext)
+        {
+            if (sendContext.From == null)
+            {
+                return sendContext;
+            }
+
+            if (sendContext.To == null)
+            {
+                sendContext.To = new SendTo();
+            }
+
+            if (string.IsNullOrWhiteSpace(sendContext.To.ScopeId))
+            {
+                sendContext.To.ScopeId = sendContext.From.ScopeId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sendContext.To.ScopeId))
+            {
+                if (sendContext.To.IsEmptyClientsAndGroups())
+                {
+                    sendContext.To.Groups.Add(HubConst.GroupName_All);
+                }
+            }
+
             return sendContext;
         }
     }

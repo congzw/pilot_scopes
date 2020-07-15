@@ -70,7 +70,7 @@ namespace SmartClass.Web.Api
 
         [Route("ClientStub")]
         [HttpPost]
-        public async Task<string> ClientStub(SendContext sendContext)
+        public async Task<SendContext> ClientStub(SendContext sendContext)
         {
             var args = new ClientMethodArgs();
             args.SendContext = sendContext;
@@ -78,7 +78,7 @@ namespace SmartClass.Web.Api
             args.MethodArgs = new { message = "From Server message" };
 
             await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
-            return "OK";
+            return sendContext;
         }
 
         [Route("AddToGroup")]

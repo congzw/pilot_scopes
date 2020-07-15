@@ -69,15 +69,15 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
             TraceHubContext("LeaveGroup");
             return Bus.Raise(new LeaveGroupEvent(this, args));
         }
-
-        //代表客户端的方法调用，供同步页面等场景使用
+        
+        //客户端主动调用的方法，可用于双向通讯场景
         public Task ClientInvoke(ClientMethodArgs args)
         {
             TraceHubContext("ClientInvoke");
             return Bus.Raise(new ClientInvokeEvent(this, args));
         }
 
-        //代表从服务器端的方法调用，供数据通知等场景使用
+        //客户端被动调用的方法，可用于单向通讯场景
         public Task ClientStub(ClientMethodArgs args)
         {
             TraceHubContext("ClientStub");
