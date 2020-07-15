@@ -16,7 +16,7 @@
         <div class="pt-md-3">
             <div>
                 <h5 class="form-inline">
-                    我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}
+                    我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}、【groups】：{{current.groups}}
                     &nbsp;&nbsp;
                     <button type="button" @click="unConnction()" class="btn btn-primary pull-right">断开</button>
                     <button type="button" @click="reConnection()" class="btn btn-primary pull-right">重连</button>
@@ -30,8 +30,8 @@
                     <div class="col">
                         <input type="text" class="form-control" v-model="toast.groupId" id="groupId" placeholder="groupId">
                     </div>
-
                     <button type="button" @click="addToGroup" class="btn btn-primary pull-right">加入组</button>
+                    <button type="button" @click="leaveGroup(current.scopeId,toast.groupId,current.clientId)" class="btn btn-primary pull-right">退出组</button>
                 </div>
 
 
@@ -103,6 +103,7 @@
                 current: {
                     scopeId: '',
                     clientId: '',
+                    groups:[],
                     userId : ''
                 },
                 connectionObj: {
@@ -249,7 +250,33 @@
                     var url = '/api/hub/AddToGroup?scopeId=' + this.current.scopeId + '&groupId=' + this.toast.groupId + '&clientId=' + this.current.clientId;
                     fetch(url)
                         .then(response => response)
-                        .then(data => console.log(data));
+                        .then(data => this.getClientGroups());
+                },
+                //离开组
+                leaveGroup: function (scopeId,group,...clients) {
+                    const parmas = {
+                        scopeId: scopeId,
+                        group: group,
+                        clientIds: clients
+                    }
+                    const url = '/api/hub/leaveGroup';
+                    fetch(url, {
+                        method: 'post',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(parmas)
+                    }).then(response => response)
+                        .then(data => console.log(data))
+                        .catch(error => console.log("error is: ", error));
+                },
+                //获取组列表
+                getClientGroups: function () {
+                    let url = '/api/hub/GetClientGroups?scopeId=' + this.current.scopeId + '&clientId=' + this.current.clientId
+                    fetch(url, {
+                        method: 'get',
+                        headers: { 'Content-Type': 'application/json' }
+                    }).then(response => response.json())
+                        .then(data => this.current.groups = data.map(item=>item.group))
+                        .catch(error => console.log("error is: ", error));
                 }
             },
             created() {
@@ -257,6 +284,7 @@
                 this.current.clientId = getQueryString("clientId");
                 this.messageObj.scopeId = this.current.scopeId;
                 this.connectionStart(this.current.scopeId, this.current.clientId);
+                this.getClientGroups();
             },
             filters: {
                 formatDate(time) {
