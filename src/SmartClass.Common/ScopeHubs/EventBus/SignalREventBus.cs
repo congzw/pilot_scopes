@@ -52,36 +52,13 @@ namespace SmartClass.Common.ScopeHubs
 
         public async Task Raise(ISignalREvent @event)
         {
-            var monitorHelper = ManageMonitorHelper.Instance;
+            var manageMonitorHelper = ManageMonitorHelper.Instance;
 
             var theEvent = (SignalREvent)@event;
-            await TraceAsync(theEvent, " handling").ConfigureAwait(false);
+            await manageMonitorHelper.TraceSignalREvent(theEvent, " handling").ConfigureAwait(false);
             await _dispatcher.Dispatch(@event).ConfigureAwait(false);
-            await TraceAsync(theEvent, " handled").ConfigureAwait(false);
-
-            if (monitorHelper.Config.UpdateConnectionsEnabled)
-            {
-                var hubClients = theEvent.TryGetHubClients();
-                var connections = _connectionRepository.GetConnections(new GetConnectionsArgs());
-                var updateConnectionsArgs = UpdateConnectionsArgs.Create(connections);
-                await monitorHelper.UpdateConnections(hubClients, updateConnectionsArgs);
-
-                var scopeClientGroups = _scopeClientGroupRepository.GetScopeClientGroups(new ScopeClientGroupLocate());
-                var updateClientTreeArgs = UpdateClientTreeArgs.Create(scopeClientGroups, connections);
-                await monitorHelper.UpdateClientTree(hubClients, updateClientTreeArgs);
-            }
-        }
-
-        private Task TraceAsync(SignalREvent theEvent, string descAppend)
-        {
-            var hubClients = theEvent.TryGetHubClients();
-            var eventName = theEvent.GetType().Name;
-            var info = new EventInvokeInfo();
-            info.SendContext = theEvent.SendContext;
-            info.Desc = eventName + descAppend;
-            info.ConnectionId = theEvent.RaiseHub?.Context?.ConnectionId;
-
-            return ManageMonitorHelper.Instance.EventInvoked(hubClients, info);
+            await manageMonitorHelper.TraceSignalREvent(theEvent, " handled").ConfigureAwait(false);
+            await manageMonitorHelper.UpdateMonitor(theEvent, _connectionRepository, _scopeClientGroupRepository);
         }
     }
 }

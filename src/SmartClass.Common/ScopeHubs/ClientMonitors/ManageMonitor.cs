@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
@@ -39,86 +40,78 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
     {
         public string Type { get; set; }
         public string Name { get; set; }
-        public int Value { get; set; }
+        public int Value { get; set; } //TotalConnectionCount
+        
+        private List<UpdateClientTreeArgs> _children = new List<UpdateClientTreeArgs>();
+        public IReadOnlyList<UpdateClientTreeArgs> Children => _children;
 
-        public List<UpdateClientTreeArgs> Children { get; set; } = new List<UpdateClientTreeArgs>();
-
-        public static UpdateClientTreeArgs Create(string type, string name, int value)
+        public UpdateClientTreeArgs GetOrCreateChild(string type, string name, int value)
         {
-            return new UpdateClientTreeArgs { Type = type, Name = name, Value = value };
+            var theOne = Children.FirstOrDefault(x => x.Name.MyEquals(name));
+            if (theOne != null)
+            {
+                return theOne;
+            }
+
+            var child = new UpdateClientTreeArgs { Type = type, Name = name, Value = value };
+            _children.Add(child);
+            return child;
         }
+        
+        private static string Root = "Root";
+        private static string Scope = "Scope";
+        private static string Group = "Group";
+        private static string Client = "Client";
+        private static string Connection = "Connection";
 
-        public static UpdateClientTreeArgs Create(IList<ScopeClientGroup> list, IList<MyConnection> connections)
+        public static UpdateClientTreeArgs Create(IList<ScopeClientGroup> scopeClientGroups, IList<MyConnection> connections)
         {
-            var scopes = list.GroupBy(x => x.ScopeId).ToList();
-            var rootNode = Create("Root", "PV100", scopes.Count);
+            var scopeConnections = connections.GroupBy(x => x.ScopeId).ToList();
+            var rootNode = new UpdateClientTreeArgs { Type = Root, Name = "PV100", Value = connections.Count };
+
+            foreach (var scopeConnection in scopeConnections)
+            {
+                var myConnections = scopeConnection.ToList();
+                var scopeNode = rootNode.GetOrCreateChild(Scope, scopeConnection.Key, myConnections.Count);
+
+                foreach (var connection in myConnections)
+                {
+                    //check if not in any group
+                    var count = scopeClientGroups.Count(x => x.ClientId.MyEquals(connection.ClientId));
+                    if (count == 0)
+                    {
+                        var singleClientNode = scopeNode.GetOrCreateChild(Client, connection.ClientId, 1);
+                        singleClientNode.GetOrCreateChild(Connection, connection.ConnectionId, 0);
+                    }
+                }
+            }
+
+            var scopes = scopeClientGroups.GroupBy(x => x.ScopeId).ToList();
+            foreach (var scope in scopes)
+            {
+                var groups = scope.GroupBy(x => x.Group).ToList();
+                var scopeNode = rootNode.GetOrCreateChild(Scope, scope.Key, groups.Count);
+                foreach (var @group in groups)
+                {
+                    var clients = @group.GroupBy(x => x.ClientId).ToList();
+                    var groupNode = scopeNode.GetOrCreateChild(Group, group.Key, clients.Count);
+                    foreach (var client in clients)
+                    {
+                        var clientNode = groupNode.GetOrCreateChild(Client, client.Key, 1);
+                        var scopeClientGroup = client.FirstOrDefault();
+                        if (scopeClientGroup != null)
+                        {
+                            var theOne = connections.SingleOrDefault(x =>
+                                x.GetScopeClientKey().MyEquals(scopeClientGroup.GetScopeClientKey()));
+                            if (theOne != null)
+                            {
+                                clientNode.GetOrCreateChild(Connection, theOne.ConnectionId, 0);
+                            }
+                        }
+                    }
+                }
+            }
             
-            foreach (var scope in scopes)
-            {
-                var groups = scope.GroupBy(x => x.Group).ToList();
-                var scopeNode = Create("Scope", scope.Key, groups.Count);
-                rootNode.Children.Add(scopeNode);
-                foreach (var @group in groups)
-                {
-                    var clients = @group.GroupBy(x => x.ClientId).ToList();
-                    var groupNode = Create("Group", group.Key, clients.Count);
-                    scopeNode.Children.Add(groupNode);
-                    foreach (var client in clients)
-                    {
-                        var clientNode = Create("Client", client.Key, 1);
-                        var scopeClientGroup = client.FirstOrDefault();
-                        if (scopeClientGroup != null)
-                        {
-                            var theOne = connections.SingleOrDefault(x =>
-                                x.GetScopeClientKey().MyEquals(scopeClientGroup.GetScopeClientKey()));
-                            if (theOne != null)
-                            {
-                                var connNode = Create("Connection", theOne.ConnectionId, 0);
-                                clientNode.Children.Add(connNode);
-                            }
-                        }
-                        groupNode.Children.Add(clientNode);
-                    }
-                }
-            }
-
-            return rootNode;
-        }
-
-        public static UpdateClientTreeArgs Create2(IList<ScopeClientGroup> list, IList<MyConnection> connections)
-        {
-            var scopes = list.GroupBy(x => x.ScopeId).ToList();
-            var rootNode = Create("Root", "PV100", scopes.Count);
-
-            foreach (var scope in scopes)
-            {
-                var groups = scope.GroupBy(x => x.Group).ToList();
-                var scopeNode = Create("Scope", scope.Key, groups.Count);
-                rootNode.Children.Add(scopeNode);
-                foreach (var @group in groups)
-                {
-                    var clients = @group.GroupBy(x => x.ClientId).ToList();
-                    var groupNode = Create("Group", group.Key, clients.Count);
-                    scopeNode.Children.Add(groupNode);
-                    foreach (var client in clients)
-                    {
-                        var clientNode = Create("Client", client.Key, 1);
-                        var scopeClientGroup = client.FirstOrDefault();
-                        if (scopeClientGroup != null)
-                        {
-                            var theOne = connections.SingleOrDefault(x =>
-                                x.GetScopeClientKey().MyEquals(scopeClientGroup.GetScopeClientKey()));
-                            if (theOne != null)
-                            {
-                                var connNode = Create("Connection", theOne.ConnectionId, 0);
-                                clientNode.Children.Add(connNode);
-                            }
-                        }
-                        groupNode.Children.Add(clientNode);
-                    }
-                }
-            }
-
             return rootNode;
         }
     }
@@ -178,6 +171,37 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         {
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateClientTree, args);
+        }
+        
+        public Task TraceSignalREvent(SignalREvent theEvent, string descAppend)
+        {
+            if (!Config.EventInvokeInfoEnabled)
+            {
+                return Task.CompletedTask;
+            }
+            var hubClients = theEvent.TryGetHubClients();
+            var eventName = theEvent.GetType().Name;
+            var info = new EventInvokeInfo();
+            info.SendContext = theEvent.SendContext;
+            info.Desc = eventName + descAppend;
+            info.ConnectionId = theEvent.RaiseHub?.Context?.ConnectionId;
+
+            return EventInvoked(hubClients, info);
+        }
+
+        public async Task UpdateMonitor(SignalREvent theEvent, IClientConnectionRepository _connectionRepository, IScopeClientGroupRepository _scopeClientGroupRepository)
+        {
+            if (Config.UpdateConnectionsEnabled)
+            {
+                var hubClients = theEvent.TryGetHubClients();
+                var connections = _connectionRepository.GetConnections(new GetConnectionsArgs());
+                var updateConnectionsArgs = UpdateConnectionsArgs.Create(connections);
+                await UpdateConnections(hubClients, updateConnectionsArgs);
+
+                var scopeClientGroups = _scopeClientGroupRepository.GetScopeClientGroups(new ScopeClientGroupLocate());
+                var updateClientTreeArgs = UpdateClientTreeArgs.Create(scopeClientGroups, connections);
+                await UpdateClientTree(hubClients, updateClientTreeArgs);
+            }
         }
 
         public static ManageMonitorHelper Instance = new ManageMonitorHelper();

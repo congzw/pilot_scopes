@@ -5,7 +5,6 @@
         #region Monitor
 
         public static string Monitor_ScopeId = "monitor_scope";
-        public static string Monitor_ClientId = "monitor_client";
         public static string Monitor_MethodInClient_EventInvoked = "eventInvoked";
         public static string Monitor_MethodInClient_ServerLog = "serverLog";
         public static string Monitor_MethodInClient_UpdateConnections = "updateConnections";
