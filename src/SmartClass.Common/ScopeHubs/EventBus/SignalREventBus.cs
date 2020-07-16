@@ -32,7 +32,6 @@ namespace SmartClass.Common.ScopeHubs
 
             foreach (var handler in sortedHandlers)
             {
-                //todo ex handing
                 await handler.HandleAsync(hubEvent).ConfigureAwait(false);
             }
         }
@@ -54,9 +53,7 @@ namespace SmartClass.Common.ScopeHubs
         public async Task Raise(ISignalREvent @event)
         {
             var manageMonitorHelper = ManageMonitorHelper.Instance;
-
             var theEvent = (SignalREvent)@event;
-            await manageMonitorHelper.TraceSignalREvent(theEvent, " handling").ConfigureAwait(false);
             try
             {
                 await _dispatcher.Dispatch(@event);
@@ -65,6 +62,7 @@ namespace SmartClass.Common.ScopeHubs
             }
             catch (Exception ex)
             {
+                await manageMonitorHelper.TraceSignalREvent(theEvent, " !ex").ConfigureAwait(false);
                 await manageMonitorHelper.ServerLog(theEvent.TryGetHubClients(), new ServerLogInfo() {Category = theEvent.GetType().Name, Message = ex.Message});
             }
         }
