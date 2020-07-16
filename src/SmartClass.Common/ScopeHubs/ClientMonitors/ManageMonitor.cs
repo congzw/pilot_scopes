@@ -42,7 +42,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         public string Name { get; set; }
         public int Value { get; set; } //TotalConnectionCount
         
-        private List<UpdateClientTreeArgs> _children = new List<UpdateClientTreeArgs>();
+        private readonly List<UpdateClientTreeArgs> _children = new List<UpdateClientTreeArgs>();
         public IReadOnlyList<UpdateClientTreeArgs> Children => _children;
 
         public UpdateClientTreeArgs GetOrCreateChild(string type, string name, int value)
@@ -139,19 +139,10 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         }
 
         public ManageMonitorConfig Config { get; set; } = new ManageMonitorConfig();
-
-        public Action<EventInvokeInfo> ProcessAction { get; set; }
-
+        
         public Task EventInvoked(IHubClients<IClientProxy> hubClients, EventInvokeInfo info)
         {
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
-            if (Config.UpdateConnectionsEnabled)
-            {
-                //todo: add connections
-                //info.Connections = ...
-            }
-
-            //info.Desc += scopeGroup;
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_EventInvoked, info);
         }
 
@@ -159,18 +150,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         {
             var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
             return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_ServerLog, logInfo);
-        }
-
-        public Task UpdateConnections(IHubClients<IClientProxy> hubClients, UpdateConnectionsArgs args)
-        {
-            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
-            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateConnections, args);
-        }
-
-        public Task UpdateClientTree(IHubClients<IClientProxy> hubClients, UpdateClientTreeArgs args)
-        {
-            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
-            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateClientTree, args);
         }
         
         public Task TraceSignalREvent(SignalREvent theEvent, string descAppend)
@@ -193,15 +172,28 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         {
             if (Config.UpdateConnectionsEnabled)
             {
-                var hubClients = theEvent.TryGetHubClients();
                 var connections = _connectionRepository.GetConnections(new GetConnectionsArgs());
+                var scopeClientGroups = _scopeClientGroupRepository.GetScopeClientGroups(new ScopeClientGroupLocate());
+
+                var hubClients = theEvent.TryGetHubClients();
                 var updateConnectionsArgs = UpdateConnectionsArgs.Create(connections);
                 await UpdateConnections(hubClients, updateConnectionsArgs);
 
-                var scopeClientGroups = _scopeClientGroupRepository.GetScopeClientGroups(new ScopeClientGroupLocate());
                 var updateClientTreeArgs = UpdateClientTreeArgs.Create(scopeClientGroups, connections);
                 await UpdateClientTree(hubClients, updateClientTreeArgs);
             }
+        }
+        
+        private Task UpdateConnections(IHubClients<IClientProxy> hubClients, UpdateConnectionsArgs args)
+        {
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
+            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateConnections, args);
+        }
+
+        private Task UpdateClientTree(IHubClients<IClientProxy> hubClients, UpdateClientTreeArgs args)
+        {
+            var scopeGroup = ScopeGroupName.GetScopedGroupAll(HubConst.Monitor_ScopeId).ToScopeGroupFullName();
+            return hubClients.Groups(scopeGroup).SendAsync(HubConst.Monitor_MethodInClient_UpdateClientTree, args);
         }
 
         public static ManageMonitorHelper Instance = new ManageMonitorHelper();

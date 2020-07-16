@@ -11,6 +11,9 @@
         <div class="pt-md-3">
             <h4>连接模拟：</h4>
             <div>
+                <a href="./clientTree.html" target="_blank">连接图</a>
+            </div>
+            <div>
                 <form>
                     <div class="form-row">
                         <div class="col">
@@ -137,15 +140,15 @@
                     var clientId = this.current.clientId;
                     var userId = this.current.userId;
                     this.current = { ...this.current, scopeId: '', clientId: '', userId: '' }
-                    window.open('clientmock.html?clientId=' + clientId + '&scopeId=' + scopeId);
+                    window.open('mock_client.html?clientId=' + clientId + '&scopeId=' + scopeId);
                 },
                 onChangeScopeId: function (value) {
                     console.log(value);
                 }
             },
             created() {
-                var scopeId = "monitor_scope";
-                var clientId = "monitor_client";
+                var scopeId = "monitor";
+                var clientId = "mock_monitor";
                 this.connectionHub(scopeId, clientId);
             },
             computed: {
