@@ -74,7 +74,7 @@ namespace SmartClass.Web.Api
         }
 
         [Route("LeaveGroup")]
-        [HttpPost]
+        [HttpGet]
         public Task<bool> LeaveGroup(string scopeId, string groupId, string clientId)
         {
             var leaveGroupArgs = new LeaveGroupArgs()
@@ -89,38 +89,38 @@ namespace SmartClass.Web.Api
             return Task.FromResult(true);
         }
 
-        [Route("ResetScope")]
-        [HttpGet]
-        public Task ResetScope(string scopeId)
-        {
-            var resetScopeArgs = new ResetScopeArgs()
-            {
-                ScopeId = scopeId
-            };
-            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            var result = _clientMonitor.ResetScope(new ResetScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, resetScopeArgs));
-            return Task.FromResult(true);
-        }
+        //[Route("ResetScope")]
+        //[HttpGet]
+        //public Task ResetScope(string scopeId)
+        //{
+        //    var resetScopeArgs = new ResetScopeArgs()
+        //    {
+        //        ScopeId = scopeId
+        //    };
+        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+        //    var result = _clientMonitor.ResetScope(new ResetScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, resetScopeArgs));
+        //    return Task.FromResult(true);
+        //}
 
-        [Route("UpdateScope")]
-        [HttpGet]
-        public Task UpdateScope(string scopeId)
-        {
-            var updateScopeArgs = new UpdateScopeArgs()
-            {
-                ScopeId = scopeId
-            };
-            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            var result = _clientMonitor.UpdateScope(new UpdateScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, updateScopeArgs));
-            return Task.FromResult(true);
-        }
+        //[Route("UpdateScope")]
+        //[HttpGet]
+        //public Task UpdateScope(string scopeId)
+        //{
+        //    var updateScopeArgs = new UpdateScopeArgs()
+        //    {
+        //        ScopeId = scopeId
+        //    };
+        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+        //    var result = _clientMonitor.UpdateScope(new UpdateScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, updateScopeArgs));
+        //    return Task.FromResult(true);
+        //}
 
-        [Route("GetClientGroups")]
-        [HttpGet]
-        public Task<IList<ScopeContext>> GetScopeContexts()
-        {
-            return _clientMonitor.GetScopeContexts();
-        }
+        //[Route("GetClientGroups")]
+        //[HttpGet]
+        //public Task<IList<ScopeContext>> GetScopeContexts()
+        //{
+        //    return _clientMonitor.GetScopeContexts();
+        //}
 
         //[Route("ClientStub")]
         //[HttpGet]
