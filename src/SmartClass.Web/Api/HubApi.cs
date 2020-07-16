@@ -69,7 +69,7 @@ namespace SmartClass.Web.Api
         }
 
         [Route("LeaveGroup")]
-        [HttpPost]
+        [HttpGet]
         public async Task LeaveGroup(string scopeId, string groupId, string clientId)
         {
             var leaveGroupArgs = new LeaveGroupArgs()

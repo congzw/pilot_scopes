@@ -259,13 +259,11 @@
                         group: group,
                         clientIds: clients
                     }
-                    const url = '/api/hub/leaveGroup';
+                    const url = '/api/hub/leaveGroup?scopeId=' + this.current.scopeId + '&groupId=' + this.toast.groupId + '&clientId=' + this.current.clientId;
                     fetch(url, {
-                        method: 'post',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(parmas)
+                        method: 'get',
                     }).then(response => response)
-                        .then(data => console.log(data))
+                        .then(data => this.getClientGroups())
                         .catch(error => console.log("error is: ", error));
                 },
                 //获取组列表
@@ -275,7 +273,10 @@
                         method: 'get',
                         headers: { 'Content-Type': 'application/json' }
                     }).then(response => response.json())
-                        .then(data => this.current.groups = data.map(item=>item.group))
+                        .then(data => {
+                            console.log(data);
+                            this.current.groups = data.map(item => item.group)
+                        })
                         .catch(error => console.log("error is: ", error));
                 }
             },
