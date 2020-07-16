@@ -7,14 +7,14 @@
     <link href="../../css/index.css" rel="stylesheet" />
     <script src="../../lib/signalr.js"></script>
     <script src="../../lib/vue.js"></script>
-    <script src="../../lib/jquery-3.2.1.js"></script>
     <script src="../../lib/echarts.min.js"></script>
 </head>
 <body>
-    <div id="main" style="width: 1000px;height:400px;"></div>
-    <div class="wrapper" id="app">
+    <div id="main" style="width: 100%;height:100%"></div>
+    <hr />
+    <div id="app">
         <div class="container">
-            <button type="button" @click="testClick" class="btn btn-primary pull-right" style="color: aqua">TestNode</button>
+            <button type="button" @click="testClick" class="btn btn-primary" style="color: aqua">TestNode</button>
         </div>
     </div>
 
@@ -23,7 +23,8 @@
         var myChart = echarts.init(document.getElementById('main'));
         var treeData = {
             name: 'PV100',
-            value: 0
+            value: 0,
+            children: []
         };
         var option = {
             tooltip: {
@@ -109,13 +110,14 @@
                 }
             ]
         };
-        
         var refreshChart = function () {
             //console.log('[refreshChart]', treeData);
             option.series[0].data[0] = treeData;
             myChart.setOption(option);
         }
         refreshChart();
+
+        window.onresize = myChart.resize;
 
         var eventInvoked = "eventInvoked";
         var serverLog = "serverLog";
@@ -135,7 +137,7 @@
             },
             methods: {
                 testClick: function () {
-                    treeData.children.push({ name: 'test Add', value: 0, type:'TestNode'});
+                    treeData.children.push({ name: 'test Add', value: 0, type: 'TestNode' });
                     refreshChart();
                 },
                 eventInvoked: function (args) {
