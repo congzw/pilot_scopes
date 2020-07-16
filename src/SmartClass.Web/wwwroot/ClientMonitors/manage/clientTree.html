@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>ECharts</title>
+    <title>Client Tree</title>
     <link href="../../css/bootstrap/bootstrap.css" rel="stylesheet" />
     <link href="../../css/index.css" rel="stylesheet" />
     <script src="../../lib/signalr.js"></script>
@@ -14,7 +14,7 @@
     <div id="main" style="width: 1000px;height:400px;"></div>
     <div class="wrapper" id="app">
         <div class="container">
-            <button type="button" @click="testClick" class="btn btn-primary pull-right">TEST</button>
+            <button type="button" @click="testClick" class="btn btn-primary pull-right" style="color: aqua">TestNode</button>
         </div>
     </div>
 
@@ -87,6 +87,10 @@
                             OfflineConnection: {
                                 fontSize: 10,
                                 color: 'red'
+                            },
+                            TestNode: {
+                                fontSize: 10,
+                                color: 'aqua'
                             }
                         }
                     },
@@ -131,8 +135,7 @@
             },
             methods: {
                 testClick: function () {
-                    console.log('testClick');
-                    treeData.children.push({name:'x', value:0});
+                    treeData.children.push({ name: 'test Add', value: 0, type:'TestNode'});
                     refreshChart();
                 },
                 eventInvoked: function (args) {
