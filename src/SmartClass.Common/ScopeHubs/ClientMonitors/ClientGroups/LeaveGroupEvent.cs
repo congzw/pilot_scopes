@@ -11,6 +11,11 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
         {
             Args = args;
         }
+
+        public LeaveGroupEvent(HubContextWrapper hubContext, SendContext sendContext, LeaveGroupArgs args) : base(hubContext, sendContext)
+        {
+            Args = args;
+        }
     }
 
     public class LeaveGroupArgs : IScopeGroupLocate

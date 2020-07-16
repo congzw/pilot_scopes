@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using SmartClass.Common;
 using SmartClass.Common.ScopeHubs;
-using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
-using SmartClass.Common.Scopes;
 
 namespace SmartClass.Web.Api
 {
@@ -22,13 +17,13 @@ namespace SmartClass.Web.Api
     {
         private readonly SignalREventBus _bus;
         private readonly IHubContext<_AnyHub> _hubContext;
-        private readonly IClientMonitor _clientMonitor;
+        private readonly IScopeClientGroupRepository _scopeClientGroupRepository;
 
-        public HubApiController(SignalREventBus bus, IHubContext<_AnyHub> hubContext, IClientMonitor clientMonitor)
+        public HubApiController(SignalREventBus bus, IHubContext<_AnyHub> hubContext, IScopeClientGroupRepository scopeClientGroupRepository)
         {
             _bus = bus;
             _hubContext = hubContext;
-            _clientMonitor = clientMonitor;
+            _scopeClientGroupRepository = scopeClientGroupRepository;
         }
 
         [Route("getDate")]
@@ -54,12 +49,13 @@ namespace SmartClass.Web.Api
         [HttpGet]
         public Task<IList<ScopeClientGroup>> GetClientGroups([FromQuery]GetClientGroupsArgs args)
         {
-            return _clientMonitor.GetClientGroups(args);
+            var scopeClientGroups = _scopeClientGroupRepository.GetScopeClientGroups(args);
+            return Task.FromResult(scopeClientGroups);
         }
 
         [Route("AddToGroup")]
         [HttpGet]
-        public Task<bool> AddToGroup(string scopeId, string groupId, string clientId)
+        public async Task AddToGroup(string scopeId, string groupId, string clientId)
         {
             var joinGroupArgs = new JoinGroupArgs()
             {
@@ -69,13 +65,12 @@ namespace SmartClass.Web.Api
             joinGroupArgs.ClientIds.Add(clientId);
 
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            _clientMonitor.JoinGroup(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext,  joinGroupArgs));
-            return Task.FromResult(true);
+            await _bus.Raise(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext, joinGroupArgs));
         }
 
         [Route("LeaveGroup")]
         [HttpGet]
-        public Task<bool> LeaveGroup(string scopeId, string groupId, string clientId)
+        public async Task LeaveGroup(string scopeId, string groupId, string clientId)
         {
             var leaveGroupArgs = new LeaveGroupArgs()
             {
@@ -85,103 +80,7 @@ namespace SmartClass.Web.Api
             leaveGroupArgs.ClientIds.Add(clientId);
 
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            //_clientMonitor.LeaveGroup(new LeaveGroupEvent(_scopeHub, leaveGroupArgs));
-            return Task.FromResult(true);
+            await _bus.Raise(new LeaveGroupEvent(_hubContext.AsHubContextWrapper(), sendContext, leaveGroupArgs));
         }
-
-        //[Route("ResetScope")]
-        //[HttpGet]
-        //public Task ResetScope(string scopeId)
-        //{
-        //    var resetScopeArgs = new ResetScopeArgs()
-        //    {
-        //        ScopeId = scopeId
-        //    };
-        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-        //    var result = _clientMonitor.ResetScope(new ResetScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, resetScopeArgs));
-        //    return Task.FromResult(true);
-        //}
-
-        //[Route("UpdateScope")]
-        //[HttpGet]
-        //public Task UpdateScope(string scopeId)
-        //{
-        //    var updateScopeArgs = new UpdateScopeArgs()
-        //    {
-        //        ScopeId = scopeId
-        //    };
-        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-        //    var result = _clientMonitor.UpdateScope(new UpdateScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, updateScopeArgs));
-        //    return Task.FromResult(true);
-        //}
-
-        //[Route("GetClientGroups")]
-        //[HttpGet]
-        //public Task<IList<ScopeContext>> GetScopeContexts()
-        //{
-        //    return _clientMonitor.GetScopeContexts();
-        //}
-
-        //[Route("ClientStub")]
-        //[HttpGet]
-        //public async Task<string> ClientStub(string scopeId, string groupId, string clientId, string message)
-        //{
-        //    if (string.IsNullOrWhiteSpace(scopeId))
-        //    {
-        //        return "BAD SCOPE!";
-        //    }
-
-        //    //todo: read SendFrom from token
-        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-        //    sendContext.To.ScopeId = scopeId;
-        //    sendContext.From.ClientId = "default";
-        //    //for demo!
-        //    var args = new ClientMethodArgs();
-        //    if (!string.IsNullOrEmpty(groupId))
-        //    {
-        //        sendContext.To.Groups.Add(groupId);
-        //    }
-        //    if (!string.IsNullOrEmpty(clientId))
-        //    {
-        //        sendContext.To.ClientIds.Add(clientId);
-        //    }
-
-        //    args.SendContext = sendContext;
-        //    args.Method = "updateMessage";
-        //    //args.SetBagValue("foo", "From Server foo");
-        //    args.MethodArgs = new { message = "From Server message" };
-
-        //    await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(),  args));
-        //    return "OK";
-        //}
-
-        //[Route("ClientStub")]
-        //[HttpPost]
-        //public async Task<string> ClientStub(SendContext sendContext)
-        //{
-        //    var args = new ClientMethodArgs();
-        //    args.SendContext = sendContext;
-        //    args.Method = "updateMessage";
-        //    args.MethodArgs = new { message = "From Server message" };
-
-        //    await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
-        //    return "OK";
-        //}
-
-        //[Route("AddToGroup")]
-        //[HttpGet]
-        //public Task<bool> AddToGroup(string scopeId, string groupId, string clientId)
-        //{
-        //    var joinGroupArgs = new JoinGroupArgs()
-        //    {
-        //        ScopeId = scopeId,
-        //        Group = groupId
-        //    };
-        //    joinGroupArgs.ClientIds.Add(clientId);
-
-        //    var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-        //    _clientMonitor.JoinGroup(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext,  joinGroupArgs));
-        //    return Task.FromResult(true);
-        //}
     }
 }
