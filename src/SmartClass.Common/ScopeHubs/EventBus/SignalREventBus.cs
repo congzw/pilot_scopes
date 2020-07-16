@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 
 // ReSharper disable once CheckNamespace
 namespace SmartClass.Common.ScopeHubs
@@ -40,41 +41,24 @@ namespace SmartClass.Common.ScopeHubs
     {
         private readonly ISignalREventDispatcher _dispatcher;
         private readonly IClientConnectionRepository _connectionRepository;
+        private readonly IScopeClientGroupRepository _scopeClientGroupRepository;
 
-        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository)
+        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository, IScopeClientGroupRepository scopeClientGroupRepository)
         {
             _dispatcher = dispatcher;
             _connectionRepository = connectionRepository;
+            _scopeClientGroupRepository = scopeClientGroupRepository;
         }
 
         public async Task Raise(ISignalREvent @event)
         {
-            var monitorHelper = ManageMonitorHelper.Instance;
+            var manageMonitorHelper = ManageMonitorHelper.Instance;
 
             var theEvent = (SignalREvent)@event;
-            await TraceAsync(theEvent, " handling").ConfigureAwait(false);
+            await manageMonitorHelper.TraceSignalREvent(theEvent, " handling").ConfigureAwait(false);
             await _dispatcher.Dispatch(@event).ConfigureAwait(false);
-            await TraceAsync(theEvent, " handled").ConfigureAwait(false);
-
-            if (monitorHelper.Config.UpdateConnectionsEnabled)
-            {
-                var hubClients = theEvent.TryGetHubClients();
-                var connections = _connectionRepository.GetConnections(new GetConnectionsArgs());
-                var updateConnectionsArgs = UpdateConnectionsArgs.Create(connections);
-                await monitorHelper.UpdateConnections(hubClients, updateConnectionsArgs);
-            }
-        }
-
-        private Task TraceAsync(SignalREvent theEvent, string descAppend)
-        {
-            var hubClients = theEvent.TryGetHubClients();
-            var eventName = theEvent.GetType().Name;
-            var info = new EventInvokeInfo();
-            info.SendContext = theEvent.SendContext;
-            info.Desc = eventName + descAppend;
-            info.ConnectionId = theEvent.RaiseHub?.Context?.ConnectionId;
-
-            return ManageMonitorHelper.Instance.EventInvoked(hubClients, info);
+            await manageMonitorHelper.TraceSignalREvent(theEvent, " handled").ConfigureAwait(false);
+            await manageMonitorHelper.UpdateMonitor(theEvent, _connectionRepository, _scopeClientGroupRepository);
         }
     }
 }
