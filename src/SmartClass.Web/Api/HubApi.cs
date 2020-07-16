@@ -11,6 +11,8 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
+using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
+using SmartClass.Common.Scopes;
 
 namespace SmartClass.Web.Api
 {
@@ -85,6 +87,39 @@ namespace SmartClass.Web.Api
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
             //_clientMonitor.LeaveGroup(new LeaveGroupEvent(_scopeHub, leaveGroupArgs));
             return Task.FromResult(true);
+        }
+
+        [Route("ResetScope")]
+        [HttpGet]
+        public Task ResetScope(string scopeId)
+        {
+            var resetScopeArgs = new ResetScopeArgs()
+            {
+                ScopeId = scopeId
+            };
+            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+            var result = _clientMonitor.ResetScope(new ResetScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, resetScopeArgs));
+            return Task.FromResult(true);
+        }
+
+        [Route("UpdateScope")]
+        [HttpGet]
+        public Task UpdateScope(string scopeId)
+        {
+            var updateScopeArgs = new UpdateScopeArgs()
+            {
+                ScopeId = scopeId
+            };
+            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+            var result = _clientMonitor.UpdateScope(new UpdateScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, updateScopeArgs));
+            return Task.FromResult(true);
+        }
+
+        [Route("GetClientGroups")]
+        [HttpGet]
+        public Task<IList<ScopeContext>> GetScopeContexts()
+        {
+            return _clientMonitor.GetScopeContexts();
         }
 
         //[Route("ClientStub")]
