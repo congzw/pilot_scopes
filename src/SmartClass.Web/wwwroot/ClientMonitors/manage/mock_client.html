@@ -263,7 +263,7 @@
                     fetch(url, {
                         method: 'get',
                     }).then(response => response)
-                        .then(data => console.log(data))
+                        .then(data => this.getClientGroups())
                         .catch(error => console.log("error is: ", error));
                 },
                 //获取组列表
