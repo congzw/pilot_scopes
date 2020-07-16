@@ -140,7 +140,7 @@
                     var clientId = this.current.clientId;
                     var userId = this.current.userId;
                     this.current = { ...this.current, scopeId: '', clientId: '', userId: '' }
-                    window.open('mock_client.html?clientId=' + clientId + '&scopeId=' + scopeId);
+                    window.open('mock_client.html?scopeId=' + scopeId + '&clientId=' + clientId);
                 },
                 onChangeScopeId: function (value) {
                     console.log(value);

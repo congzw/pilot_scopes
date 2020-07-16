@@ -49,6 +49,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var theOne = Children.FirstOrDefault(x => x.Name.MyEquals(name));
             if (theOne != null)
             {
+                theOne.Value = value;
                 return theOne;
             }
 
@@ -63,9 +64,29 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         private static string Client = "Client";
         private static string Connection = "Connection";
 
-        public static UpdateClientTreeArgs Create(IList<ScopeClientGroup> relations, IList<SignalRConnection> signalRConnections)
+        public static UpdateClientTreeArgs Create(IList<ScopeClientGroup> relations, IList<SignalRConnection> signalRConnections, IList<MyConnection> clientConnections)
         {
             var rootNode = new UpdateClientTreeArgs { Type = Root, Name = "PV100", Value = signalRConnections.Count };
+
+            var gScopes = clientConnections.GroupBy(x => x.ScopeId).ToList();
+            foreach (var gScope in gScopes)
+            {
+                //即使没有任何活动的连接，也为scope造型
+                var scopeNode = rootNode.GetOrCreateChild(Scope, gScope.Key, 0);
+
+                var gConnections = gScope.ToList();
+                foreach (var myConnection in gConnections)
+                {
+                    //check if not in any group
+                    var count = relations.Count(x => x.ClientId.MyEquals(myConnection.ClientId) && x.ScopeId.MyEquals(myConnection.ScopeId));
+                    if (count == 0)
+                    {
+                        //即使没有任何活动的连接，也为不属于group的client和conn造型
+                        var singleClientNode = scopeNode.GetOrCreateChild(Client, myConnection.ClientId, 0);
+                        var singleClientConnNode = singleClientNode.GetOrCreateChild(Connection, myConnection.ConnectionId, 0);
+                    }
+                }
+            }
 
             //signalRConnections
             var theConnScopes = signalRConnections.GroupBy(x => x.ScopeId).ToList();
@@ -112,6 +133,19 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                     }
                 }
             }
+
+            //auto add empty signalr conn for UI
+            foreach (var groupNode in rootNode.Children)
+            {
+                foreach (var clientNode in groupNode.Children)
+                {
+                    if (clientNode.Children.Count == 0)
+                    {
+                        clientNode.GetOrCreateChild(Connection, string.Empty, 0);
+                    }
+                }
+            }
+
             
             return rootNode;
         }
@@ -181,7 +215,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 await UpdateConnections(hubClients, updateConnectionsArgs);
 
                 var signalRConnections = signalRConnectionCache.Locates(new ClientConnectionLocate());
-                var updateClientTreeArgs = UpdateClientTreeArgs.Create(scopeClientGroups, signalRConnections);
+                var updateClientTreeArgs = UpdateClientTreeArgs.Create(scopeClientGroups, signalRConnections, connections);
                 await UpdateClientTree(hubClients, updateClientTreeArgs);
             }
         }

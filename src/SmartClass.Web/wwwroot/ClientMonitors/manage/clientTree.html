@@ -57,6 +57,10 @@
                             var nodeData = params.data;
                             //formatter: '{richKey| txt}',
 
+                            if (nodeData.value === 0 && nodeData.type === 'Client' && nodeData.children.length === 0) {
+                                return '{OfflineConnection| ' + nodeData.name + ' [离线] }';
+                            }
+
                             if (nodeData.name) {
                                 return '{' + nodeData.type + "|" + nodeData.name + "}";
                             } else {
