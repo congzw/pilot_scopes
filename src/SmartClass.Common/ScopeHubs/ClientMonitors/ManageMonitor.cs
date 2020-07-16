@@ -56,7 +56,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             foreach (var scope in scopes)
             {
                 var groups = scope.GroupBy(x => x.Group).ToList();
-                var scopeNode = Create("Classroom", scope.Key, groups.Count);
+                var scopeNode = Create("Scope", scope.Key, groups.Count);
                 rootNode.Children.Add(scopeNode);
                 foreach (var @group in groups)
                 {
@@ -73,7 +73,44 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                                 x.GetScopeClientKey().MyEquals(scopeClientGroup.GetScopeClientKey()));
                             if (theOne != null)
                             {
-                                var connNode = Create("Conn", theOne.ConnectionId, 0);
+                                var connNode = Create("Connection", theOne.ConnectionId, 0);
+                                clientNode.Children.Add(connNode);
+                            }
+                        }
+                        groupNode.Children.Add(clientNode);
+                    }
+                }
+            }
+
+            return rootNode;
+        }
+
+        public static UpdateClientTreeArgs Create2(IList<ScopeClientGroup> list, IList<MyConnection> connections)
+        {
+            var scopes = list.GroupBy(x => x.ScopeId).ToList();
+            var rootNode = Create("Root", "PV100", scopes.Count);
+
+            foreach (var scope in scopes)
+            {
+                var groups = scope.GroupBy(x => x.Group).ToList();
+                var scopeNode = Create("Scope", scope.Key, groups.Count);
+                rootNode.Children.Add(scopeNode);
+                foreach (var @group in groups)
+                {
+                    var clients = @group.GroupBy(x => x.ClientId).ToList();
+                    var groupNode = Create("Group", group.Key, clients.Count);
+                    scopeNode.Children.Add(groupNode);
+                    foreach (var client in clients)
+                    {
+                        var clientNode = Create("Client", client.Key, 1);
+                        var scopeClientGroup = client.FirstOrDefault();
+                        if (scopeClientGroup != null)
+                        {
+                            var theOne = connections.SingleOrDefault(x =>
+                                x.GetScopeClientKey().MyEquals(scopeClientGroup.GetScopeClientKey()));
+                            if (theOne != null)
+                            {
+                                var connNode = Create("Connection", theOne.ConnectionId, 0);
                                 clientNode.Children.Add(connNode);
                             }
                         }

@@ -11,8 +11,7 @@
     <script src="../../lib/echarts.min.js"></script>
 </head>
 <body>
-
-    <div id="main" style="width: 600px;height:400px;"></div>
+    <div id="main" style="width: 1000px;height:400px;"></div>
     <div class="wrapper" id="app">
         <div class="container">
             <button type="button" @click="testClick" class="btn btn-primary pull-right">TEST</button>
@@ -49,7 +48,38 @@
                         position: 'left',
                         verticalAlign: 'middle',
                         align: 'right',
-                        fontSize: 9
+                        fontSize: 9,
+                        formatter: function (params) {
+                            console.log(params);
+                            if (!params.data) {
+                                return null;
+                            }
+                            var nodeData = params.data;
+                            //formatter: '{richKey| txt}',
+                            return '{' + nodeData.type + "|" + nodeData.name + "}";
+                        },
+                        // rich 里是文本片段的样式设置：
+                        rich: {
+                            Root: {
+                                color: 'orange'
+                            },
+                            Scope: {
+                                fontSize: 30,
+                                color: 'red'
+                            },
+                            Group: {
+                                fontSize: 20,
+                                color: 'green'
+                            },
+                            Client: {
+                                fontSize: 10,
+                                color: 'black'
+                            },
+                            Connection: {
+                                fontSize: 10,
+                                color: 'gray'
+                            }
+                        }
                     },
 
                     leaves: {
