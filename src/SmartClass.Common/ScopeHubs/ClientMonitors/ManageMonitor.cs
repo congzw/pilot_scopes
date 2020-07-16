@@ -63,20 +63,19 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         private static string Client = "Client";
         private static string Connection = "Connection";
 
-        public static UpdateClientTreeArgs Create(IList<ScopeClientGroup> scopeClientGroups, IList<MyConnection> connections)
+        public static UpdateClientTreeArgs Create(IList<ScopeClientGroup> relations, IList<SignalRConnection> signalRConnections)
         {
-            var scopeConnections = connections.GroupBy(x => x.ScopeId).ToList();
-            var rootNode = new UpdateClientTreeArgs { Type = Root, Name = "PV100", Value = connections.Count };
+            var rootNode = new UpdateClientTreeArgs { Type = Root, Name = "PV100", Value = signalRConnections.Count };
 
-            foreach (var scopeConnection in scopeConnections)
+            //signalRConnections
+            var theConnScopes = signalRConnections.GroupBy(x => x.ScopeId).ToList();
+            foreach (var theConnScope in theConnScopes)
             {
-                var myConnections = scopeConnection.ToList();
-                var scopeNode = rootNode.GetOrCreateChild(Scope, scopeConnection.Key, myConnections.Count);
-
-                foreach (var connection in myConnections)
+                var scopeNode = rootNode.GetOrCreateChild(Scope, theConnScope.Key, theConnScope.Count());
+                foreach (var connection in theConnScope)
                 {
                     //check if not in any group
-                    var count = scopeClientGroups.Count(x => x.ClientId.MyEquals(connection.ClientId));
+                    var count = relations.Count(x => x.ClientId.MyEquals(connection.ClientId));
                     if (count == 0)
                     {
                         var singleClientNode = scopeNode.GetOrCreateChild(Client, connection.ClientId, 1);
@@ -85,27 +84,30 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 }
             }
 
-            var scopes = scopeClientGroups.GroupBy(x => x.ScopeId).ToList();
-            foreach (var scope in scopes)
+            var theScopes = relations.GroupBy(x => x.ScopeId).ToList();
+            foreach (var theScope in theScopes)
             {
-                var groups = scope.GroupBy(x => x.Group).ToList();
-                var scopeNode = rootNode.GetOrCreateChild(Scope, scope.Key, groups.Count);
-                foreach (var @group in groups)
+                //root->scopes
+                var theGroups = theScope.GroupBy(x => x.Group).ToList();
+                var scopeNode = rootNode.GetOrCreateChild(Scope, theScope.Key, theGroups.Count);
+                foreach (var theGroup in theGroups)
                 {
-                    var clients = @group.GroupBy(x => x.ClientId).ToList();
-                    var groupNode = scopeNode.GetOrCreateChild(Group, group.Key, clients.Count);
-                    foreach (var client in clients)
+                    //root->scope->group
+                    var groupNode = scopeNode.GetOrCreateChild(Group, theGroup.Key, theGroup.Count());
+                    foreach (var theClient in theGroup)
                     {
-                        var clientNode = groupNode.GetOrCreateChild(Client, client.Key, 1);
-                        var scopeClientGroup = client.FirstOrDefault();
-                        if (scopeClientGroup != null)
+                        //root->scope->group->client
+                        var clientNode = groupNode.GetOrCreateChild(Client, theClient.ClientId, 0);
+
+                        var theConnections = signalRConnections.Where(x =>
+                            x.ScopeId.MyEquals(theScope.Key) &&
+                            x.ClientId.MyEquals(theClient.ClientId)).ToList();
+                        clientNode.Value = theConnections.Count;
+
+                        foreach (var theConnection in theConnections)
                         {
-                            var theOne = connections.SingleOrDefault(x =>
-                                x.GetScopeClientKey().MyEquals(scopeClientGroup.GetScopeClientKey()));
-                            if (theOne != null)
-                            {
-                                clientNode.GetOrCreateChild(Connection, theOne.ConnectionId, 0);
-                            }
+                            //root->scope->group->client->connection
+                            clientNode.GetOrCreateChild(Connection, theConnection.ConnectionId, 0);
                         }
                     }
                 }
@@ -167,18 +169,19 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             return EventInvoked(hubClients, info);
         }
 
-        public async Task UpdateMonitor(SignalREvent theEvent, IClientConnectionRepository _connectionRepository, IScopeClientGroupRepository _scopeClientGroupRepository)
+        public async Task UpdateMonitor(SignalREvent theEvent, IClientConnectionRepository connectionRepository, IScopeClientGroupRepository scopeClientGroupRepository, SignalRConnectionCache signalRConnectionCache)
         {
             if (Config.UpdateConnectionsEnabled)
             {
-                var connections = _connectionRepository.GetConnections(new GetConnectionsArgs());
-                var scopeClientGroups = _scopeClientGroupRepository.GetScopeClientGroups(new ScopeClientGroupLocate());
-
+                var connections = connectionRepository.GetConnections(new GetConnectionsArgs());
+                var scopeClientGroups = scopeClientGroupRepository.GetScopeClientGroups(new ScopeClientGroupLocate());
+                
                 var hubClients = theEvent.TryGetHubClients();
                 var updateConnectionsArgs = UpdateConnectionsArgs.Create(connections);
                 await UpdateConnections(hubClients, updateConnectionsArgs);
 
-                var updateClientTreeArgs = UpdateClientTreeArgs.Create(scopeClientGroups, connections);
+                var signalRConnections = signalRConnectionCache.Locates(new ClientConnectionLocate());
+                var updateClientTreeArgs = UpdateClientTreeArgs.Create(scopeClientGroups, signalRConnections);
                 await UpdateClientTree(hubClients, updateClientTreeArgs);
             }
         }

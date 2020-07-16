@@ -42,12 +42,14 @@ namespace SmartClass.Common.ScopeHubs
         private readonly ISignalREventDispatcher _dispatcher;
         private readonly IClientConnectionRepository _connectionRepository;
         private readonly IScopeClientGroupRepository _scopeClientGroupRepository;
+        private readonly SignalRConnectionCache _signalRConnectionCache;
 
-        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository, IScopeClientGroupRepository scopeClientGroupRepository)
+        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository, IScopeClientGroupRepository scopeClientGroupRepository, SignalRConnectionCache signalRConnectionCache)
         {
             _dispatcher = dispatcher;
             _connectionRepository = connectionRepository;
             _scopeClientGroupRepository = scopeClientGroupRepository;
+            _signalRConnectionCache = signalRConnectionCache;
         }
 
         public async Task Raise(ISignalREvent @event)
@@ -58,7 +60,7 @@ namespace SmartClass.Common.ScopeHubs
             {
                 await _dispatcher.Dispatch(@event);
                 await manageMonitorHelper.TraceSignalREvent(theEvent, " handled").ConfigureAwait(false);
-                await manageMonitorHelper.UpdateMonitor(theEvent, _connectionRepository, _scopeClientGroupRepository);
+                await manageMonitorHelper.UpdateMonitor(theEvent, _connectionRepository, _scopeClientGroupRepository, _signalRConnectionCache);
             }
             catch (Exception ex)
             {
