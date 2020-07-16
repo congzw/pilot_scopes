@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
@@ -56,9 +57,16 @@ namespace SmartClass.Common.ScopeHubs
 
             var theEvent = (SignalREvent)@event;
             await manageMonitorHelper.TraceSignalREvent(theEvent, " handling").ConfigureAwait(false);
-            await _dispatcher.Dispatch(@event).ConfigureAwait(false);
-            await manageMonitorHelper.TraceSignalREvent(theEvent, " handled").ConfigureAwait(false);
-            await manageMonitorHelper.UpdateMonitor(theEvent, _connectionRepository, _scopeClientGroupRepository);
+            try
+            {
+                await _dispatcher.Dispatch(@event);
+                await manageMonitorHelper.TraceSignalREvent(theEvent, " handled").ConfigureAwait(false);
+                await manageMonitorHelper.UpdateMonitor(theEvent, _connectionRepository, _scopeClientGroupRepository);
+            }
+            catch (Exception ex)
+            {
+                await manageMonitorHelper.ServerLog(theEvent.TryGetHubClients(), new ServerLogInfo() {Category = theEvent.GetType().Name, Message = ex.Message});
+            }
         }
     }
 }
