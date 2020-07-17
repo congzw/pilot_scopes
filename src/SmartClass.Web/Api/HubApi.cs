@@ -125,6 +125,14 @@ namespace SmartClass.Web.Api
             return Task.FromResult(scopeContexts);
         }
 
+        [Route("GetScopeContext")]
+        [HttpGet]
+        public Task<ScopeContext> GetScopeContext(string scopeId)
+        {
+            var scopeContext = ScopeContext.GetScopeContext(scopeId,false);
+            return Task.FromResult(scopeContext);
+        }
+
         [Route("ResetScope")]
         [HttpGet]
         public async Task ResetScope(string scopeId)

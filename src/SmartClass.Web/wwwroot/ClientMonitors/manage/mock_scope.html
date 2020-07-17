@@ -9,28 +9,9 @@
 <body>
     <div class="container" id="app">
         <div class="pt-md-3">
-            <h4>连接模拟：</h4>
+            <h4>当前scope： {{ scopeId }}</h4>
             <div>
                 <a href="./clientTree.html" target="_blank">连接图</a>
-            </div>
-            <div>
-                <form>
-                    <div class="form-row">
-                        <div class="col">
-                            <!--<label for="scopeId">ScopeId</label>-->
-                            <input type="text" class="form-control" v-model="current.scopeId" id="scopeId" placeholder="ScopeId">
-                        </div>
-                        <div class="col">
-                            <!--<label for="ClientId">ClientId</label>-->
-                            <input type="text" class="form-control" v-model="current.clientId" id="ClientId" placeholder="ClientId">
-                        </div>
-                        <!--<div class="col">
-                            <input type="text" class="form-control" v-model="current.userId" id="UserId" placeholder="UserId">
-                        </div>-->
-                        <button type="button" @click="mockConnect" class="btn btn-primary pull-right">进行连接</button>
-                    </div>
-
-                </form>
             </div>
         </div>
         <hr />
@@ -39,19 +20,17 @@
                 <div class="form-group col-md-9">
                     <h4>
                         <span>连接列表：</span>
-                        <button disabled type="button" class="btn btn-info">{{filterObj.scopeId}}在线人数：{{computedConnections.filter(item=>item.connectionId).length}}</button>
-                        <button disabled type="button" class="btn btn-info">{{filterObj.scopeId}}总人数：{{computedConnections.length}}</button>
-                        <button disabled type="button" class="btn btn-info">在线人数：{{connectionObj.onlineCount}}</button>
-                        <button disabled type="button" class="btn btn-info">总人数：{{connectionObj.totalCount}}</button>
+                        <button disabled type="button" class="btn btn-info">在线人数：{{0}}</button>
+                        <button disabled type="button" class="btn btn-info">总人数：{{0}}</button>
                     </h4>
                 </div>
-                <div class="form-group col-md-3">
+                <!--<div class="form-group col-md-3">
                     <label>scope选择：</label>
                     <select class="form-control" id="exampleFormControlSelect1" v-model="filterObj.scopeId" @change="onChangeScopeId(filterObj.scopeId)">
                         <option value="">全部</option>
                         <option :value="scope" v-for="scope in scopes">{{scope}}</option>
                     </select>
-                </div>
+                </div>-->
             </form>
             <table class="table">
                 <thead>
@@ -72,8 +51,6 @@
                         <td>{{item.lastUpdateAt | formatDate }}</td>
                         <td>
                             <button type="button" class="btn btn-danger" @click="resetScope(item.scopeId)">踢除</button>
-                            <!--<button type="button" class="btn btn-danger" @click="resetScope(item.scopeId)">重置</button>
-                            <button type="button" class="btn btn-primary" @click="updateScope(item.scopeId)">刷新</button>-->
                         </td>
                     </tr>
                 </tbody>
@@ -102,20 +79,13 @@
         var app = new Vue({
             el: '#app',
             data: {
-                scopeContexts:[],
+                scopeId:'',
+                scopeContext: { },
                 connectionObj: {
                     connections: [],
                     offlineCount: 0,
                     onlineCount: 0,
                     totalCount: 3
-                },
-                current: {
-                    scopeId: '',
-                    clientId: '',
-                    userId: ''
-                },
-                filterObj: {
-                    scopeId: ''
                 }
             },
             methods: {
@@ -136,20 +106,22 @@
                         .catch(error => console.log("error is: ", error));
                 },
                 //获取scopes
-                getScopeContexts: function () {
-                    let url = '/api/hub/GetScopeContexts';
+                getScopeContext: function () {
+                    let url = '/api/hub/GetScopeContext?scopeId=' + this.scopeId;
                     fetch(url, {
                         method: 'get',
                         headers: { 'Content-Type': 'application/json' }
                     }).then(response => response.json())
                         .then(data => {
                             this.scopeContexts = data;
+                            console.log(this.getScopeContext);
                         })
                         .catch(error => console.log("error is: ", error));
                 }
             },
             created() {
-                this.getScopeContexts();
+                this.scopeId = getQueryString("scopeId");
+                this.getScopeContext();
             },
             computed: {
                 scopes: function () {
@@ -179,7 +151,14 @@
                 }
             }
         });
-
+        function getQueryString(name) {
+            var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+            var r = location.search.substr(1).match(reg);
+            if (r != null) {
+                return unescape(r[2]);
+            }
+            return null;
+        }
         function formatDate(date, fmt) {
             if (/(y+)/.test(fmt)) {
                 fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))

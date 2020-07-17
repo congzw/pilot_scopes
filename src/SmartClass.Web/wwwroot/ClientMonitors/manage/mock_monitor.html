@@ -71,28 +71,13 @@
                         <td>{{item.connectionId || "null"}}</td>
                         <td>{{item.lastUpdateAt | formatDate }}</td>
                         <td>
-                            <button type="button" class="btn btn-danger" @click="resetScope(item.scopeId)">踢除</button>
+                            <button type="button" class="btn btn-primary" @click="gotoScope(item.scopeId)">进入scope</button>
                             <!--<button type="button" class="btn btn-danger" @click="resetScope(item.scopeId)">重置</button>
                             <button type="button" class="btn btn-primary" @click="updateScope(item.scopeId)">刷新</button>-->
                         </td>
                     </tr>
                 </tbody>
             </table>
-        </div>
-        <hr />
-        <div>
-            <ul class="list-group">
-                <li class="list-group-item" v-for="scope in scopeContexts" :key="scope.scopeId">
-                    {{scope.scopeId}}
-                    <span class="badge badge-primary badge-pill" v-if="scope.bags.Connections">{{scope.bags.Connections.length}}</span>
-                    <span class="badge badge-primary badge-pill" v-else>0</span>
-                    <button class="btn btn-danger" @click="resetScope(scope.scopeId)">reset</button>
-                    <button class="btn btn-primary" @click="updateScope(scope.scopeId)">update</button>
-                    <ul class="list-group">
-                        <li class="list-group-item" v-for="client in scope.bags.Connections" :key="client.clientId">{{client.clientId}}</li>
-                    </ul>
-                </li>
-            </ul>
         </div>
     </div>
     <script src="/lib/vue.js" type="text/javascript"></script>
@@ -155,44 +140,17 @@
                     this.current = { ...this.current, scopeId: '', clientId: '', userId: '' }
                     window.open('mock_client.html?scopeId=' + scopeId + '&clientId=' + clientId);
                 },
+                gotoScope: function (scopeId) {
+                    window.open('mock_scope.html?scopeId=' + scopeId);
+                },
                 onChangeScopeId: function (value) {
                     console.log(value);
-                },
-
-                //清空scope
-                resetScope: function (scopeId) {
-                    var url = '/api/hub/resetScope?scopeId=' + scopeId;
-                    fetch(url)
-                        .then(response => response)
-                        .then(data => this.getScopeContexts());
-                },
-                //跟新scope
-                updateScope: function (scopeId) {
-                    const url = '/api/hub/updateScope?scopeId=' + scopeId;
-                    fetch(url, {
-                        method: 'get',
-                    }).then(response => response)
-                        .then(data => this.getScopeContexts())
-                        .catch(error => console.log("error is: ", error));
-                },
-                //获取scopes
-                getScopeContexts: function () {
-                    let url = '/api/hub/GetScopeContexts';
-                    fetch(url, {
-                        method: 'get',
-                        headers: { 'Content-Type': 'application/json' }
-                    }).then(response => response.json())
-                        .then(data => {
-                            this.scopeContexts = data;
-                        })
-                        .catch(error => console.log("error is: ", error));
                 }
             },
             created() {
                 var scopeId = "monitor";
                 var clientId = "mock_monitor";
                 this.connectionHub(scopeId, clientId);
-                this.getScopeContexts();
             },
             computed: {
                 scopes: function () {
