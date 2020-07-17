@@ -12,7 +12,7 @@
             <h4>连接模拟：</h4>
             <div>
                 <a href="/ClientMonitors/manage/clientTree.html" target="_blank">查看视图</a>
-                <button @click="autoAddClient" class="btn btn-primary">增加连接</button>
+                
             </div>
             <div>
                 <form>
@@ -25,10 +25,8 @@
                             <!--<label for="ClientId">ClientId</label>-->
                             <input type="text" class="form-control" v-model="current.clientId" id="ClientId" placeholder="ClientId">
                         </div>
-                        <!--<div class="col">
-                            <input type="text" class="form-control" v-model="current.userId" id="UserId" placeholder="UserId">
-                        </div>-->
-                        <button type="button" @click="mockConnect" class="btn btn-primary pull-right">进行连接</button>
+                        <button type="button" @click="mockConnect" class="btn btn-primary pull-right">进入客户端</button> &nbsp;
+                        <button type="button" @click="autoAddClient" class="btn btn-primary">增加连接</button>
                     </div>
 
                 </form>
@@ -85,6 +83,7 @@
     <script src="/lib/signalr.js" type="text/javascript"></script>
     <script>
         var connection;
+        const hubName = "DemoHub";
         var app = new Vue({
             el: '#app',
             data: {
@@ -107,7 +106,7 @@
             methods: {
                 connectionHub: function (scopeId, clientId, userId) {
                     let _this = this;
-                    let hubName = "DemoHub";
+                    
                     let connectionHub = new signalR.HubConnectionBuilder()
                         .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId + '&userId=' + userId)
                         .build();
@@ -155,7 +154,12 @@
                         number++;
                     };
                     let clientId = "c" + number;
-                    window.open('/ClientMonitors/manage/mock_client.html?scopeId=' + scopeId + '&clientId=' + clientId, "", "width=400, height=250, top=800, left=1500");
+
+                    let newHub = new signalR.HubConnectionBuilder()
+                        .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId)
+                        .build();
+                    newHub.start();
+                    //window.open('/ClientMonitors/manage/mock_client.html?scopeId=' + scopeId + '&clientId=' + clientId, "", "width=400, height=250, top=800, left=1500");
                 }
             },
             created() {

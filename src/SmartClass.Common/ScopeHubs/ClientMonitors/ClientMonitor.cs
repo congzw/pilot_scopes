@@ -277,8 +277,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
 
             //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
-            var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubKicked);
-            clientMethodArgs.MethodArgs = new { Reason = "Scope Reset: " + resetScopeArgs.ScopeId };
+            var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubScopeUpdated);
+            clientMethodArgs.MethodArgs = new { Reason = "Scope update: " + resetScopeArgs.ScopeId };
             var hubClients = theEvent.TryGetHubClients();
             var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(resetScopeArgs.ScopeId).ToScopeGroupFullName();
             await hubClients.Group(scopeGroupFullName).SendAsync(HubConst.ClientMethod_StubScopeUpdated, clientMethodArgs);
