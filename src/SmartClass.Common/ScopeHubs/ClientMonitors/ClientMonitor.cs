@@ -21,13 +21,15 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         private readonly ClientStubProcessBus _clientStubProcessBus;
         private readonly HubCallerContextCache _hubCallerContextCache;
         private readonly ScopeClientConnectionKeyMaps _scopeClientConnectionKeyMaps;
+        private readonly SignalRConnectionCache _signalRConnectionCache;
 
         public ClientMonitor(IClientConnectionRepository connRepos
             , IScopeClientGroupRepository clientGroupRepos
             , ClientInvokeProcessBus clientInvokeProcessBus
             , ClientStubProcessBus clientStubProcessBus
             , HubCallerContextCache hubCallerContextCache
-            , ScopeClientConnectionKeyMaps scopeClientConnectionKeyMaps)
+            , ScopeClientConnectionKeyMaps scopeClientConnectionKeyMaps
+            , SignalRConnectionCache signalRConnectionCache)
         {
             _repository = connRepos ?? throw new ArgumentNullException(nameof(connRepos));
             _clientGroupRepos = clientGroupRepos ?? throw new ArgumentNullException(nameof(clientGroupRepos));
@@ -35,6 +37,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             _clientStubProcessBus = clientStubProcessBus ?? throw new ArgumentNullException(nameof(clientStubProcessBus));
             _hubCallerContextCache = hubCallerContextCache ?? throw new ArgumentNullException(nameof(hubCallerContextCache));
             _scopeClientConnectionKeyMaps = scopeClientConnectionKeyMaps ?? throw new ArgumentNullException(nameof(scopeClientConnectionKeyMaps));
+            _signalRConnectionCache = signalRConnectionCache;
         }
         
         public async Task OnConnected(OnConnectedEvent theEvent)
@@ -49,6 +52,9 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var sendFrom = hub.TryGetHttpContext().GetSendFrom();
             var locate = hub.TryGetClientConnectionLocate();
             AllPropsShouldHasValue(locate);
+
+            var signalRConnection = new SignalRConnection().WithScopeId(locate.ScopeId).WithClientId(locate.ClientId).WithConnectionId(locate.ConnectionId);
+            _signalRConnectionCache.Set(signalRConnection);
 
             var theCallerContext = TryGetHubCallerContext(locate);
             if (theCallerContext != null)
@@ -145,6 +151,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             //set scopeContext
             var scopeContext = ScopeContext.GetScopeContext(locate.ScopeId);
             scopeContext.OnDisconnected(locate);
+            
+            _signalRConnectionCache.Remove(locate.ConnectionId);
         }
 
         public async Task ClientInvoke(ClientInvokeEvent theEvent)
@@ -289,15 +297,15 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         {
             if (string.IsNullOrWhiteSpace(locate.ClientId))
             {
-                throw new ArgumentException("ClientId not find!");
+                throw new ArgumentException("ClientId should has value!");
             }
             if (string.IsNullOrWhiteSpace(locate.ScopeId))
             {
-                throw new ArgumentException("ScopeId not find!");
+                throw new ArgumentException("ScopeId should has value!");
             }
             if (string.IsNullOrWhiteSpace(locate.ConnectionId))
             {
-                throw new ArgumentException("SignalRConnectionId not find!");
+                throw new ArgumentException("SignalR ConnectionId should has value!");
             }
 
             return locate;

@@ -32,7 +32,6 @@ namespace SmartClass.Common.ScopeHubs
 
             foreach (var handler in sortedHandlers)
             {
-                //todo ex handing
                 await handler.HandleAsync(hubEvent).ConfigureAwait(false);
             }
         }
@@ -43,28 +42,29 @@ namespace SmartClass.Common.ScopeHubs
         private readonly ISignalREventDispatcher _dispatcher;
         private readonly IClientConnectionRepository _connectionRepository;
         private readonly IScopeClientGroupRepository _scopeClientGroupRepository;
+        private readonly SignalRConnectionCache _signalRConnectionCache;
 
-        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository, IScopeClientGroupRepository scopeClientGroupRepository)
+        public SignalREventBus(ISignalREventDispatcher dispatcher, IClientConnectionRepository connectionRepository, IScopeClientGroupRepository scopeClientGroupRepository, SignalRConnectionCache signalRConnectionCache)
         {
             _dispatcher = dispatcher;
             _connectionRepository = connectionRepository;
             _scopeClientGroupRepository = scopeClientGroupRepository;
+            _signalRConnectionCache = signalRConnectionCache;
         }
 
         public async Task Raise(ISignalREvent @event)
         {
             var manageMonitorHelper = ManageMonitorHelper.Instance;
-
             var theEvent = (SignalREvent)@event;
-            await manageMonitorHelper.TraceSignalREvent(theEvent, " handling").ConfigureAwait(false);
             try
             {
                 await _dispatcher.Dispatch(@event);
                 await manageMonitorHelper.TraceSignalREvent(theEvent, " handled").ConfigureAwait(false);
-                await manageMonitorHelper.UpdateMonitor(theEvent, _connectionRepository, _scopeClientGroupRepository);
+                await manageMonitorHelper.UpdateMonitor(theEvent, _connectionRepository, _scopeClientGroupRepository, _signalRConnectionCache);
             }
             catch (Exception ex)
             {
+                await manageMonitorHelper.TraceSignalREvent(theEvent, " !ex").ConfigureAwait(false);
                 await manageMonitorHelper.ServerLog(theEvent.TryGetHubClients(), new ServerLogInfo() {Category = theEvent.GetType().Name, Message = ex.Message});
             }
         }
