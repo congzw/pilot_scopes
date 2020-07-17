@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 
 // ReSharper disable once CheckNamespace
 namespace SmartClass.Common.ScopeHubs
@@ -77,20 +80,21 @@ namespace SmartClass.Common.ScopeHubs
             return hub.TryGetHttpContext().GetSendFrom();
         }
 
+        public static List<string> GetFullNameGroups(this SendTo sendTo)
+        {
+            if (sendTo == null) throw new ArgumentNullException(nameof(sendTo));
+            if (sendTo.Groups.IsNullOrEmpty())
+            {
+                return new List<string>();
+            }
+            return sendTo.Groups.Select(x => ScopeGroupName.GetScopedGroup(sendTo.ScopeId, x).ToScopeGroupFullName()).Distinct().ToList();
+        }
+
         public static SendContext GetSendContext(this SendFrom sendFrom)
         {
             return new SendContext { From = sendFrom };
         }
-
-        //public static IList<string> AddIfNotExist(this IList<string> list, string value)
-        //{
-        //    if (!list.MyContains(value))
-        //    {
-        //        list.Add(value);
-        //    }
-        //    return list;
-        //}
-
+        
         public static SendContext WithSendFrom(this SendContext sendContext, SendFrom sendFrom)
         {
             sendContext.From = sendFrom;

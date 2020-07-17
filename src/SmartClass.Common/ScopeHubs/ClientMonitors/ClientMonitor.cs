@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
@@ -326,10 +327,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             }
 
             var hubCallerClients = theEvent.TryGetHubClients();
-            foreach (var group in sendTo.Groups)
+
+            //是否需要去重复？ GroupName -> ClientIds
+            var fullNameGroups = sendTo.GetFullNameGroups();
+            if (!fullNameGroups.IsNullOrEmpty())
             {
-                var groupFullName = ScopeGroupName.GetScopedGroup(sendTo.ScopeId, @group).ToScopeGroupFullName();
-                await hubCallerClients.Groups(groupFullName).SendAsync(clientMethod, clientMethodArgs);
+                await hubCallerClients.Groups(fullNameGroups).SendAsync(clientMethod, clientMethodArgs);
             }
 
             var connectionIds = new List<string>();
