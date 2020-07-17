@@ -28,28 +28,16 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
 
     public static class ClientMethodArgsExtensions
     {
-        //public static void WithSendContext<T>(this T args, SendContext sendContext) where T : IClientMethod
-        //{
-        //    args.SetBagValue("SendContext", sendContext);
-        //}
-
-        public static ClientMethodArgs ForLogMessage(this ClientMethodArgs self, object methodArgs)
-        {
-            self.Method = HubConst.ClientMethod_LogMessage;
-            self.MethodArgs = methodArgs;
-            return self;
-        }
-
         public static ClientMethodArgs ForNotify(this ClientMethodArgs self, object methodArgs)
         {
-            self.Method = HubConst.ClientMethod_Notify;
+            self.Method = HubConst.ClientMethod_StubNotify;
             self.MethodArgs = methodArgs;
             return self;
         }
 
         public static ClientMethodArgs ForKicked(this ClientMethodArgs self, object methodArgs)
         {
-            self.Method = HubConst.ClientMethod_Kicked;
+            self.Method = HubConst.ClientMethod_StubKicked;
             self.MethodArgs = methodArgs;
             return self;
         }

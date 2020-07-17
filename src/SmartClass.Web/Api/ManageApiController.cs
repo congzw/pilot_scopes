@@ -76,7 +76,7 @@ namespace SmartClass.Web.Api
                 sendContext.WithSendTo(SendTo.CreateForScopeGroupAll(scopeId));
             }
 
-            var args = ClientMethodArgs.Create().ForLogMessage(new { message = "From Server ClientMethod" });
+            var args = ClientMethodArgs.Create().ForNotify(new { message = "From Server ClientMethod" });
             args.SendContext = sendContext;
 
             await _bus.Raise(new ClientMethodEvent(_hubContext.AsHubContextWrapper(),  args));

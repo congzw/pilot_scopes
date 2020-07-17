@@ -18,14 +18,25 @@
                 <h5 class="form-inline">
                     我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}
                     &nbsp;&nbsp;
-                    <button type="button" @click="unConnction()" class="btn btn-primary pull-right">断开</button>
-                    <button type="button" @click="reConnection()" class="btn btn-primary pull-right">重连</button>
+                    <button type="button" @click="disconnect()" class="btn btn-primary pull-right">断开</button>
+                    <button type="button" @click="reconnect()" class="btn btn-primary pull-right">重连</button>
                 </h5>
             </div>
             <div>
                 <h5 class="form-inline">
                     我的通讯组：【groups】：{{current.groups}}
                 </h5>
+            </div>
+            <div>
+                <p>
+                    连接状态: {{current.connState}}
+                </p>
+                <p>
+                    Scope内全局变量: {{current.scopeContext}}
+                </p>
+                <p>
+                    Notify: {{current.notifyMessage}}
+                </p>
             </div>
         </div>
         <hr />
@@ -83,7 +94,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="item in myMesssages" :key="item.id">
+                    <tr v-for="item in myMessages" :key="item.id">
                         <th scope="row">{{item.sendContext.from.scopeId}}</th>
                         <td>{{item.sendContext.from.clientId}}</td>
                         <td>{{item.method}}</td>
@@ -101,14 +112,18 @@
     <script>
         let connectionHub;
         let clientMethod = "ClientMethod";
+
         var app = new Vue({
             el: '#app',
             data: {
                 current: {
                     scopeId: '',
                     clientId: '',
-                    groups:[],
-                    userId : ''
+                    groups: [],
+                    userId: '',
+                    scopeContext: {},
+                    notifyMessage: null,
+                    connState: '连接中'
                 },
                 connectionObj: {
                     connections: [],
@@ -122,12 +137,24 @@
                     groupId: '',
                     message: ''
                 },
-                myMesssages: [],
+                myMessages: [],
                 toast: {
                     groupId: ''
                 }
             },
             methods: {
+                stubKicked: function () {
+                    let _this = this;
+                    _this.disconnect();
+                },
+                stubScopeUpdated: function (ctx) {
+                    let _this = this;
+                    _this.scopeContext = ctx;
+                },
+                stubNotify: function (args) {
+                    let _this = this;
+                    _this.notifyMessage = args;
+                },
                 connectionStart: function (scopeId, clientId, userId) {
                     let _this = this;
                     let hubName = "DemoHub";
@@ -136,29 +163,34 @@
                         .build();
 
                     connectionHub.on(clientMethod, function (theArgs) {
-                        _this.myMesssages.push(theArgs);
-                        if (theArgs.method === "kicked") {
-                            console.log("kicked");
-                            _this.unConnction();
-                        }
                         console.log('callback: ' + clientMethod, theArgs);
+                        _this.myMessages.push(theArgs);
+                        if (_this[theArgs.method]) {
+                            _this[theArgs.method](theArgs.methodArgs);
+                        }
                     });
                     connectionHub.start()
                         .then(function () {
                             console.log("与服务器连接成功");
+                            _this.current.connState = "连接成功";
                         })
                         .catch(error => {
                             console.error(error.message);
+                            _this.current.connState = "连接失败";
                         });
                 },
                 //断开
-                unConnction: function () {
+                disconnect: function () {
+                    let _this = this;
                     //manually_stopped = 1
-                    connection.stop();
+                    connectionHub.stop();
                     console.log(connectionHub);
+                    _this.current.connState = "已断开";
                 },
                 //重连
-                reConnection: function () {
+                reconnect: function () {
+                    let _this = this;
+                    _this.disconnect();
                     this.connectionStart(this.current.scopeId, this.current.clientId);
                 },
                 //发送消息：api

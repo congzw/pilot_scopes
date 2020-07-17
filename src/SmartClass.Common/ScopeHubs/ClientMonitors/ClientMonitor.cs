@@ -56,7 +56,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             {
                 //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
                 //theCallerContext.Abort();
-                var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_Kicked);
+                var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubKicked);
                 clientMethodArgs.MethodArgs = new { Reason = "Same Scope Client Connected: " + locate.GetScopeClientKey()};
                 await hub.Clients.Client(theCallerContext.ConnectionId).SendAsync(HubConst.ClientMethod, clientMethodArgs);
 
@@ -239,15 +239,15 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 }
 
                 _clientGroupRepos.Remove(scopeClientGroup);
-                
-                //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
-                var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_Kicked);
-                clientMethodArgs.MethodArgs = new { Reason = "Scope Reset: " + locate.GetScopeClientKey() };
-                var hubClients = theEvent.TryGetHubClients();
-                var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(resetScopeArgs.ScopeId).ToScopeGroupFullName();
-                await hubClients.Group(scopeGroupFullName).SendAsync(HubConst.ClientMethod, clientMethodArgs);
             }
-
+            
+            //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
+            var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubKicked);
+            clientMethodArgs.MethodArgs = new { Reason = "Scope Reset: " + resetScopeArgs.ScopeId };
+            var hubClients = theEvent.TryGetHubClients();
+            var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(resetScopeArgs.ScopeId).ToScopeGroupFullName();
+            await hubClients.Group(scopeGroupFullName).SendAsync(HubConst.ClientMethod, clientMethodArgs);
+            
             var connections = _repository.GetConnections(new GetConnectionsArgs().WithScopeId(resetScopeArgs.ScopeId));
             foreach (var myConnection in connections)
             {
@@ -259,7 +259,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             scopeContext.Bags.Clear();
         }
 
-        public Task UpdateScope(UpdateScopeEvent theEvent)
+        public async Task UpdateScope(UpdateScopeEvent theEvent)
         {
             if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
 
@@ -274,7 +274,14 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             {
                 scopeContext.SetBagValue(bag.Key, bag.Value);
             }
-            return Task.CompletedTask;
+
+
+            //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
+            var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubKicked);
+            clientMethodArgs.MethodArgs = new { Reason = "Scope Reset: " + resetScopeArgs.ScopeId };
+            var hubClients = theEvent.TryGetHubClients();
+            var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(resetScopeArgs.ScopeId).ToScopeGroupFullName();
+            await hubClients.Group(scopeGroupFullName).SendAsync(HubConst.ClientMethod_StubScopeUpdated, clientMethodArgs);
         }
 
         public Task<IList<ScopeContext>> GetScopeContexts()

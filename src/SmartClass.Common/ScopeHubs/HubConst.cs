@@ -21,9 +21,9 @@
 
         public static string ClientMethod = "ClientMethod";
 
-        public static string ClientMethod_Notify = "notify";
-        public static string ClientMethod_LogMessage = "logMessage";
-        public static string ClientMethod_Kicked = "kicked";
+        public static string ClientMethod_StubKicked = "stubKicked";
+        public static string ClientMethod_StubScopeUpdated = "stubScopeUpdated";
+        public static string ClientMethod_StubNotify = "stubNotify";
 
         public static HubConst Ext = new HubConst();
     }
