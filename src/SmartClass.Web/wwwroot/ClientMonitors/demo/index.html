@@ -100,7 +100,7 @@
                     .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId)
                     .build();
 
-                var clientMethod = "ClientMethod";
+                var clientMethod = "clientMethod";
                 connectionHub.on(clientMethod, function (theArgs) {
                     console.log('callback: ' + clientMethod, theArgs);
                     if (theArgs.method) {

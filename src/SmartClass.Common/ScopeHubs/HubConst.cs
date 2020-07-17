@@ -1,4 +1,9 @@
-﻿namespace SmartClass.Common.ScopeHubs
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
+
+namespace SmartClass.Common.ScopeHubs
 {
     public class HubConst
     {
@@ -19,12 +24,20 @@
         public static string Args_ClientType = "clientType";
         public static string GroupName_All = string.Empty;
 
-        public static string ClientMethod = "ClientMethod";
-
         public static string ClientMethod_StubKicked = "stubKicked";
         public static string ClientMethod_StubScopeUpdated = "stubScopeUpdated";
         public static string ClientMethod_StubNotify = "stubNotify";
 
         public static HubConst Ext = new HubConst();
+    }
+
+    public static class ClientMethodExtensions
+    {
+        //让前端必须大写
+        private static string ClientMethod = "clientMethod";
+        public static Task SendAsyncToClientMethod(this IClientProxy clientProxy, ClientMethodArgs args)
+        {
+            return clientProxy.SendAsync(ClientMethod, args);
+        }
     }
 }

@@ -83,7 +83,9 @@
                     fetch(url, {
                         method: 'get',
                     }).then(response => response)
-                        .then(data => this.getScopeContext())
+                        .then(data => {
+                            //this.getScopeContext();
+                        })
                         .catch(error => console.log("error is: ", error));
                 },
                 //获取scopes

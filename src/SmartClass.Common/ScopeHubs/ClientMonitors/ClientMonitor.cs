@@ -58,7 +58,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 //theCallerContext.Abort();
                 var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubKicked);
                 clientMethodArgs.MethodArgs = new { Reason = "Same Scope Client Connected: " + locate.GetScopeClientKey()};
-                await hub.Clients.Client(theCallerContext.ConnectionId).SendAsync(HubConst.ClientMethod, clientMethodArgs);
+                await hub.Clients.Client(theCallerContext.ConnectionId).SendAsyncToClientMethod(clientMethodArgs);
 
                 //trace for manage
                 var hubClients = theEvent.TryGetHubClients();
@@ -159,7 +159,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             theEvent.SendContext.AutoFixToGroupAllIfEmpty();
 
             await _clientMethodProcessBus.Process(theEvent).ConfigureAwait(false);
-            await SendClientMethod(theEvent, theEvent.Args, HubConst.ClientMethod).ConfigureAwait(false);
+            await SendClientMethod(theEvent, theEvent.Args).ConfigureAwait(false);
         }
         
         public async Task JoinGroup(JoinGroupEvent theEvent)
@@ -246,7 +246,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             clientMethodArgs.MethodArgs = new { Reason = "Scope Reset: " + resetScopeArgs.ScopeId };
             var hubClients = theEvent.TryGetHubClients();
             var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(resetScopeArgs.ScopeId).ToScopeGroupFullName();
-            await hubClients.Group(scopeGroupFullName).SendAsync(HubConst.ClientMethod, clientMethodArgs);
+            await hubClients.Group(scopeGroupFullName).SendAsyncToClientMethod(clientMethodArgs);
             
             var connections = _repository.GetConnections(new GetConnectionsArgs().WithScopeId(resetScopeArgs.ScopeId));
             foreach (var myConnection in connections)
@@ -263,14 +263,14 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         {
             if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
 
-            var resetScopeArgs = theEvent.Args;
-            if (resetScopeArgs == null || string.IsNullOrWhiteSpace(resetScopeArgs.ScopeId))
+            var eventArgs = theEvent.Args;
+            if (eventArgs == null || string.IsNullOrWhiteSpace(eventArgs.ScopeId))
             {
                 throw new ArgumentException("scopeId should have value!");
             }
 
-            var scopeContext = ScopeContext.GetScopeContext(resetScopeArgs.ScopeId, true);
-            foreach (var bag in resetScopeArgs.Bags)
+            var scopeContext = ScopeContext.GetScopeContext(eventArgs.ScopeId, true);
+            foreach (var bag in eventArgs.Bags)
             {
                 scopeContext.SetBagValue(bag.Key, bag.Value);
             }
@@ -278,10 +278,10 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
             //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
             var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubScopeUpdated);
-            clientMethodArgs.MethodArgs = new { Reason = "Scope update: " + resetScopeArgs.ScopeId };
+            clientMethodArgs.MethodArgs = new { Reason = "Scope update: " + eventArgs.ScopeId };
             var hubClients = theEvent.TryGetHubClients();
-            var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(resetScopeArgs.ScopeId).ToScopeGroupFullName();
-            await hubClients.Group(scopeGroupFullName).SendAsync(HubConst.ClientMethod_StubScopeUpdated, clientMethodArgs);
+            var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(eventArgs.ScopeId).ToScopeGroupFullName();
+            await hubClients.Group(scopeGroupFullName).SendAsyncToClientMethod(clientMethodArgs);
         }
 
         public Task<IList<ScopeContext>> GetScopeContexts()
@@ -309,7 +309,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
             return locate;
         }
-        private async Task SendClientMethod(SignalREvent theEvent, ClientMethodArgs clientMethodArgs, string clientMethod)
+        private async Task SendClientMethod(SignalREvent theEvent, ClientMethodArgs clientMethodArgs)
         {
             if (theEvent.StopSend)
             {
@@ -330,7 +330,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             var fullNameGroups = sendTo.GetFullNameGroups();
             if (!fullNameGroups.IsNullOrEmpty())
             {
-                await hubCallerClients.Groups(fullNameGroups).SendAsync(clientMethod, clientMethodArgs);
+                await hubCallerClients.Groups(fullNameGroups).SendAsyncToClientMethod(clientMethodArgs);
             }
 
             var connectionIds = new List<string>();
@@ -345,7 +345,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
 
             if (!connectionIds.IsNullOrEmpty())
             {
-                await hubCallerClients.Clients(connectionIds).SendAsync(clientMethod, clientMethodArgs);
+                await hubCallerClients.Clients(connectionIds).SendAsyncToClientMethod(clientMethodArgs);
             }
         }
         private HubCallerContext TryGetHubCallerContext(ClientConnectionLocate locate)
