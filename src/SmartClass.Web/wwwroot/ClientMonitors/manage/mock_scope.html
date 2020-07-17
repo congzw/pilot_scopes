@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>连接监控</title>
+    <title>scope管理</title>
     <link href="../../css/bootstrap4/bootstrap.css" rel="stylesheet" />
 </head>
 <body>
@@ -119,46 +119,6 @@
                 }
             },
             methods: {
-                connectionHub: function (scopeId, clientId, userId) {
-                    let _this = this;
-                    let hubName = "DemoHub";
-                    let connectionHub = new signalR.HubConnectionBuilder()
-                        .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId + '&userId=' + userId)
-                        .build();
-                    console.log("connectionHub:");
-                    console.log(connectionHub);
-                    let updateConnections = "updateConnections";
-                    connectionHub.on(updateConnections, function (theArgs) {
-                        _this.updateConnections(theArgs);
-                        console.log(theArgs);
-                    });
-                    connectionHub.start()
-                        .then(function () {
-                            console.log("与服务器连接成功");
-                        })
-                        .catch(error => {
-                            console.error(error.message);
-                        });
-                },
-                updateConnections: function (args) {
-                    this.connectionObj = args;
-                    //this.connectionObj.connections.sort(function (a, b) {
-                    //    console.log(a.createAt > b.createAt);
-                    //    return a.createAt > b.createAt;
-                    //})
-                },
-
-                mockConnect: function () {
-                    var scopeId = this.current.scopeId;
-                    var clientId = this.current.clientId;
-                    var userId = this.current.userId;
-                    this.current = { ...this.current, scopeId: '', clientId: '', userId: '' }
-                    window.open('mock_client.html?clientId=' + clientId + '&scopeId=' + scopeId);
-                },
-                onChangeScopeId: function (value) {
-                    console.log(value);
-                },
-
                 //清空scope
                 resetScope: function (scopeId) {
                     var url = '/api/hub/resetScope?scopeId=' + scopeId;
@@ -189,9 +149,6 @@
                 }
             },
             created() {
-                var scopeId = "monitor";
-                var clientId = "mock_monitor";
-                this.connectionHub(scopeId, clientId);
                 this.getScopeContexts();
             },
             computed: {

@@ -7,7 +7,10 @@ using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
+using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
+using SmartClass.Common.Scopes;
 
 namespace SmartClass.Web.Api
 {
@@ -32,6 +35,13 @@ namespace SmartClass.Web.Api
         {
             return DateTime.Now.ToString("s");
         }
+
+        #region 消息发送
+        /// <summary>
+        /// 发消息给具体的clients、group的某个组件,通常的使用方式是前端知道发给某个组或者某一类客户端
+        /// </summary>
+        /// <param name="sendContext"></param>
+        /// <returns></returns>
         [Route("ClientStub")]
         [HttpPost]
         public async Task<string> ClientStub(SendContext sendContext)
@@ -41,9 +51,29 @@ namespace SmartClass.Web.Api
             args.Method = "updateMessage";
             args.MethodArgs = new { message = "From Server message" };
 
+            //纯粹的服务器端通知给客户端能力
             await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
             return "OK";
         }
+        /// <summary>
+        /// 广播
+        /// </summary>
+        /// <param name="sendContext"></param>
+        /// <returns></returns>
+        [Route("ClientInvoke")]
+        [HttpPost]
+        public async Task<string> ClientInvoke(SendContext sendContext)
+        {
+            var args = new ClientMethodArgs();
+            args.SendContext = sendContext;
+            args.Method = "updateMessage";
+            args.MethodArgs = new { message = "From Server message" };
+            await _bus.Raise(new ClientInvokeEvent(_hubContext.AsHubContextWrapper(), args));
+            return "OK";
+        }
+        #endregion
+
+        #region 组的操作
 
         [Route("GetClientGroups")]
         [HttpGet]
@@ -82,5 +112,45 @@ namespace SmartClass.Web.Api
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
             await _bus.Raise(new LeaveGroupEvent(_hubContext.AsHubContextWrapper(), sendContext, leaveGroupArgs));
         }
+
+        #endregion
+
+        #region scope 操作
+        [Route("GetScopeContexts")]
+        [HttpGet]
+        public Task<IList<ScopeContext>> GetScopeContexts()
+        {
+            var scopeRepository = ScopeContext.Resolve();
+            var scopeContexts = scopeRepository.GetScopeContexts();
+            return Task.FromResult(scopeContexts);
+        }
+
+        [Route("ResetScope")]
+        [HttpGet]
+        public async Task ResetScope(string scopeId)
+        {
+            var resetScopeArgs = new ResetScopeArgs()
+            {
+                ScopeId = scopeId
+            };
+            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+            await _bus.Raise(new ResetScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, resetScopeArgs));
+        }
+
+        [Route("UpdateScope")]
+        [HttpGet]
+        public async Task UpdateScope(string scopeId)
+        {
+            var updateScopeArgs = new UpdateScopeArgs()
+            {
+                ScopeId = scopeId
+            };
+            var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
+            await _bus.Raise(new UpdateScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, updateScopeArgs));
+        }
+
+        #endregion
+
+
     }
 }
