@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 using SmartClass.Common.Scopes;
 
@@ -56,9 +55,9 @@ namespace SmartClass.Web.Api
             return "OK";
         }
 
-        [Route("ClientStub")]
+        [Route("ClientMethod")]
         [HttpGet]
-        public async Task<string> ClientStub(string scopeId, string clientIds)
+        public async Task<string> ClientMethod(string scopeId, string clientIds)
         {
             if (string.IsNullOrWhiteSpace(scopeId))
             {
@@ -78,10 +77,10 @@ namespace SmartClass.Web.Api
                 sendContext.WithSendTo(SendTo.CreateForScopeGroupAll(scopeId));
             }
 
-            var args = ClientMethodArgs.Create().ForLogMessage(new { message = "From Server ClientStub" });
+            var args = ClientMethodArgs.Create().ForLogMessage(new { message = "From Server ClientMethod" });
             args.SendContext = sendContext;
 
-            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(),  args));
+            await _bus.Raise(new ClientMethodEvent(_hubContext.AsHubContextWrapper(),  args));
             return "OK";
         }
 

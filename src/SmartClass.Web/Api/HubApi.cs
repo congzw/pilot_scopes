@@ -35,24 +35,16 @@ namespace SmartClass.Web.Api
         {
             return DateTime.Now.ToString("s");
         }
-
-        #region 消息发送
-        /// <summary>
-        /// 发消息给具体的clients、group的某个组件,通常的使用方式是前端知道发给某个组或者某一类客户端
-        /// </summary>
-        /// <param name="sendContext"></param>
-        /// <returns></returns>
-        [Route("ClientStub")]
+        [Route("ClientMethod")]
         [HttpPost]
-        public async Task<string> ClientStub(SendContext sendContext)
+        public async Task<string> ClientMethod(SendContext sendContext)
         {
             var args = new ClientMethodArgs();
             args.SendContext = sendContext;
             args.Method = "updateMessage";
             args.MethodArgs = new { message = "From Server message" };
 
-            //纯粹的服务器端通知给客户端能力
-            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
+            await _bus.Raise(new ClientMethodEvent(_hubContext.AsHubContextWrapper(), args));
             return "OK";
         }
         /// <summary>

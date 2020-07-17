@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
@@ -69,19 +67,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
             TraceHubContext("LeaveGroup");
             return Bus.Raise(new LeaveGroupEvent(this, args));
         }
-        
-        //客户端主动调用的方法，可用于双向通讯场景
-        public Task ClientInvoke(ClientMethodArgs args)
-        {
-            TraceHubContext("ClientInvoke");
-            return Bus.Raise(new ClientInvokeEvent(this, args));
-        }
 
-        //客户端被动调用的方法，可用于单向通讯场景
-        public Task ClientStub(ClientMethodArgs args)
+        //调用客户端方法
+        public Task ClientMethod(ClientMethodArgs args)
         {
-            TraceHubContext("ClientStub");
-            return Bus.Raise(new ClientStubEvent(this, args));
+            TraceHubContext("ClientMethod");
+            return Bus.Raise(new ClientMethodEvent(this, args));
         }
 
         private void TraceHubContext(string method)
@@ -99,7 +90,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
             //[13704] [_AnyHub] OnConnectedAsync >>>>>>>> ?scopeId=s1&clientId=c2&id=gMop-YWYX7zbRWdqJOhyig
             //[13704] [_AnyHub] OnDisconnectedAsync >>>>>>>> ?scopeId=s1&clientId=c2&id=gMop-YWYX7zbRWdqJOhyig
             //[10664] [_AnyHub] KickClient >>>>>>>> ?scopeId=s1&clientId=c1&id=hB1kQwNfvF9bu-Tp_cSaig
-            //[10664] [_AnyHub] InvokeClientStub >>>>>>>> ?scopeId=s1&clientId=c1&id=hB1kQwNfvF9bu-Tp_cSaig
+            //[10664] [_AnyHub] ClientMethod >>>>>>>> ?scopeId=s1&clientId=c1&id=hB1kQwNfvF9bu-Tp_cSaig
             EventLogHelper.Resolve().Log(string.Format("[_AnyHub] {0} >>>>>>>> {1}", method, this.TryGetHttpContext().Request.QueryString));
         }
     }

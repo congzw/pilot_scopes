@@ -60,8 +60,8 @@
                         <div class="col">
                             <input type="text" class="form-control" v-model="messageObj.message" id="Message" placeholder="消息体">
                         </div>
-                        <button type="button" @click="clientStub(messageObj)" class="btn btn-primary pull-right">clientStub发送</button>
-                        <button type="button" @click="clientInvoke(messageObj)" class="btn btn-primary pull-right">clientInvoke发送</button>
+                        <button type="button" @click="clientMethodApi(messageObj)" class="btn btn-primary pull-right">Api发送</button>
+                        <button type="button" @click="clientMethodHub(messageObj)" class="btn btn-primary pull-right">Hub发送</button>
                     </div>
 
                 </form>
@@ -100,8 +100,7 @@
     <script src="/lib/signalr.js" type="text/javascript"></script>
     <script>
         let connectionHub;
-        let clientInvoke = "ClientInvoke";
-        let clientStub = "ClientStub";
+        let clientMethod = "ClientMethod";
         var app = new Vue({
             el: '#app',
             data: {
@@ -136,7 +135,7 @@
                         .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId + '&userId=' + userId)
                         .build();
 
-                    connectionHub.on(clientInvoke, function (theArgs) {
+                    connectionHub.on(clientMethod, function (theArgs) {
                         theArgs: {
                             sendContext: {
                                 from: {
@@ -157,11 +156,7 @@
                             }
                         }
                         _this.myMesssages.push(theArgs);
-                        console.log('callback: ' + clientInvoke, theArgs);
-                    });
-                    connectionHub.on(clientStub, function (theArgs) {
-                        _this.myMesssages.push(theArgs);
-                        console.log('callback: ' + clientStub, theArgs);
+                        console.log('callback: ' + clientMethod, theArgs);
                     });
                     connectionHub.start()
                         .then(function () {
@@ -182,7 +177,7 @@
                 },
 
                 //发送消息：api
-                clientStub: function (messageObj) {
+                clientMethodApi: function (messageObj) {
                     let toClients = [];
                     if (messageObj.clientId) {
                         toClients = messageObj.clientId.split(',');
@@ -205,7 +200,7 @@
                             groups: toGroups
                         }
                     };
-                    let url = '/api/hub/ClientStub';
+                    let url = '/api/hub/ClientMethod';
                     fetch(url, {
                         method: 'post',
                         headers: { 'Content-Type': 'application/json' },
@@ -215,7 +210,7 @@
                         .catch(error => console.log("error is: ", error));
                 },
                 //发送消息：signalr
-                clientInvoke: function (messageObj) {
+                clientMethodHub: function (messageObj) {
                     let toClients = [];
                     if (messageObj.clientId) {
                         toClients = messageObj.clientId.split(',');
@@ -242,7 +237,7 @@
                         method: "updateMessage",
                         methodArgs: { message: messageObj.message }
                     };
-                    connectionHub.invoke(clientInvoke, theArgs);
+                    connectionHub.invoke(clientMethod, theArgs);
                 },
 
                 //加入组

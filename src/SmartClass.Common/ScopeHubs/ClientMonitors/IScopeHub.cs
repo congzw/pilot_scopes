@@ -37,17 +37,11 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
         Task LeaveGroup(LeaveGroupArgs args);
 
         /// <summary>
-        /// 客户端方法自主调用后广播
+        /// 调用客户端方法
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        Task ClientInvoke(ClientMethodArgs args);
-        /// <summary>
-        /// 调用客户端桩子方法（来自外部）
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        Task ClientStub(ClientMethodArgs args);
+        Task ClientMethod(ClientMethodArgs args);
 
         /// <summary>
         /// 重置Scope

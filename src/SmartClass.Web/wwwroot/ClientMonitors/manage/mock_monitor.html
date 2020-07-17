@@ -11,7 +11,7 @@
         <div class="pt-md-3">
             <h4>连接模拟：</h4>
             <div>
-                <a href="./clientTree.html" target="_blank">连接图</a>
+                <a href="/ClientMonitors/manage/clientTree.html" target="_blank">查看视图</a>
             </div>
             <div>
                 <form>
@@ -138,7 +138,7 @@
                     var clientId = this.current.clientId;
                     var userId = this.current.userId;
                     this.current = { ...this.current, scopeId: '', clientId: '', userId: '' }
-                    window.open('mock_client.html?scopeId=' + scopeId + '&clientId=' + clientId);
+                    window.open('/ClientMonitors/manage/mock_client.html?scopeId=' + scopeId + '&clientId=' + clientId);
                 },
                 gotoScope: function (scopeId) {
                     window.open('mock_scope.html?scopeId=' + scopeId);

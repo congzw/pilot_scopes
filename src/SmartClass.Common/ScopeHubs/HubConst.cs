@@ -19,8 +19,7 @@
         public static string Args_ClientType = "clientType";
         public static string GroupName_All = string.Empty;
 
-        public static string ClientStub = "ClientStub";
-        public static string ClientInvoke = "ClientInvoke";
+        public static string ClientMethod = "ClientMethod";
 
         public static string ClientMethod_Notify = "notify";
         public static string ClientMethod_LogMessage = "logMessage";

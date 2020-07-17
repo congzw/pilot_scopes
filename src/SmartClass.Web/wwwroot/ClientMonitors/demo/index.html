@@ -100,18 +100,9 @@
                     .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId)
                     .build();
 
-                var clientInvoke = "ClientInvoke";
-                connectionHub.on(clientInvoke, function (theArgs) {
-                    console.log('callback: ' + clientInvoke, theArgs);
-                    if (theArgs.method) {
-                        _this[theArgs.method](theArgs.methodArgs);
-                    }
-                    //todo more
-                });
-
-                var clientStub = "ClientStub";
-                connectionHub.on(clientStub, function (theArgs) {
-                    console.log('callback: ' + clientStub, theArgs);
+                var clientMethod = "ClientMethod";
+                connectionHub.on(clientMethod, function (theArgs) {
+                    console.log('callback: ' + clientMethod, theArgs);
                     if (theArgs.method) {
                         _this[theArgs.method](theArgs.methodArgs);
                     }
@@ -131,7 +122,7 @@
                                     foo: "foo"
                                 }
                             };
-                            connectionHub.invoke(clientInvoke, theArgs);
+                            connectionHub.invoke(clientMethod, theArgs);
                             event.preventDefault();
                         });
                         document.getElementById('btnUpdateState').addEventListener('click', function (event) {
@@ -144,7 +135,7 @@
                                     bar: "bar"
                                 }
                             };
-                            connectionHub.invoke(clientInvoke, theArgs);
+                            connectionHub.invoke(clientMethod, theArgs);
                             event.preventDefault();
                         });
                     })

@@ -40,7 +40,9 @@ ScopedId + ClientId => SignalRConnectionId => ClientConnection(代表一个连�
 
 ## 关于ClientMethods
 
-跟前端约定了两种调用模式：
+移除了跟前端约定了两种调用模式：
 
-- ClientInvoke 客户端主动调用的方法，可用于双向通讯场景，例如：客户端 -> 中心 -> 客户端
-- ClientStub 客户端被动调用的方法，可用于单向通讯场景，例如：外部（Api或服务） -> 中心 -> 客户端
+- x ClientInvoke 客户端主动调用的方法，可用于双向通讯场景，例如：客户端 -> 中心 -> 客户端
+- x ClientStub 客户端被动调用的方法，可用于单向通讯场景，例如：外部（Api或服务） -> 中心 -> 客户端
+
+只保留一种统一的模式：ClientMethod

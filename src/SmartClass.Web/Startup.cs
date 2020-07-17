@@ -24,7 +24,7 @@ namespace SmartClass.Web
         {
             var fileServerOptions = new FileServerOptions();
             var defaultPages = new List<string>();
-            defaultPages.Add("ClientMonitors/index.html");
+            defaultPages.Add("ClientMonitors/manage/mock_monitor.html");
             fileServerOptions.DefaultFilesOptions.DefaultFileNames = defaultPages;
 
             app.UseFileServer(fileServerOptions);
