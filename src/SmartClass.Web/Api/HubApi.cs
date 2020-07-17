@@ -126,12 +126,23 @@ namespace SmartClass.Web.Api
         {
             var updateScopeArgs = new UpdateScopeArgs()
             {
-                ScopeId = scopeId
+                ScopeId = scopeId,
             };
+            updateScopeArgs.Bags["testKey"] = "testValue" + DateTime.Now.ToString("yyyy-mm-dd HH:MM:SS");
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
             await _bus.Raise(new UpdateScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, updateScopeArgs));
         }
 
+        [Route("NotifyScope")]
+        [HttpGet]
+        public async Task NotifyScope(string scopeId)
+        {
+            var args = new ClientMethodArgs().ForNotify(new { message = "NotifyScope message" + DateTime.Now.ToString("yyyy-mm-dd HH:MM:SS") });
+            var sendContext = new SendContext();
+            sendContext.From.ScopeId = scopeId;
+            args.SendContext = sendContext;
+            await _bus.Raise(new ClientMethodEvent(_hubContext.AsHubContextWrapper(), args));
+        }
         #endregion
 
 

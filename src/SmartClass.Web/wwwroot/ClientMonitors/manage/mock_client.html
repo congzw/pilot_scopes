@@ -18,7 +18,7 @@
                 <h5 class="form-inline">
                     我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}
                     &nbsp;&nbsp;
-                    <button type="button" @click="disconnect()" class="btn btn-primary pull-right">断开</button>
+                    <button type="button" @click="disconnect()" class="btn btn-primary pull-right">断开</button> &nbsp;
                     <button type="button" @click="reconnect()" class="btn btn-primary pull-right">重连</button>
                 </h5>
             </div>
@@ -46,7 +46,7 @@
                     <div class="col">
                         <input type="text" class="form-control" v-model="toast.groupId" id="groupId" placeholder="groupId">
                     </div>
-                    <button type="button" @click="addToGroup" class="btn btn-primary pull-right">加入组</button>
+                    <button type="button" @click="addToGroup" class="btn btn-primary pull-right">加入组</button> &nbsp;
                     <button type="button" @click="leaveGroup(current.scopeId,toast.groupId,current.clientId)" class="btn btn-primary pull-right">退出组</button>
                 </div>
 
@@ -71,7 +71,7 @@
                         <div class="col">
                             <input type="text" class="form-control" v-model="messageObj.message" id="Message" placeholder="消息体">
                         </div>
-                        <button type="button" @click="clientMethodApi(messageObj)" class="btn btn-primary pull-right">Api发送</button>
+                        <button type="button" @click="clientMethodApi(messageObj)" class="btn btn-primary pull-right">Api发送</button> &nbsp;
                         <button type="button" @click="clientMethodHub(messageObj)" class="btn btn-primary pull-right">Hub发送</button>
                     </div>
 
@@ -148,12 +148,12 @@
                     _this.disconnect();
                 },
                 stubScopeUpdated: function (ctx) {
+                    console.log(ctx);
                     let _this = this;
                     _this.scopeContext = ctx;
                 },
                 stubNotify: function (args) {
-                    let _this = this;
-                    _this.notifyMessage = args;
+                    this.current.notifyMessage = args;
                 },
                 connectionStart: function (scopeId, clientId, userId) {
                     let _this = this;

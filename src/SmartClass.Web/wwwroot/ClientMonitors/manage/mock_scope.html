@@ -14,6 +14,7 @@
                 &nbsp;&nbsp;
                 <button type="button" @click="resetScope(scopeId)" class="btn btn-primary pull-right">重置</button>
                 <button type="button" @click="updateScope(scopeId)" class="btn btn-primary pull-right">刷新</button>
+                <button type="button" @click="notifyScope(scopeId)" class="btn btn-primary pull-right">通知</button>
             </h4>
             <div>
                 <a href="./clientTree.html" target="_blank">连接图</a>
@@ -67,9 +68,18 @@
                         .then(response => response)
                         .then(data => this.getScopeContext());
                 },
-                //跟新scope
+                //更新scope
                 updateScope: function (scopeId) {
                     const url = '/api/hub/updateScope?scopeId=' + scopeId;
+                    fetch(url, {
+                        method: 'get',
+                    }).then(response => response)
+                        .then(data => this.getScopeContext())
+                        .catch(error => console.log("error is: ", error));
+                },
+                //通知scope
+                notifyScope: function (scopeId) {
+                    const url = '/api/hub/notifyScope?scopeId=' + scopeId;
                     fetch(url, {
                         method: 'get',
                     }).then(response => response)
