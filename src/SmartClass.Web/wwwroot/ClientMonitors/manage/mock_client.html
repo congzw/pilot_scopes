@@ -16,10 +16,15 @@
         <div class="pt-md-3">
             <div>
                 <h5 class="form-inline">
-                    我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}、【groups】：{{current.groups}}
+                    我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}
                     &nbsp;&nbsp;
                     <button type="button" @click="unConnction()" class="btn btn-primary pull-right">断开</button>
                     <button type="button" @click="reConnection()" class="btn btn-primary pull-right">重连</button>
+                </h5>
+            </div>
+            <div>
+                <h5 class="form-inline">
+                    我的通讯组：【groups】：{{current.groups}}
                 </h5>
             </div>
         </div>

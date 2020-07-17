@@ -1,0 +1,161 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>scope管理</title>
+    <link href="../../css/bootstrap4/bootstrap.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="pt-md-3">
+            <h4>
+                当前scope： {{ scopeId }}
+                &nbsp;&nbsp;
+                <button type="button" @click="resetScope(scopeId)" class="btn btn-primary pull-right">重置</button>
+                <button type="button" @click="updateScope(scopeId)" class="btn btn-primary pull-right">更新</button>
+            </h4>
+            <div>
+                <a href="./clientTree.html" target="_blank">连接图</a>
+            </div>
+        </div>
+        <hr />
+        <div>
+            <form class="form-inline">
+                <div class="form-group col-md-9">
+                    <h4>
+                        <span>连接列表：</span>
+                        <button disabled type="button" class="btn btn-info">总人数：{{scopeContext.connections.length}}</button>
+                    </h4>
+                </div>
+            </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">clientId</th>
+                        <th scope="col">connectionId</th>
+                        <th scope="col">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in scopeContext.connections" :key="item.id">
+                        <td  scope="row">{{item.clientId}}</td>
+                        <td>{{item.connectionId || "null"}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <script src="/lib/vue.js" type="text/javascript"></script>
+    <script src="/lib/signalr.js" type="text/javascript"></script>
+    <script>
+        var connection;
+        var app = new Vue({
+            el: '#app',
+            data: {
+                scopeId:'',
+                scopeContext: {
+                    connections: []
+                },
+            },
+            methods: {
+                //清空scope
+                resetScope: function (scopeId) {
+                    var url = '/api/hub/resetScope?scopeId=' + scopeId;
+                    fetch(url)
+                        .then(response => response)
+                        .then(data => this.getScopeContexts());
+                },
+                //跟新scope
+                updateScope: function (scopeId) {
+                    const url = '/api/hub/updateScope?scopeId=' + scopeId;
+                    fetch(url, {
+                        method: 'get',
+                    }).then(response => response)
+                        .then(data => this.getScopeContexts())
+                        .catch(error => console.log("error is: ", error));
+                },
+                //获取scopes
+                getScopeContext: function () {
+                    let url = '/api/hub/GetScopeContext?scopeId=' + this.scopeId;
+                    fetch(url, {
+                        method: 'get',
+                        headers: { 'Content-Type': 'application/json' }
+                    }).then(response => response.json())
+                        .then(data => {
+                            this.scopeContext.connections = data.bags.Connections;
+                            console.log(this.scopeContext);
+                        })
+                        .catch(error => console.log("error is: ", error));
+                }
+            },
+            created() {
+                this.scopeId = getQueryString("scopeId");
+                console.log(this.scopeId);
+                this.getScopeContext();
+            },
+            computed: {
+                scopes: function () {
+                    let scopes = this.connectionObj.connections.map(function (item) {
+                        return item["scopeId"];
+                    });
+                    //去重
+                    return [...new Set(scopes)];
+                },
+                computedConnections: function () {
+                    if (!this.filterObj.scopeId) {
+                        return this.connectionObj.connections;
+                    }
+                    return this.connectionObj.connections.filter(item => item.scopeId == this.filterObj.scopeId);
+                }
+            },
+            filters: {
+                scopeFilter(connections, filterObj) {
+                    for (var key in filterObj) {
+                        console.log(key);
+                    }
+                    return connections.filters(item => item.scopeId);
+                },
+                formatDate(time) {
+                    let date = new Date(time);
+                    return formatDate(date, 'yyyy-MM-dd hh:mm')
+                }
+            }
+        });
+        function getQueryString(name) {
+            var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+            var r = location.search.substr(1).match(reg);
+            if (r != null) {
+                console.log(unescape(r[2]));
+                return unescape(r[2]);
+            }
+            return null;
+        }
+        function formatDate(date, fmt) {
+            if (/(y+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
+            }
+            let o = {
+                'M+': date.getMonth() + 1,
+                'd+': date.getDate(),
+                'h+': date.getHours(),
+                'm+': date.getMinutes(),
+                's+': date.getSeconds()
+            }
+            for (let k in o) {
+                if (new RegExp(`(${k})`).test(fmt)) {
+                    let str = o[k] + ''
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? str : padLeftZero(str))
+                }
+            }
+            return fmt
+        }
+        function padLeftZero(str) {
+            return ('00' + str).substr(str.length)
+        }
+    </script>
+</body>
+</html>
+
+
