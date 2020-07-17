@@ -5,8 +5,7 @@ using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
+using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.DAL;
 
 // ReSharper disable CheckNamespace
@@ -29,12 +28,8 @@ namespace Common.SignalR.Scoped
             //services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped, typeof(SignalREventHandlerDecorator));
             services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped);
 
-            services.AddScoped<ClientInvokeProcessBus>();
-            services.AddAllImpl<IClientInvokeProcess>(ServiceLifetime.Scoped);
-            
-            services.AddScoped<ClientStubProcessBus>();
-            services.AddAllImpl<IClientStubProcess>(ServiceLifetime.Scoped);
-
+            services.AddScoped<ClientMethodProcessBus>();
+            services.AddAllImpl<IClientMethodProcess>(ServiceLifetime.Scoped);
             
             services.AddSingleton<IEventLogHelper, HubClientLogHelper>();
             services.AddSingleton<ScopeClientConnectionKeyMaps>();

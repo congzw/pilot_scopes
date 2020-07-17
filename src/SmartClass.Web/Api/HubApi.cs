@@ -7,7 +7,6 @@ using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 
 namespace SmartClass.Web.Api
 {
@@ -32,16 +31,16 @@ namespace SmartClass.Web.Api
         {
             return DateTime.Now.ToString("s");
         }
-        [Route("ClientStub")]
+        [Route("ClientMethod")]
         [HttpPost]
-        public async Task<string> ClientStub(SendContext sendContext)
+        public async Task<string> ClientMethod(SendContext sendContext)
         {
             var args = new ClientMethodArgs();
             args.SendContext = sendContext;
             args.Method = "updateMessage";
             args.MethodArgs = new { message = "From Server message" };
 
-            await _bus.Raise(new ClientStubEvent(_hubContext.AsHubContextWrapper(), args));
+            await _bus.Raise(new ClientMethodEvent(_hubContext.AsHubContextWrapper(), args));
             return "OK";
         }
 

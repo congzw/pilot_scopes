@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 using SmartClass.Common.Scopes;
@@ -18,24 +16,21 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
     {
         private readonly IClientConnectionRepository _repository;
         private readonly IScopeClientGroupRepository _clientGroupRepos;
-        private readonly ClientInvokeProcessBus _clientInvokeProcessBus;
-        private readonly ClientStubProcessBus _clientStubProcessBus;
+        private readonly ClientMethodProcessBus _clientMethodProcessBus;
         private readonly HubCallerContextCache _hubCallerContextCache;
         private readonly ScopeClientConnectionKeyMaps _scopeClientConnectionKeyMaps;
         private readonly SignalRConnectionCache _signalRConnectionCache;
 
         public ClientMonitor(IClientConnectionRepository connRepos
             , IScopeClientGroupRepository clientGroupRepos
-            , ClientInvokeProcessBus clientInvokeProcessBus
-            , ClientStubProcessBus clientStubProcessBus
+            , ClientMethodProcessBus clientMethodProcessBus
             , HubCallerContextCache hubCallerContextCache
             , ScopeClientConnectionKeyMaps scopeClientConnectionKeyMaps
             , SignalRConnectionCache signalRConnectionCache)
         {
             _repository = connRepos ?? throw new ArgumentNullException(nameof(connRepos));
             _clientGroupRepos = clientGroupRepos ?? throw new ArgumentNullException(nameof(clientGroupRepos));
-            _clientInvokeProcessBus = clientInvokeProcessBus ?? throw new ArgumentNullException(nameof(clientInvokeProcessBus));
-            _clientStubProcessBus = clientStubProcessBus ?? throw new ArgumentNullException(nameof(clientStubProcessBus));
+            _clientMethodProcessBus = clientMethodProcessBus ?? throw new ArgumentNullException(nameof(clientMethodProcessBus));
             _hubCallerContextCache = hubCallerContextCache ?? throw new ArgumentNullException(nameof(hubCallerContextCache));
             _scopeClientConnectionKeyMaps = scopeClientConnectionKeyMaps ?? throw new ArgumentNullException(nameof(scopeClientConnectionKeyMaps));
             _signalRConnectionCache = signalRConnectionCache;
@@ -64,7 +59,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 //theCallerContext.Abort();
                 var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_Kicked);
                 clientMethodArgs.MethodArgs = new { Reason = "Same Scope Client Connected: " + locate.GetScopeClientKey()};
-                await hub.Clients.Client(theCallerContext.ConnectionId).SendAsync(HubConst.ClientStub, clientMethodArgs);
+                await hub.Clients.Client(theCallerContext.ConnectionId).SendAsync(HubConst.ClientMethod, clientMethodArgs);
 
                 //trace for manage
                 var hubClients = theEvent.TryGetHubClients();
@@ -155,29 +150,19 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
             
             _signalRConnectionCache.Remove(locate.ConnectionId);
         }
-
-        public async Task ClientInvoke(ClientInvokeEvent theEvent)
+        
+        public async Task ClientMethod(ClientMethodEvent theEvent)
         {
-            //可能来自Hub的请求
+            //可能来自Hub的内部和外部的请求
             if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
-            if (theEvent.RaiseHub == null) throw new ArgumentException("ClientInvoke方法只能用于基于Hub连接的客户端请求");
-            
+
             //默认在自身连接的ScopeId内广播
             theEvent.SendContext.AutoFixToGroupAllIfEmpty();
 
-            await _clientInvokeProcessBus.Process(theEvent).ConfigureAwait(false);
-            await SendClientMethod(theEvent, theEvent.Args, HubConst.ClientInvoke).ConfigureAwait(false);
+            await _clientMethodProcessBus.Process(theEvent).ConfigureAwait(false);
+            await SendClientMethod(theEvent, theEvent.Args, HubConst.ClientMethod).ConfigureAwait(false);
         }
-
-        public async Task ClientStub(ClientStubEvent theEvent)
-        {
-            //可能来自API或Hub的请求
-            if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
-            theEvent.SendContext.AutoFixToGroupAllIfEmpty();
-            await _clientStubProcessBus.Process(theEvent).ConfigureAwait(false);
-            await SendClientMethod(theEvent, theEvent.Args, HubConst.ClientStub).ConfigureAwait(false);
-        }
-
+        
         public async Task JoinGroup(JoinGroupEvent theEvent)
         {
             if (theEvent == null) throw new ArgumentNullException(nameof(theEvent));
