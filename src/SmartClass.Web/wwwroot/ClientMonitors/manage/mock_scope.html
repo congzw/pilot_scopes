@@ -5,6 +5,8 @@
     <meta charset="utf-8" />
     <title>scope管理</title>
     <link href="../../css/bootstrap4/bootstrap.css" rel="stylesheet" />
+    <script src="../../lib/jquery-3.2.1.js"></script>
+    <script src="../../lib/qrcode.js"></script>
 </head>
 <body>
     <div class="container" id="app">
@@ -20,6 +22,9 @@
                 <a href="./clientTree.html" target="_blank">连接图</a>
             </div>
         </div>
+        <hr />
+        <h2>模拟入口</h2>
+        <div id="qrCode" style="width:200px; height:200px; margin-top:15px;"></div>
         <hr />
         <div>
             <form class="form-inline">
@@ -40,7 +45,7 @@
                 </thead>
                 <tbody>
                     <tr v-for="item in scopeContext.connections" :key="item.id">
-                        <td  scope="row">{{item.clientId}}</td>
+                        <td scope="row">{{item.clientId}}</td>
                         <td>{{item.connectionId || "null"}}</td>
                     </tr>
                 </tbody>
@@ -55,7 +60,7 @@
         var app = new Vue({
             el: '#app',
             data: {
-                scopeId:'',
+                scopeId: '',
                 scopeContext: {
                     connections: []
                 },
@@ -96,7 +101,7 @@
                         headers: { 'Content-Type': 'application/json' }
                     }).then(response => response.json())
                         .then(data => {
-                            this.scopeContext.connections = data.bags.Connections ||[];
+                            this.scopeContext.connections = data.bags.Connections || [];
                             console.log(this.scopeContext);
                         })
                         .catch(error => console.log("error is: ", error));
@@ -106,6 +111,7 @@
                 this.scopeId = getQueryString("scopeId");
                 console.log(this.scopeId);
                 this.getScopeContext();
+
             },
             computed: {
                 scopes: function () {
@@ -166,6 +172,18 @@
         function padLeftZero(str) {
             return ('00' + str).substr(str.length)
         }
+    </script>
+    
+    <script type="text/javascript">
+        var qrCode = new QRCode(document.getElementById("qrCode"), {
+            width: 200,
+            height: 200
+        });
+        
+        var theScopeId = getQueryString("scopeId");
+        var entryUri = window.location.origin + "/ClientMonitors/manage/mock_mobile.html?scopeId=" + theScopeId;
+        console.log(window.location);
+        qrCode.makeCode(entryUri);
     </script>
 </body>
 </html>

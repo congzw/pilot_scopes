@@ -1,0 +1,369 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>客户端-Mobile</title>
+    <link href="../../css/bootstrap4/bootstrap.css" rel="stylesheet" />
+    <style>
+        .toast {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="pt-md-3">
+            <div>
+                <h5 class="form-inline">
+                    我的连接：【scopeId】：{{current.scopeId}} 、 【clientId】：{{current.clientId}}
+                    &nbsp;&nbsp;
+                    <button type="button" @click="disconnect()" class="btn btn-primary pull-right">断开</button> &nbsp;
+                    <button type="button" @click="reconnect()" class="btn btn-primary pull-right">重连</button>
+                </h5>
+            </div>
+            <div>
+                <h5 class="form-inline">
+                    我的通讯组：【groups】：{{current.groups}}
+                </h5>
+            </div>
+            <div>
+                <p>
+                    连接状态: {{current.connState}}
+                </p>
+                <p>
+                    Scope内全局变量: {{current.scopeContext}}
+                </p>
+                <p>
+                    Notify: {{current.notifyMessage}}
+                </p>
+            </div>
+        </div>
+        <hr />
+        <div>
+            <form>
+                <div class="form-row">
+                    <div class="col">
+                        <input type="text" class="form-control" v-model="toast.groupId" id="groupId" placeholder="groupId">
+                    </div>
+                    <button type="button" @click="addToGroup" class="btn btn-primary pull-right">加入组</button> &nbsp;
+                    <button type="button" @click="leaveGroup(current.scopeId,toast.groupId,current.clientId)" class="btn btn-primary pull-right">退出组</button>
+                </div>
+
+
+            </form>
+        </div>
+        <hr />
+        <div>
+            <h5>发送消息：</h5>
+            <div>
+                <form>
+                    <div class="form-row">
+                        <div class="col">
+                            <input type="text" class="form-control" v-model="messageObj.scopeId" id="scopeId" disabled>
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" v-model="messageObj.clientId" id="ClientId" placeholder="ClientId">
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" v-model="messageObj.groupId" id="GroupId" placeholder="GroupId">
+                        </div>
+                        <div class="col">
+                            <input type="text" class="form-control" v-model="messageObj.message" id="Message" placeholder="消息体">
+                        </div>
+                        <button type="button" @click="clientMethodApi(messageObj)" class="btn btn-primary pull-right">Api发送</button> &nbsp;
+                        <button type="button" @click="clientMethodHub(messageObj)" class="btn btn-primary pull-right">Hub发送</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        <hr />
+        <div>
+            <h5>
+                <span>接收消息：</span>
+            </h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">来自scopeId</th>
+                        <th scope="col">来自clientId</th>
+                        <th scope="col">method</th>
+                        <th scope="col">sendContext</th>
+                        <th scope="col">methodArgs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in myMessages" :key="item.id">
+                        <th scope="row">{{item.sendContext.from.scopeId}}</th>
+                        <td>{{item.sendContext.from.clientId}}</td>
+                        <td>{{item.method}}</td>
+                        <td>{{item.sendContext}}</td>
+                        <td>{{item.methodArgs }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+    <script src="/lib/vue.js" type="text/javascript"></script>
+    <script src="/lib/signalr.js" type="text/javascript"></script>
+    <script>
+        let connectionHub;
+        let clientMethod = "clientMethod";
+
+        function TryGetParams(name, defaultValue) {
+            var sPageURL = window.location.search.substring(1);
+            var sURLVariables = sPageURL.split('&');
+            for (var i = 0; i < sURLVariables.length; i++) {
+                var sParameterName = sURLVariables[i].split('=');
+                if (sParameterName[0] === name) {
+                    return sParameterName[1];
+                }
+            }
+            return defaultValue;
+        };
+
+
+        var app = new Vue({
+            el: '#app',
+            data: {
+                current: {
+                    scopeId: '',
+                    clientId: '',
+                    groups: [],
+                    userId: '',
+                    scopeContext: {},
+                    notifyMessage: null,
+                    connState: '连接中'
+                },
+                connectionObj: {
+                    connections: [],
+                    offlineCount: 0,
+                    onlineCount: 0,
+                    totalCount: 3
+                },
+                messageObj: {
+                    scopeId: '',
+                    clientId: '',
+                    groupId: '',
+                    message: ''
+                },
+                myMessages: [],
+                toast: {
+                    groupId: ''
+                }
+            },
+            methods: {
+                stubKicked: function () {
+                    let _this = this;
+                    _this.disconnect();
+                },
+                stubScopeUpdated: function (ctx) {
+                    console.log(ctx);
+                    let _this = this;
+                    _this.current.scopeContext = ctx;
+                },
+                stubNotify: function (args) {
+                    this.current.notifyMessage = args;
+                },
+                connectionStart: function (scopeId, clientId, userId) {
+                    let _this = this;
+                    let hubName = "DemoHub";
+                    connectionHub = new signalR.HubConnectionBuilder()
+                        .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId + '&userId=' + userId)
+                        .build();
+
+                    connectionHub.on(clientMethod, function (theArgs) {
+                        console.log('callback: ' + clientMethod, theArgs);
+                        _this.myMessages.push(theArgs);
+                        if (_this[theArgs.method]) {
+                            _this[theArgs.method](theArgs.methodArgs);
+                        }
+                    });
+                    connectionHub.start()
+                        .then(function () {
+                            console.log("与服务器连接成功");
+                            _this.current.connState = "连接成功";
+                        })
+                        .catch(error => {
+                            console.error(error.message);
+                            _this.current.connState = "连接失败";
+                        });
+                },
+                //断开
+                disconnect: function () {
+                    let _this = this;
+                    //manually_stopped = 1
+                    connectionHub.stop();
+                    console.log(connectionHub);
+                    _this.current.connState = "已断开";
+                },
+                //重连
+                reconnect: function () {
+                    let _this = this;
+                    _this.disconnect();
+                    this.connectionStart(this.current.scopeId, this.current.clientId);
+                },
+                //发送消息：api
+                clientMethodApi: function (messageObj) {
+                    let toClients = [];
+                    if (messageObj.clientId) {
+                        toClients = messageObj.clientId.split(',');
+                    }
+                    let toGroups = [];
+                    if (messageObj.groupId) {
+                        toGroups = messageObj.groupId.split(',');
+                    }
+                    const sendContext =
+                    {
+                        from: {
+                            scopeId: this.current.scopeId || '',
+                            clientId: this.current.clientId || '',
+                            userId: this.current.userId || '',
+                            clientType: ''
+                        },
+                        to: {
+                            scopeId: messageObj.scopeId || '',
+                            clientIds: toClients,
+                            groups: toGroups
+                        }
+                    };
+                    let url = '/api/hub/ClientMethod';
+                    fetch(url, {
+                        method: 'post',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(sendContext)
+                    }).then(response => response)
+                        .then(data => console.log(data))
+                        .catch(error => console.log("error is: ", error));
+                },
+                //发送消息：signalr
+                clientMethodHub: function (messageObj) {
+                    let toClients = [];
+                    if (messageObj.clientId) {
+                        toClients = messageObj.clientId.split(',');
+                    }
+                    let toGroups = [];
+                    if (messageObj.groupId) {
+                        toGroups = messageObj.groupId.split(',');
+                    }
+
+                    let theArgs = {
+                        sendContext: {
+                            from: {
+                                scopeId: this.current.scopeId,
+                                clientId: this.current.clientId,
+                                userId: this.current.userId,
+                                clientType: ''
+                            },
+                            to: {
+                                scopeId: messageObj.scopeId,
+                                clientIds: toClients,
+                                groups: toGroups
+                            }
+                        },
+                        method: "updateMessage",
+                        methodArgs: { message: messageObj.message }
+                    };
+                    connectionHub.invoke(clientMethod, theArgs);
+                },
+
+                //加入组
+                addToGroup: function () {
+                    console.log(this.toast.groupId);
+                    if (!this.toast.groupId) {
+                        alert("请填写组名");
+                        return;
+                    }
+                    var url = '/api/hub/AddToGroup?scopeId=' + this.current.scopeId + '&groupId=' + this.toast.groupId + '&clientId=' + this.current.clientId;
+                    fetch(url)
+                        .then(response => response)
+                        .then(data => this.getClientGroups());
+                },
+                //离开组
+                leaveGroup: function (scopeId, group, ...clients) {
+                    const parmas = {
+                        scopeId: scopeId,
+                        group: group,
+                        clientIds: clients
+                    }
+                    const url = '/api/hub/leaveGroup?scopeId=' + this.current.scopeId + '&groupId=' + this.toast.groupId + '&clientId=' + this.current.clientId;
+                    fetch(url, {
+                        method: 'get',
+                    }).then(response => response)
+                        .then(data => this.getClientGroups())
+                        .catch(error => console.log("error is: ", error));
+                },
+                //获取组列表
+                getClientGroups: function () {
+                    let url = '/api/hub/GetClientGroups?scopeId=' + this.current.scopeId + '&clientId=' + this.current.clientId
+                    fetch(url, {
+                        method: 'get',
+                        headers: { 'Content-Type': 'application/json' }
+                    }).then(response => response.json())
+                        .then(data => {
+                            console.log(data);
+                            this.current.groups = data.map(item => item.group)
+                        })
+                        .catch(error => console.log("error is: ", error));
+                }
+            },
+            created() {
+
+                var scopeId = getQueryString("scopeId");
+                if (scopeId == null) {
+                    alert('bad scope!');
+                    return;
+                }
+                this.current.scopeId = scopeId;
+                var clientId = "M[" + formatDate(new Date(), 'hhmmss') + "]";
+                this.current.clientId = clientId;
+                this.messageObj.scopeId = this.current.scopeId;
+                this.connectionStart(this.current.scopeId, this.current.clientId);
+                this.getClientGroups();
+            },
+            filters: {
+                formatDate(time) {
+                    let date = new Date(time);
+                    return formatDate(date, 'yyyy-MM-dd hh:mm');
+                }
+            }
+        });
+
+        function getQueryString(name) {
+            var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+            var r = location.search.substr(1).match(reg);
+            if (r != null) {
+                return unescape(r[2]);
+            }
+            return null;
+        }
+        function formatDate(date, fmt) {
+            if (/(y+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
+            }
+            let o = {
+                'M+': date.getMonth() + 1,
+                'd+': date.getDate(),
+                'h+': date.getHours(),
+                'm+': date.getMinutes(),
+                's+': date.getSeconds()
+            }
+            for (let k in o) {
+                if (new RegExp(`(${k})`).test(fmt)) {
+                    let str = o[k] + ''
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? str : padLeftZero(str))
+                }
+            }
+            return fmt;
+        }
+        function padLeftZero(str) {
+            return ('00' + str).substr(str.length);
+        }
+    </script>
+</body>
+</html>
+
+
