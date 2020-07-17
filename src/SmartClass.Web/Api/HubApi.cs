@@ -7,8 +7,6 @@ using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Invokes;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods.Stubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 using SmartClass.Common.Scopes;
 
@@ -35,32 +33,18 @@ namespace SmartClass.Web.Api
         {
             return DateTime.Now.ToString("s");
         }
+
+        #region 消息发送
         [Route("ClientMethod")]
         [HttpPost]
         public async Task<string> ClientMethod(SendContext sendContext)
         {
             var args = new ClientMethodArgs();
             args.SendContext = sendContext;
-            args.Method = "updateMessage";
+            args.Method = "updateMessage";                 //
             args.MethodArgs = new { message = "From Server message" };
 
             await _bus.Raise(new ClientMethodEvent(_hubContext.AsHubContextWrapper(), args));
-            return "OK";
-        }
-        /// <summary>
-        /// 广播
-        /// </summary>
-        /// <param name="sendContext"></param>
-        /// <returns></returns>
-        [Route("ClientInvoke")]
-        [HttpPost]
-        public async Task<string> ClientInvoke(SendContext sendContext)
-        {
-            var args = new ClientMethodArgs();
-            args.SendContext = sendContext;
-            args.Method = "updateMessage";
-            args.MethodArgs = new { message = "From Server message" };
-            await _bus.Raise(new ClientInvokeEvent(_hubContext.AsHubContextWrapper(), args));
             return "OK";
         }
         #endregion

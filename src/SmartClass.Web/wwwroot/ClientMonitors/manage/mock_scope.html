@@ -9,7 +9,12 @@
 <body>
     <div class="container" id="app">
         <div class="pt-md-3">
-            <h4>当前scope： {{ scopeId }}</h4>
+            <h4>
+                当前scope： {{ scopeId }}
+                &nbsp;&nbsp;
+                <button type="button" @click="resetScope(scopeId)" class="btn btn-primary pull-right">重置</button>
+                <button type="button" @click="updateScope(scopeId)" class="btn btn-primary pull-right">更新</button>
+            </h4>
             <div>
                 <a href="./clientTree.html" target="_blank">连接图</a>
             </div>
@@ -20,57 +25,27 @@
                 <div class="form-group col-md-9">
                     <h4>
                         <span>连接列表：</span>
-                        <button disabled type="button" class="btn btn-info">在线人数：{{0}}</button>
-                        <button disabled type="button" class="btn btn-info">总人数：{{0}}</button>
+                        <button disabled type="button" class="btn btn-info">总人数：{{scopeContext.connections.length}}</button>
                     </h4>
                 </div>
-                <!--<div class="form-group col-md-3">
-                    <label>scope选择：</label>
-                    <select class="form-control" id="exampleFormControlSelect1" v-model="filterObj.scopeId" @change="onChangeScopeId(filterObj.scopeId)">
-                        <option value="">全部</option>
-                        <option :value="scope" v-for="scope in scopes">{{scope}}</option>
-                    </select>
-                </div>-->
             </form>
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col">scopeId </th>
                         <th scope="col">clientId</th>
                         <th scope="col">connectionId</th>
-                        <th scope="col">最新连接时间</th>
                         <th scope="col">操作</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="item in computedConnections" :key="item.id">
-                        <th scope="row">{{item.scopeId}}</th>
-                        <td>{{item.clientId}}</td>
-                        <!--<td>{{item.groups}}</td>-->
+                    <tr v-for="item in scopeContext.connections" :key="item.id">
+                        <td  scope="row">{{item.clientId}}</td>
                         <td>{{item.connectionId || "null"}}</td>
-                        <td>{{item.lastUpdateAt | formatDate }}</td>
-                        <td>
-                            <button type="button" class="btn btn-danger" @click="resetScope(item.scopeId)">踢除</button>
-                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <hr />
-        <div>
-            <ul class="list-group">
-                <li class="list-group-item" v-for="scope in scopeContexts" :key="scope.scopeId">
-                    {{scope.scopeId}}
-                    <span class="badge badge-primary badge-pill" v-if="scope.bags.Connections">{{scope.bags.Connections.length}}</span>
-                    <span class="badge badge-primary badge-pill" v-else>0</span>
-                    <button class="btn btn-danger" @click="resetScope(scope.scopeId)">reset</button>
-                    <button class="btn btn-primary" @click="updateScope(scope.scopeId)">update</button>
-                    <ul class="list-group">
-                        <li class="list-group-item" v-for="client in scope.bags.Connections" :key="client.clientId">{{client.clientId}}</li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
+
     </div>
     <script src="/lib/vue.js" type="text/javascript"></script>
     <script src="/lib/signalr.js" type="text/javascript"></script>
@@ -80,13 +55,9 @@
             el: '#app',
             data: {
                 scopeId:'',
-                scopeContext: { },
-                connectionObj: {
-                    connections: [],
-                    offlineCount: 0,
-                    onlineCount: 0,
-                    totalCount: 3
-                }
+                scopeContext: {
+                    connections: []
+                },
             },
             methods: {
                 //清空scope
@@ -113,14 +84,15 @@
                         headers: { 'Content-Type': 'application/json' }
                     }).then(response => response.json())
                         .then(data => {
-                            this.scopeContexts = data;
-                            console.log(this.getScopeContext);
+                            this.scopeContext.connections = data.bags.Connections;
+                            console.log(this.scopeContext);
                         })
                         .catch(error => console.log("error is: ", error));
                 }
             },
             created() {
                 this.scopeId = getQueryString("scopeId");
+                console.log(this.scopeId);
                 this.getScopeContext();
             },
             computed: {
@@ -155,6 +127,7 @@
             var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
             var r = location.search.substr(1).match(reg);
             if (r != null) {
+                console.log(unescape(r[2]));
                 return unescape(r[2]);
             }
             return null;

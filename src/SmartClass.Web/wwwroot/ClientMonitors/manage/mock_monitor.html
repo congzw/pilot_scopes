@@ -78,6 +78,9 @@
                     </tr>
                 </tbody>
             </table>
+            <div>
+                <button @click="autoAddClient" class="btn btn-primary btn-lg">增加连接</button>
+            </div>
         </div>
     </div>
     <script src="/lib/vue.js" type="text/javascript"></script>
@@ -141,10 +144,20 @@
                     window.open('/ClientMonitors/manage/mock_client.html?scopeId=' + scopeId + '&clientId=' + clientId);
                 },
                 gotoScope: function (scopeId) {
-                    window.open('mock_scope.html?scopeId=' + scopeId);
+                    window.open('/ClientMonitors/manage/mock_scope.html?scopeId=' + scopeId);
                 },
                 onChangeScopeId: function (value) {
                     console.log(value);
+                },
+                autoAddClient: function () {
+                    let scopeId = this.filterObj.scopeId || 'monitor';
+                    let connections = this.connectionObj.connections.filter(item => item.scopeId === scopeId);
+                    let number = connections.length;
+                    while (connections.filter(item => item.clientId === "c" + number).length > 0) {
+                        number++;
+                    };
+                    let clientId = "c" + number;
+                    window.open('/ClientMonitors/manage/mock_client.html?scopeId=' + scopeId + '&clientId=' + clientId);
                 }
             },
             created() {
