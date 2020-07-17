@@ -1,13 +1,12 @@
 ﻿using System.Threading.Tasks;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 
-namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
+namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
 {
-    public class ResetScopeEventHandler : ISignalREventHandler
+    public class JoinGroupEventHandler : ISignalREventHandler
     {
         private readonly IClientMonitor _clientMonitor;
 
-        public ResetScopeEventHandler(IClientMonitor clientMonitor)
+        public JoinGroupEventHandler(IClientMonitor clientMonitor)
         {
             _clientMonitor = clientMonitor;
         }
@@ -16,21 +15,21 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
 
         public bool ShouldHandle(ISignalREvent @event)
         {
-            return @event is ResetScopeEvent;
+            return @event is JoinGroupEvent;
         }
 
         public async Task HandleAsync(ISignalREvent @event)
         {
-            var theEvent = (ResetScopeEvent)@event;
-            await _clientMonitor.ResetScope(theEvent);
+            var theEvent = (JoinGroupEvent)@event;
+            await _clientMonitor.JoinGroup(theEvent);
         }
     }
 
-    public class UpdateScopeEventHandler : ISignalREventHandler
+    public class LeaveGroupEventHandler : ISignalREventHandler
     {
         private readonly IClientMonitor _clientMonitor;
 
-        public UpdateScopeEventHandler(IClientMonitor clientMonitor)
+        public LeaveGroupEventHandler(IClientMonitor clientMonitor)
         {
             _clientMonitor = clientMonitor;
         }
@@ -39,13 +38,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications.Handlers
 
         public bool ShouldHandle(ISignalREvent @event)
         {
-            return @event is UpdateScopeEvent;
+            return @event is LeaveGroupEvent;
         }
 
         public async Task HandleAsync(ISignalREvent @event)
         {
-            var theEvent = (UpdateScopeEvent)@event;
-            await _clientMonitor.UpdateScope(theEvent);
+            var theEvent = (LeaveGroupEvent)@event;
+            await _clientMonitor.LeaveGroup(theEvent);
         }
     }
 }

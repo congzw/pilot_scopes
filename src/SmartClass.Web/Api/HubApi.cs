@@ -8,7 +8,6 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
-using SmartClass.Common.Scopes;
 
 namespace SmartClass.Web.Api
 {

@@ -8,7 +8,6 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
-using SmartClass.Common.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
