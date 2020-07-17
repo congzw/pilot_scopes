@@ -136,26 +136,11 @@
                         .build();
 
                     connectionHub.on(clientMethod, function (theArgs) {
-                        theArgs: {
-                            sendContext: {
-                                from: {
-                                    clientId: "c3"
-                                    clientType: ""
-                                    scopeId: "s1"
-                                    userId: ""
-                                };
-                                to: {
-                                    clientIds: []
-                                    groups: []
-                                    scopeId: 's1'
-                                };
-                            }
-                            method: "updateMessage";
-                            methodArgs: {
-                                message: ""
-                            }
-                        }
                         _this.myMesssages.push(theArgs);
+                        if (theArgs.method === "kicked") {
+                            console.log("kicked");
+                            _this.unConnction();
+                        }
                         console.log('callback: ' + clientMethod, theArgs);
                     });
                     connectionHub.start()
@@ -168,14 +153,14 @@
                 },
                 //断开
                 unConnction: function () {
-                    connectionHub.stop();
+                    //manually_stopped = 1
+                    connection.stop();
                     console.log(connectionHub);
                 },
                 //重连
                 reConnection: function () {
                     this.connectionStart(this.current.scopeId, this.current.clientId);
                 },
-
                 //发送消息：api
                 clientMethodApi: function (messageObj) {
                     let toClients = [];
@@ -286,6 +271,7 @@
                 this.messageObj.scopeId = this.current.scopeId;
                 this.connectionStart(this.current.scopeId, this.current.clientId);
                 this.getClientGroups();
+                
             },
             filters: {
                 formatDate(time) {
