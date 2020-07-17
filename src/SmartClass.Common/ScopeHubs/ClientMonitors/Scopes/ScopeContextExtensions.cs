@@ -1,12 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using SmartClass.Common.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
 {
     public static class ScopeContextExtensions
     {
         private static string Connections = "Connections";
+
+        public static T GetItemAs<T>(this ScopeContext ctx, string key, T defaultValue = default(T))
+        {
+            var value = ctx.GetBagValue(key, defaultValue);
+            return (T)Convert.ChangeType(value, typeof(T));
+        }
 
         public static ScopeContext OnConnected(this ScopeContext scopeContext, ClientConnectionLocate locate)
         {
