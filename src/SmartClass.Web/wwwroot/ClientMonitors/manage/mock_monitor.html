@@ -12,6 +12,7 @@
             <h4>连接模拟：</h4>
             <div>
                 <a href="/ClientMonitors/manage/clientTree.html" target="_blank">查看视图</a>
+                <button @click="autoAddClient" class="btn btn-primary">增加连接</button>
             </div>
             <div>
                 <form>
@@ -78,9 +79,6 @@
                     </tr>
                 </tbody>
             </table>
-            <div>
-                <button @click="autoAddClient" class="btn btn-primary btn-lg">增加连接</button>
-            </div>
         </div>
     </div>
     <script src="/lib/vue.js" type="text/javascript"></script>
