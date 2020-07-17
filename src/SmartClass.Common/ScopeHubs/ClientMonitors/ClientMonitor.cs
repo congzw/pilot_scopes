@@ -239,6 +239,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors
                 }
 
                 _clientGroupRepos.Remove(scopeClientGroup);
+                
+                //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
+                var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_Kicked);
+                clientMethodArgs.MethodArgs = new { Reason = "Scope Reset: " + locate.GetScopeClientKey() };
+                var hubClients = theEvent.TryGetHubClients();
+                var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(resetScopeArgs.ScopeId).ToScopeGroupFullName();
+                await hubClients.Group(scopeGroupFullName).SendAsync(HubConst.ClientMethod, clientMethodArgs);
             }
 
             var connections = _repository.GetConnections(new GetConnectionsArgs().WithScopeId(resetScopeArgs.ScopeId));
