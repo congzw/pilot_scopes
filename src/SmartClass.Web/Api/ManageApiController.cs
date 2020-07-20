@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
+using SmartClass.Common.ScopeHubs._Impl;
 using SmartClass.Common.Scopes;
 
 namespace SmartClass.Web.Api

@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Common.DependencyInjection;
-using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
+using SmartClass.Common.ScopeHubs._Impl;
 using SmartClass.DAL;
 
 // ReSharper disable CheckNamespace
 
-namespace Common.SignalR.Scoped
+namespace SmartClass.Common.ScopeHubs
 {
     public static class ScopedExtensions
     {

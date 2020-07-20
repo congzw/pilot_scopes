@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {

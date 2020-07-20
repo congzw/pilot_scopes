@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
 {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
 {
@@ -26,7 +27,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
         }
     }
 
-    public static class ClientMethodArgsExtensions
+    public static class ClientMethodExtensions
     {
         public static ClientMethodArgs ForNotify(this ClientMethodArgs self, object methodArgs)
         {
@@ -40,6 +41,12 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
             self.Method = HubConst.ClientMethod_StubKicked;
             self.MethodArgs = methodArgs;
             return self;
+        }
+
+        private static string ClientMethod = "clientMethod";
+        public static Task SendAsyncToClientMethod(this IClientProxy clientProxy, ClientMethodArgs args)
+        {
+            return clientProxy.SendAsync(ClientMethod, args);
         }
     }
 }

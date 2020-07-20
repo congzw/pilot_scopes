@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using Common.SignalR.Scoped;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Applications;
+using SmartClass.Common.ScopeHubs;
+using SmartClass.Common.ScopeHubs._Impl;
 using SmartClass.Web.Boots;
 using SmartClass.Web.Chats;
 

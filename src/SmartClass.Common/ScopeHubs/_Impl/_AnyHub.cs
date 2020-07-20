@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 
-namespace SmartClass.Common.ScopeHubs.ClientMonitors.Applications
+namespace SmartClass.Common.ScopeHubs._Impl
 {
     //a demo for how to use IScopeHub
     public class _AnyHub : Hub, IScopeHub

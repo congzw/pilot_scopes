@@ -3,55 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
-using SmartClass.Common.ScopeHubs.ClientMonitors.Groups;
 
-// ReSharper disable once CheckNamespace
 namespace SmartClass.Common.ScopeHubs
 {
-    public class SendContext
-    {
-        /// <summary>
-        /// 如果不是从Hub连接发送的，则此字段为空
-        /// </summary>
-        public string SendConnectionId { get; set; }
-        public SendFrom From { get; set; } = new SendFrom();
-        public SendTo To { get; set; } = new SendTo();
-
-        public static SendContext Create()
-        {
-            return new SendContext();
-        }
-    }
-
-    public class SendFrom : IScopeClientLocate
-    {
-        public string ScopeId { get; set; }
-        public string ClientId { get; set; }
-        public string UserId { get; set; }
-        public string ClientType { get; set; }
-    }
-
-    public class SendTo : IScopeKey
-    {
-        public string ScopeId { get; set; }
-        public IList<string> ClientIds { get; set; } = new List<string>();
-        public IList<string> Groups { get; set; } = new List<string>();
-        public static SendTo CreateForScopeGroupAll(string scopeId)
-        {
-            var args = new SendTo();
-            args.WithScopeId(scopeId);
-            args.Groups.Add(HubConst.GroupName_All);
-            return args;
-        }
-
-        public bool IsEmptyClientsAndGroups()
-        {
-            return ClientIds.Count == 0 && Groups.Count == 0;
-        }
-    }
-
     public static class SendContextExtensions
     {
+        public static THub FixScopeIdForArgs<THub>(this THub hub, IScopeKey args) where THub : Hub
+        {
+            if (string.IsNullOrWhiteSpace(args.ScopeId))
+            {
+                args.ScopeId = hub.GetSendFrom().ScopeId;
+            }
+            return hub;
+        }
+
         public static SendFrom GetSendFrom(this HttpContext httpContext)
         {
             var scopeId = httpContext.TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
@@ -94,7 +59,7 @@ namespace SmartClass.Common.ScopeHubs
         {
             return new SendContext { From = sendFrom };
         }
-        
+
         public static SendContext WithSendFrom(this SendContext sendContext, SendFrom sendFrom)
         {
             sendContext.From = sendFrom;

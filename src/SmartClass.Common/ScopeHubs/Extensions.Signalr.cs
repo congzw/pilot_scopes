@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -11,14 +12,6 @@ namespace SmartClass.Common.ScopeHubs
         public static HttpContext TryGetHttpContext(this Hub hub)
         {
             return hub?.Context?.GetHttpContext();
-        }
-        public static THub FixScopeIdForArgs<THub>(this THub hub, IScopeKey args) where THub : Hub
-        {
-            if (string.IsNullOrWhiteSpace(args.ScopeId))
-            {
-                args.ScopeId = hub.GetSendFrom().ScopeId;
-            }
-            return hub;
         }
 
         public static async Task AddToGroupsAsync(this IGroupManager groupManager, string connectionId, IEnumerable<string> groupNames, CancellationToken cancellationToken = default(CancellationToken))
@@ -35,6 +28,11 @@ namespace SmartClass.Common.ScopeHubs
             {
                 await groupManager.RemoveFromGroupAsync(connectionId, groupName, cancellationToken);
             }
+        }
+
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> list)
+        {
+            return !list.Any();
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 
 namespace SmartClass.Common.ScopeHubs
 {
@@ -107,4 +106,20 @@ namespace SmartClass.Common.ScopeHubs
     }
 
     #endregion
+    
+    public class ScopeGroupName
+    {
+        public static IScopeGroupLocate GetScopedGroup(string scopeId, string group)
+        {
+            var scopeGroupName = new ScopeGroupLocate();
+            scopeGroupName.ScopeId = scopeId;
+            scopeGroupName.Group = group;
+            return scopeGroupName;
+        }
+
+        public static IScopeGroupLocate GetScopedGroupAll(string scopeId)
+        {
+            return GetScopedGroup(scopeId, HubConst.GroupName_All);
+        }
+    }
 }
