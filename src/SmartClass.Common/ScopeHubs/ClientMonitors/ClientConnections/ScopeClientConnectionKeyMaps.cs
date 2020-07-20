@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
 {
-    public class ScopeClientConnectionKeyMaps
+    public class ScopeClientConnectionKeyMaps : IMySingleton
     {
         public ScopeClientConnectionKeyMaps SetCache(IClientConnectionLocate connectionLocate)
         {

@@ -5,7 +5,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
-    public interface IClientMonitor : 
+    public interface IClientMonitor : IMyScoped,
         IClientConnectionManager,
         IClientMethodManager,
         IClientGroupManager,

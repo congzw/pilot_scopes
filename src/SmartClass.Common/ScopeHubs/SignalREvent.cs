@@ -114,13 +114,13 @@ namespace SmartClass.Common.ScopeHubs
         }
     }
 
-    public interface ISignalREventHandler
+    public interface ISignalREventHandler : IMyScoped
     {
         float HandleOrder { set; get; }
         bool ShouldHandle(ISignalREvent @event);
         Task HandleAsync(ISignalREvent @event);
     }
-    public interface ISignalREventDispatcher
+    public interface ISignalREventDispatcher : IMyTransient
     {
         Task Dispatch(ISignalREvent hubEvent);
     }

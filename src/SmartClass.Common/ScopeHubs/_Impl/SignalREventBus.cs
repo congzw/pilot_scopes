@@ -6,7 +6,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 
 namespace SmartClass.Common.ScopeHubs._Impl
 {
-    public class SignalREventBus
+    public class SignalREventBus : IMyScoped
     {
         private readonly ISignalREventDispatcher _dispatcher;
         private readonly IClientConnectionRepository _connectionRepository;

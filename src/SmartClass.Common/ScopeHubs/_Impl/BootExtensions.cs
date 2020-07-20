@@ -3,16 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Common.DependencyInjection;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
-using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
-using SmartClass.Common.ScopeHubs._Impl;
-using SmartClass.DAL;
 
-// ReSharper disable CheckNamespace
-
-namespace SmartClass.Common.ScopeHubs
+namespace SmartClass.Common.ScopeHubs._Impl
 {
-    public static class ScopedExtensions
+    public static class BootExtensions
     {
         public static IServiceCollection AddClientMonitors(this IServiceCollection services)
         {
@@ -30,13 +25,11 @@ namespace SmartClass.Common.ScopeHubs
 
             services.AddScoped<ClientMethodProcessBus>();
             services.AddAllImpl<IClientMethodProcess>(ServiceLifetime.Scoped);
-            
+
             services.AddSingleton<IEventLogHelper, HubClientLogHelper>();
             services.AddSingleton<ScopeClientConnectionKeyMaps>();
             services.AddSingleton<HubCallerContextCache>();
             services.AddSingleton<SignalRConnectionCache>();
-            services.AddScoped<IClientConnectionRepository, ClientConnectionRepository>();
-            services.AddScoped<IScopeClientGroupRepository, ScopeClientGroupRepository>();
             services.AddScoped<IClientMonitor, ClientMonitor>();
             return services;
         }

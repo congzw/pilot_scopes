@@ -2,10 +2,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using SmartClass.Common.ScopeHubs;
-using SmartClass.Common.ScopeHubs._Impl;
 using SmartClass.Web.Boots;
-using SmartClass.Web.Chats;
+using SmartClass.Web.Hubs;
 
 namespace SmartClass.Web
 {
@@ -16,8 +14,7 @@ namespace SmartClass.Web
             services.AddMvc();
             services.AddSignalR();
             services.AddMyDAL();
-            services.AddClientMonitors();
-            services.AddChats();
+            services.AddClientMonitorsWrap();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -30,26 +27,7 @@ namespace SmartClass.Web
             app.UseFileServer(fileServerOptions);
 
             app.UseMyDAL(env);
-            app.UseClientMonitors();
-            app.UseChats();
-
-            ////pipeline demo for hub
-            //app.Use(async (context, next) =>
-            //{
-            //    //var hubContext = context.RequestServices.GetRequiredService<IHubContext<_AnyHub>>();
-            //    //[13204] [_AnyHub] Pipeline >>>>>>>> /Api/Test/Raise
-            //    //[10556] [_AnyHub] Pipeline >>>>>>>> /DemoHub?scopeId=s1&clientId=c1&id=UlsKEWRNiIq8YR_wV7fcPg => only first connect!!!
-            //    Trace.WriteLine(string.Format("[_AnyHub] {0} >>>>>>>> {1}", "Pipeline", context.Request.GetEncodedPathAndQuery()));
-            //    if (next != null)
-            //    {
-            //        await next.Invoke();
-            //    }
-            //});
-
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<_AnyHub>("/DemoHub");
-            });
+            app.UseClientMonitorsWrap();
 
             app.UseMvc();
         }

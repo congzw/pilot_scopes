@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
 {
-    public class SignalRConnectionCache
+    public class SignalRConnectionCache : IMySingleton
     {
         public IDictionary<string, SignalRConnection> Connections { get; set; } = new Dictionary<string, SignalRConnection>(StringComparer.OrdinalIgnoreCase);
 

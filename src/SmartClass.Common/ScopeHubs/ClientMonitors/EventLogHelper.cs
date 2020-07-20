@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
-    public interface IEventLogHelper
+    public interface IEventLogHelper : IMySingleton
     {
         void Log(object message, string prefix = "");
     }
