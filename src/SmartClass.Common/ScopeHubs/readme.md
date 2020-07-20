@@ -46,3 +46,8 @@ ScopedId + ClientId => SignalRConnectionId => ClientConnection(代表一个连�
 - x ClientStub 客户端被动调用的方法，可用于单向通讯场景，例如：外部（Api或服务） -> 中心 -> 客户端
 
 只保留一种统一的模式：ClientMethod
+
+
+scopeId
+scopeId + clientIds
+scopeId + groups
