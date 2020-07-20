@@ -9,12 +9,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
     {
         private static string Connections = "Connections";
 
-        public static T GetItemAs<T>(this ScopeContext ctx, string key, T defaultValue = default(T))
-        {
-            var value = ctx.GetBagValue(key, defaultValue);
-            return (T)Convert.ChangeType(value, typeof(T));
-        }
-
         public static ScopeContext OnConnected(this ScopeContext scopeContext, ClientConnectionLocate locate)
         {
             var clientConnectionLocates = scopeContext.GetBagValue(Connections, new List<ClientConnectionLocate>());
