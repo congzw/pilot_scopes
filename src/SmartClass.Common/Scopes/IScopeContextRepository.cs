@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
+namespace SmartClass.Common.Scopes
 {
-    public interface IScopeRepository
+    public interface IScopeContextRepository
     {
         IList<ScopeContext> GetScopeContexts();
         ScopeContext GetScopeContext(string scopeId, bool createIfNotExist);
@@ -14,7 +14,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
         void ClearAll();
     }
 
-    public class ScopeRepository : IScopeRepository
+    public class ScopeRepository : IScopeContextRepository
     {
         //default use memory dictionary impl, can also be replaced by other impl such as database source...
         public IDictionary<string, ScopeContext> Contexts { get; set; } = new ConcurrentDictionary<string, ScopeContext>(StringComparer.OrdinalIgnoreCase);

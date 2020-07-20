@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
+namespace SmartClass.Common.Scopes
 {
     public class ScopeContext : IHaveBags
     {
@@ -16,8 +16,8 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
             return scopeService.GetScopeContext(scopeId, createIfNotExist);
         }
 
-        private static readonly Lazy<IScopeRepository> LazyInstance = new Lazy<IScopeRepository>(() => new ScopeRepository());
-        public static Func<IScopeRepository> Resolve { get; set; } = () => LazyInstance.Value;
+        private static readonly Lazy<IScopeContextRepository> LazyInstance = new Lazy<IScopeContextRepository>(() => new ScopeRepository());
+        public static Func<IScopeContextRepository> Resolve { get; set; } = () => LazyInstance.Value;
 
         #endregion
     }

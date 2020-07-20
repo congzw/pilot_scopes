@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SmartClass.Common.Scopes;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
 {
