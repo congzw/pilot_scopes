@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using SmartClass.Common.ScopeHubs.ClientMonitors;
 
-namespace SmartClass.Common.ScopeHubs
+namespace SmartClass.Common.ScopeHubs.ClientMonitors
 {
     public interface IEventLogHelper
     {
