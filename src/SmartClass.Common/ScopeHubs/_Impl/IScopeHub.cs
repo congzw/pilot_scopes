@@ -4,7 +4,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 
-namespace SmartClass.Common.ScopeHubs.ClientMonitors
+namespace SmartClass.Common.ScopeHubs._Impl
 {
     /// <summary>
     /// ScopedHub interface

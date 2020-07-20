@@ -11,7 +11,6 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
 
     public class ClientMethodArgs : IClientMethod
     {
-
         public string Method { get; set; }
         public object MethodArgs { get; set; }
         public SendContext SendContext { get; set; } = new SendContext();

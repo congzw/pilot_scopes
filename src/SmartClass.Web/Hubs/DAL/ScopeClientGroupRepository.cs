@@ -16,8 +16,7 @@ namespace SmartClass.DAL
         {
             _hblTempRepository = hblTempRepository;
         }
-
-
+        
         public IList<ScopeClientGroup> GetScopeClientGroups(IScopeClientGroupLocate args)
         {
             if (args == null) throw new ArgumentNullException(nameof(args));
@@ -40,8 +39,7 @@ namespace SmartClass.DAL
             var list = query.ToList();
             return list;
         }
-
-
+        
         public ScopeClientGroup GetScopeClientGroup(IScopeClientGroupLocate args)
         {
             if (args == null) throw new ArgumentNullException(nameof(args));
