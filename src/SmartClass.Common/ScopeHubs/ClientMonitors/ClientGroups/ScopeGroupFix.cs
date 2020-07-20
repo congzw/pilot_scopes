@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
-namespace SmartClass.Common.ScopeHubs.ClientMonitors.Groups
+namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups
 {
     internal class ScopeGroupFix
     {
