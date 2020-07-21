@@ -57,7 +57,7 @@ namespace SmartClass.Common.ScopeHubs._Impl
                 //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
                 //theCallerContext.Abort();
                 var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubKicked);
-                clientMethodArgs.MethodArgs = new { Reason = "Same Scope Client Connected: " + locate.GetScopeClientKey()};
+                clientMethodArgs.MethodArgs = new { Reason = "Same Scope Client Connected: " + locate.GetScopeClientKey()}.ToDictionary();
                 await hub.Clients.Client(theCallerContext.ConnectionId).SendAsyncToClientMethod(clientMethodArgs);
 
                 //trace for manage
@@ -243,7 +243,7 @@ namespace SmartClass.Common.ScopeHubs._Impl
             
             //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
             var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubKicked);
-            clientMethodArgs.MethodArgs = new { Reason = "Scope Reset: " + resetScopeArgs.ScopeId };
+            clientMethodArgs.MethodArgs = new { Reason = "Scope Reset: " + resetScopeArgs.ScopeId }.ToDictionary();
             var hubClients = theEvent.TryGetHubClients();
             var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(resetScopeArgs.ScopeId).ToScopeGroupFullName();
             await hubClients.Group(scopeGroupFullName).SendAsyncToClientMethod(clientMethodArgs);
@@ -278,7 +278,7 @@ namespace SmartClass.Common.ScopeHubs._Impl
 
             //为了保持Scope+Client的唯一通道，踢掉原有的连接通道！目前客户端有重连逻辑，如果服务器端断开，会导致死循环！改为通知客户端自己处理
             var clientMethodArgs = ClientMethodArgs.Create(HubConst.ClientMethod_StubScopeUpdated);
-            clientMethodArgs.MethodArgs = new { Reason = "Scope update: " + eventArgs.ScopeId };
+            clientMethodArgs.MethodArgs = new { Reason = "Scope update: " + eventArgs.ScopeId }.ToDictionary();
             var hubClients = theEvent.TryGetHubClients();
             var scopeGroupFullName = ScopeGroupName.GetScopedGroupAll(eventArgs.ScopeId).ToScopeGroupFullName();
             await hubClients.Group(scopeGroupFullName).SendAsyncToClientMethod(clientMethodArgs);

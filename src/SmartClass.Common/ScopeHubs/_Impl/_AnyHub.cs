@@ -72,6 +72,7 @@ namespace SmartClass.Common.ScopeHubs._Impl
         //调用客户端方法
         public Task ClientMethod(ClientMethodArgs args)
         {
+            //json token to dic
             TraceHubContext("ClientMethod");
             return Bus.Raise(new ClientMethodEvent(this, args));
         }

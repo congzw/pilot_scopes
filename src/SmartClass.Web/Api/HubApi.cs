@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using SmartClass.Common;
 using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
@@ -40,8 +41,8 @@ namespace SmartClass.Web.Api
         {
             var args = new ClientMethodArgs();
             args.SendContext = sendContext;
-            args.Method = "updateMessage";                 //
-            args.MethodArgs = new { message = "From Server message" };
+            args.Method = "updateMessage";
+            args.MethodArgs = new { message = "From Server message" }.ToDictionary();
 
             await _bus.Raise(new ClientMethodEvent(_hubContextWrapperHold.Wrapper, args));
             return "OK";

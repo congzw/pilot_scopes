@@ -19,23 +19,13 @@ namespace SmartClass.Common.ScopeHubs
 
         public static SendFrom GetSendFrom(this HttpContext httpContext)
         {
-            var scopeId = httpContext.TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
-            var clientId = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientId, string.Empty);
-            var userId = string.Empty;
-            var clientType = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientType, string.Empty);
-
-            ////todo: read from claim
-            //var user = httpContext.User;
-            //var scopeId = user.FindFirst("ScopeId").Value;
-            //var clientId = user.FindFirst("ClientId").Value;
-            //var clientType = user.FindFirst("ClientType").Value;
-            //var userId = user.Claims.Single(x => x.Type == ClaimTypes.Name).Value;
+            var currentClientContext = ClientContext.GetCurrentClientContext(httpContext);
 
             var ctx = new SendFrom();
-            ctx.ScopeId = scopeId;
-            ctx.ClientId = clientId;
-            ctx.UserId = userId;
-            ctx.ClientType = clientType;
+            ctx.ScopeId = currentClientContext.ScopeId;
+            ctx.ClientId = currentClientContext.ClientId;
+            ctx.UserId = currentClientContext.UserId;
+            ctx.ClientType = currentClientContext.ClientType;
 
             return ctx;
         }

@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
@@ -6,13 +8,13 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
     public interface IClientMethod
     {
         string Method { get; set; }
-        object MethodArgs { get; set; }
+        IDictionary<string, object> MethodArgs { get; set; }
     }
 
     public class ClientMethodArgs : IClientMethod
     {
         public string Method { get; set; }
-        public object MethodArgs { get; set; }
+        public IDictionary<string, object> MethodArgs { get; set; } = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         public SendContext SendContext { get; set; } = new SendContext();
 
         public static ClientMethodArgs Create()
@@ -31,21 +33,33 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
         public static ClientMethodArgs ForNotify(this ClientMethodArgs self, object methodArgs)
         {
             self.Method = HubConst.ClientMethod_StubNotify;
-            self.MethodArgs = methodArgs;
+            self.MethodArgs = methodArgs.ToDictionary();
             return self;
         }
 
         public static ClientMethodArgs ForKicked(this ClientMethodArgs self, object methodArgs)
         {
             self.Method = HubConst.ClientMethod_StubKicked;
-            self.MethodArgs = methodArgs;
+            self.MethodArgs = methodArgs.ToDictionary();
             return self;
         }
 
-        private static string ClientMethod = "clientMethod";
         public static Task SendAsyncToClientMethod(this IClientProxy clientProxy, ClientMethodArgs args)
         {
-            return clientProxy.SendAsync(ClientMethod, args);
+            return clientProxy.SendAsync(HubConst.ClientMethod, args);
+        }
+
+        public static TValue GetArgsValue<TValue>(this IClientMethod clientMethod, string key, TValue defaultValue)
+        {
+            var dictionary = clientMethod.MethodArgs.ToDictionary();
+            var theValue = dictionary.TryGetValueAs(key, defaultValue);
+            return theValue;
+        }
+
+        public static void SetArgsValue(this IClientMethod clientMethod, string key, object value)
+        {
+            var dictionary = clientMethod.MethodArgs;
+            dictionary[key] = value;
         }
     }
 }
