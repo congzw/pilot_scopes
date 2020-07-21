@@ -28,31 +28,51 @@ namespace SmartClass.Common.ScopeHubs
 
     #region HubContext Wrapper
 
+    public interface IHubContextWrapperHold
+    {
+        HubContextWrapper Wrapper { get; set; }
+    }
+
     public class HubContextWrapper
     {
         public IHubClients<IClientProxy> Clients { get; set; }
         public IGroupManager Groups { get; set; }
-    }
 
-    public class HubContextWrapper<THub> : HubContextWrapper where THub : Hub
-    {
-        public IHubContext<THub> HubContext { get; set; }
+        public object HubContext { get; set; }
+        public IHubContext<THub> GetHubContext<THub>() where THub : Hub
+        {
+            return HubContext as IHubContext<THub>;
+        }
     }
-
+    
     public static class HubContextExtensions
     {
-        public static HubContextWrapper<THub> AsHubContextWrapper<THub>(this IHubContext<THub> context) where THub : Hub
+        public static HubContextWrapper AsHubContextWrapper<THub>(this IHubContext<THub> context) where THub : Hub
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
-            var hubContext = new HubContextWrapper<THub>();
+            var hubContext = new HubContextWrapper();
             hubContext.Clients = context.Clients;
             hubContext.Groups = context.Groups;
             hubContext.HubContext = context;
             return hubContext;
         }
+
+
+        //public static HubContextWrapper<THub> AsHubContextWrapper<THub>(this IHubContext<THub> context) where THub : Hub
+        //{
+        //    if (context == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(context));
+        //    }
+        //    var hubContext = new HubContextWrapper<THub>();
+        //    hubContext.Clients = context.Clients;
+        //    hubContext.Groups = context.Groups;
+        //    hubContext.HubContext = context;
+        //    return hubContext;
+        //}
     }
 
     #endregion

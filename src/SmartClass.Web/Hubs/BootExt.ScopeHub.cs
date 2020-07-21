@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs._Impl;
@@ -12,6 +13,8 @@ namespace SmartClass.Web.Hubs
         public static IServiceCollection AddClientMonitorsWrap(this IServiceCollection services)
         {
             services.AddClientMonitors();
+
+            services.AddScoped<IHubContextWrapperHold, _AnyHubContextWrapperHold>();
             services.AddScoped<IClientConnectionRepository, ClientConnectionRepository>();
             services.AddScoped<IScopeClientGroupRepository, ScopeClientGroupRepository>();
             return services;

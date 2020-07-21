@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using SmartClass.Common.ScopeHubs;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
@@ -17,13 +16,13 @@ namespace SmartClass.Web.Api
     public class HubApiController : ControllerBase
     {
         private readonly SignalREventBus _bus;
-        private readonly IHubContext<_AnyHub> _hubContext;
+        private readonly IHubContextWrapperHold _hubContextWrapperHold;
         private readonly IScopeClientGroupRepository _scopeClientGroupRepository;
 
-        public HubApiController(SignalREventBus bus, IHubContext<_AnyHub> hubContext, IScopeClientGroupRepository scopeClientGroupRepository)
+        public HubApiController(SignalREventBus bus, IHubContextWrapperHold hubContextWrapperHold, IScopeClientGroupRepository scopeClientGroupRepository)
         {
             _bus = bus;
-            _hubContext = hubContext;
+            _hubContextWrapperHold = hubContextWrapperHold;
             _scopeClientGroupRepository = scopeClientGroupRepository;
         }
 
@@ -44,7 +43,7 @@ namespace SmartClass.Web.Api
             args.Method = "updateMessage";                 //
             args.MethodArgs = new { message = "From Server message" };
 
-            await _bus.Raise(new ClientMethodEvent(_hubContext.AsHubContextWrapper(), args));
+            await _bus.Raise(new ClientMethodEvent(_hubContextWrapperHold.Wrapper, args));
             return "OK";
         }
         #endregion
@@ -71,7 +70,7 @@ namespace SmartClass.Web.Api
             joinGroupArgs.ClientIds.Add(clientId);
 
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            await _bus.Raise(new JoinGroupEvent(_hubContext.AsHubContextWrapper(), sendContext, joinGroupArgs));
+            await _bus.Raise(new JoinGroupEvent(_hubContextWrapperHold.Wrapper, sendContext, joinGroupArgs));
         }
 
         [Route("LeaveGroup")]
@@ -86,7 +85,7 @@ namespace SmartClass.Web.Api
             leaveGroupArgs.ClientIds.Add(clientId);
 
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            await _bus.Raise(new LeaveGroupEvent(_hubContext.AsHubContextWrapper(), sendContext, leaveGroupArgs));
+            await _bus.Raise(new LeaveGroupEvent(_hubContextWrapperHold.Wrapper, sendContext, leaveGroupArgs));
         }
 
         #endregion
@@ -105,7 +104,7 @@ namespace SmartClass.Web.Api
         [HttpGet]
         public Task<ScopeContext> GetScopeContext(string scopeId)
         {
-            var scopeContext = ScopeContext.GetScopeContext(scopeId,false);
+            var scopeContext = ScopeContext.GetScopeContext(scopeId, false);
             return Task.FromResult(scopeContext);
         }
 
@@ -118,7 +117,7 @@ namespace SmartClass.Web.Api
                 ScopeId = scopeId
             };
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            await _bus.Raise(new ResetScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, resetScopeArgs));
+            await _bus.Raise(new ResetScopeEvent(_hubContextWrapperHold.Wrapper, sendContext, resetScopeArgs));
         }
 
         [Route("UpdateScope")]
@@ -131,7 +130,7 @@ namespace SmartClass.Web.Api
             };
             updateScopeArgs.Bags["testKey"] = "testValue" + DateTime.Now.ToString("yyyy-mm-dd HH:MM:SS");
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
-            await _bus.Raise(new UpdateScopeEvent(_hubContext.AsHubContextWrapper(), sendContext, updateScopeArgs));
+            await _bus.Raise(new UpdateScopeEvent(_hubContextWrapperHold.Wrapper, sendContext, updateScopeArgs));
         }
 
         [Route("NotifyScope")]
@@ -142,7 +141,7 @@ namespace SmartClass.Web.Api
             var sendContext = new SendContext();
             sendContext.From.ScopeId = scopeId;
             args.SendContext = sendContext;
-            await _bus.Raise(new ClientMethodEvent(_hubContext.AsHubContextWrapper(), args));
+            await _bus.Raise(new ClientMethodEvent(_hubContextWrapperHold.Wrapper, args));
         }
         #endregion
 
