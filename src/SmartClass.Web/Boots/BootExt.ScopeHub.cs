@@ -6,7 +6,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs._Impl;
 using SmartClass.DAL;
 
-namespace SmartClass.Web.Hubs
+namespace SmartClass.Web.Boots
 {
     public static partial class BootExt
     {

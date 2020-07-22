@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Web.Boots;
-using SmartClass.Web.Hubs;
 
 namespace SmartClass.Web
 {
