@@ -65,7 +65,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
             _clientMonitor = clientMonitor;
         }
 
-        public float HandleOrder { get; set; }
+        public float HandleOrder { get; set; } = SignalREventHandlerOrder.System;
 
         public bool ShouldHandle(ISignalREvent @event)
         {
@@ -88,7 +88,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.Scopes
             _clientMonitor = clientMonitor;
         }
 
-        public float HandleOrder { get; set; }
+        public float HandleOrder { get; set; } = SignalREventHandlerOrder.System;
 
         public bool ShouldHandle(ISignalREvent @event)
         {

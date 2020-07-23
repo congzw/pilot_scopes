@@ -4,6 +4,7 @@ using SmartClass.Common.DependencyInjection;
 using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
+using SmartClass.Common.Scopes;
 
 namespace SmartClass.Common.ScopeHubs._Impl
 {
@@ -11,33 +12,32 @@ namespace SmartClass.Common.ScopeHubs._Impl
     {
         public static IServiceCollection AddClientMonitors(this IServiceCollection services)
         {
-            services.AddTransient<ISignalREventDispatcher, SignalREventDispatcher>();
-            services.AddScoped<SignalREventBus>();
-            //todo by config
-            //todo: 不用第三方的DI工具，如何支持Decorator?
-            //var traceEventBus = false;
-            //if (traceEventBus)
-            //{
-            //    services.Decorate<ISignalREventHandler, SignalREventHandlerDecorator>();
-            //}
-            //services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped, typeof(SignalREventHandlerDecorator));
-            services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped);
+            //already auto registered by IMyLifetime!
+            //services.AddTransient<ISignalREventDispatcher, SignalREventDispatcher>();
+            //services.AddScoped<SignalREventBus>();
+            //services.AddAllImpl<ISignalREventHandler>(ServiceLifetime.Scoped);
 
-            services.AddScoped<ClientMethodProcessBus>();
-            services.AddAllImpl<IClientMethodProcess>(ServiceLifetime.Scoped);
+            //services.AddScoped<ClientMethodProcessBus>();
+            //services.AddAllImpl<IClientMethodProcess>(ServiceLifetime.Scoped);
 
-            services.AddSingleton<IEventLogHelper, HubClientLogHelper>();
-            services.AddSingleton<ScopeClientConnectionKeyMaps>();
-            services.AddSingleton<HubCallerContextCache>();
-            services.AddSingleton<SignalRConnectionCache>();
-            services.AddScoped<IClientMonitor, ClientMonitor>();
+            //services.AddSingleton<IEventLogHelper, HubClientLogHelper>();
+            //services.AddSingleton<ScopeClientConnectionKeyMaps>();
+            //services.AddSingleton<HubCallerContextCache>();
+            //services.AddSingleton<SignalRConnectionCache>();
+            //services.AddScoped<IClientMonitor, ClientMonitor>();
+
+            services.AddSingleton<IClientContextService, RequestClientContextService>();
+            services.AddSingleton(ManageMonitorHelper.Instance);
+
             return services;
         }
 
-        public static IApplicationBuilder UseClientMonitors(this IApplicationBuilder sp)
+        public static IApplicationBuilder UseClientMonitors(this IApplicationBuilder app)
         {
-            EventLogHelper.Resolve = () => sp.ApplicationServices.GetRequiredService<IEventLogHelper>();
-            return sp;
+            EventLogHelper.Resolve = () => app.ApplicationServices.GetRequiredService<IEventLogHelper>();
+            ClientContext.Resolve = () => app.ApplicationServices.GetRequiredService<IClientContextService>();
+            ScopeContext.ResolveScopeId = () => ClientContext.GetCurrentClientContext(null)?.ScopeId;
+            return app;
         }
     }
 }

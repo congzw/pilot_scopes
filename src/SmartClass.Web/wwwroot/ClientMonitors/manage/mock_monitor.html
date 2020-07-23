@@ -110,12 +110,11 @@
                     let connectionHub = new signalR.HubConnectionBuilder()
                         .withUrl('/' + hubName + '?scopeId=' + scopeId + '&clientId=' + clientId + '&userId=' + userId)
                         .build();
-                    console.log("connectionHub:");
                     console.log(connectionHub);
                     let updateConnections = "updateConnections";
                     connectionHub.on(updateConnections, function (theArgs) {
-                        _this.updateConnections(theArgs);
                         console.log(theArgs);
+                        _this.updateConnections(theArgs);
                     });
                     connectionHub.start()
                         .then(function () {
@@ -127,10 +126,6 @@
                 },
                 updateConnections: function (args) {
                     this.connectionObj = args;
-                    //this.connectionObj.connections.sort(function (a, b) {
-                    //    console.log(a.createAt > b.createAt);
-                    //    return a.createAt > b.createAt;
-                    //})
                 },
 
                 mockConnect: function () {

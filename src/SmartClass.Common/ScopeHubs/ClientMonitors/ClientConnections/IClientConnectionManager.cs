@@ -37,7 +37,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
             _clientMonitor = clientMonitor;
         }
 
-        public float HandleOrder { get; set; }
+        public float HandleOrder { get; set; } = SignalREventHandlerOrder.System;
         public bool ShouldHandle(ISignalREvent @event)
         {
             return @event is OnConnectedEvent;
@@ -59,7 +59,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
             _manager = manager;
         }
 
-        public float HandleOrder { get; set; }
+        public float HandleOrder { get; set; } = SignalREventHandlerOrder.System;
 
         public bool ShouldHandle(ISignalREvent hubEvent)
         {

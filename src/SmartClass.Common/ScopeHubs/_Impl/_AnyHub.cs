@@ -72,7 +72,6 @@ namespace SmartClass.Common.ScopeHubs._Impl
         //调用客户端方法
         public Task ClientMethod(ClientMethodArgs args)
         {
-            //json token to dic
             TraceHubContext("ClientMethod");
             return Bus.Raise(new ClientMethodEvent(this, args));
         }
@@ -87,12 +86,6 @@ namespace SmartClass.Common.ScopeHubs._Impl
                 invokeCount++;
             }
             this.Context.Items[invokeCountKey] = invokeCount;
-
-            //基于hub的所有方法调用，都能拿到基于当前的上下文信息参数Query
-            //[13704] [_AnyHub] OnConnectedAsync >>>>>>>> ?scopeId=s1&clientId=c2&id=gMop-YWYX7zbRWdqJOhyig
-            //[13704] [_AnyHub] OnDisconnectedAsync >>>>>>>> ?scopeId=s1&clientId=c2&id=gMop-YWYX7zbRWdqJOhyig
-            //[10664] [_AnyHub] KickClient >>>>>>>> ?scopeId=s1&clientId=c1&id=hB1kQwNfvF9bu-Tp_cSaig
-            //[10664] [_AnyHub] ClientMethod >>>>>>>> ?scopeId=s1&clientId=c1&id=hB1kQwNfvF9bu-Tp_cSaig
             EventLogHelper.Resolve().Log(string.Format("[_AnyHub] {0} >>>>>>>> {1}", method, this.TryGetHttpContext().Request.QueryString));
         }
     }

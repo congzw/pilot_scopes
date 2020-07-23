@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections
 {
-    public class HubCallerContextCache : IMySingleton
+    public class HubCallerContextCache: IMySingleton
     {
         //signalR connectionId -> HubCallerContext
         internal IDictionary<string, HubCallerContext> HubCallerContexts { get; set; } = new ConcurrentDictionary<string, HubCallerContext>(StringComparer.OrdinalIgnoreCase);

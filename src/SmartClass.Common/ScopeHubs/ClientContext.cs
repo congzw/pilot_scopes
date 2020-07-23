@@ -11,7 +11,7 @@ namespace SmartClass.Common.ScopeHubs
         public string ClientId { get; set; }
         public string UserId { get; set; }
         public string ClientType { get; set; }
-        
+
         public static ClientContext GetCurrentClientContext(HttpContext httpContext)
         {
             return Resolve().GetCurrent(httpContext);
@@ -27,11 +27,11 @@ namespace SmartClass.Common.ScopeHubs
 
     #region for extensions
 
-    public interface IClientContextService : IMyScoped
+    public interface IClientContextService
     {
         ClientContext GetCurrent(HttpContext httpContext);
     }
-    
+
     public class RequestClientContextService : IClientContextService
     {
         public ClientContext GetCurrent(HttpContext httpContext)
@@ -70,7 +70,7 @@ namespace SmartClass.Common.ScopeHubs
             {
                 clientType = user.FindFirstValue("ClientType");
             }
-            
+
             var ctx = new ClientContext();
             ctx.ScopeId = scopeId;
             ctx.ClientId = clientId;

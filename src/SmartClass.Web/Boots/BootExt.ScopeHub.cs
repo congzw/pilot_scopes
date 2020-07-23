@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using SmartClass.Common.ScopeHubs;
+using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 using SmartClass.Common.ScopeHubs._Impl;

@@ -18,7 +18,7 @@
         public static string Args_ClientType = "clientType";
         public static string GroupName_All = string.Empty;
 
-        internal static string OnClientMethod = "onClientMethod";
+        internal static string ClientMethod = "clientMethod";
         public static string ClientMethod_StubKicked = "stubKicked";
         public static string ClientMethod_StubScopeUpdated = "stubScopeUpdated";
         public static string ClientMethod_StubNotify = "stubNotify";
