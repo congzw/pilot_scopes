@@ -46,7 +46,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
 
         public static Task SendAsyncToClientMethod(this IClientProxy clientProxy, ClientMethodArgs args)
         {
-            return clientProxy.SendAsync(HubConst.ClientMethod, args);
+            return clientProxy.SendAsync(HubConst.OnClientMethod, args);
         }
 
         public static TValue GetArgsValue<TValue>(this IClientMethod clientMethod, string key, TValue defaultValue)

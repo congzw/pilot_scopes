@@ -27,40 +27,50 @@ namespace SmartClass.Common.ScopeHubs
 
     #region for extensions
 
-    public interface IClientContextService
+    public interface IClientContextService : IMyScoped
     {
         ClientContext GetCurrent(HttpContext httpContext);
     }
-
+    
     public class RequestClientContextService : IClientContextService
     {
         public ClientContext GetCurrent(HttpContext httpContext)
         {
-            var scopeId = httpContext.TryGetQueryParameterValue(HubConst.Args_ScopeId, HubConst.ScopeId_Default);
-            var clientId = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientId, string.Empty);
-            var userId = string.Empty;
-            var clientType = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientType, string.Empty);
-            
-            var ctx = new ClientContext();
-            ctx.ScopeId = scopeId;
-            ctx.ClientId = clientId;
-            ctx.UserId = userId;
-            ctx.ClientType = clientType;
+            if (httpContext == null)
+            {
+                var httpContextAccessor = ServiceLocator.Current.GetService<IHttpContextAccessor>();
+                httpContext = httpContextAccessor.HttpContext;
+            }
 
-            return ctx;
-        }
-    }
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
 
-    public class TokenClientContextService : IClientContextService
-    {
-        public ClientContext GetCurrent(HttpContext httpContext)
-        {
             var user = httpContext.User;
-            var scopeId = user.FindFirst("ScopeId").Value;
-            var clientId = user.FindFirst("ClientId").Value;
-            var clientType = user.FindFirst("ClientType").Value;
-            var userId = user.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
 
+            var scopeId = httpContext.TryGetQueryParameterValue(HubConst.Args_ScopeId, string.Empty);
+            if (string.IsNullOrWhiteSpace(scopeId))
+            {
+                scopeId = user.FindFirstValue("ScopeId");
+            }
+            var clientId = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientId, string.Empty);
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                clientId = user.FindFirstValue("ClientId");
+            }
+            var userId = httpContext.TryGetQueryParameterValue(HubConst.Args_UserId, string.Empty);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                userId = user.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+            }
+
+            var clientType = httpContext.TryGetQueryParameterValue(HubConst.Args_ClientType, string.Empty);
+            if (string.IsNullOrWhiteSpace(clientType))
+            {
+                clientType = user.FindFirstValue("ClientType");
+            }
+            
             var ctx = new ClientContext();
             ctx.ScopeId = scopeId;
             ctx.ClientId = clientId;

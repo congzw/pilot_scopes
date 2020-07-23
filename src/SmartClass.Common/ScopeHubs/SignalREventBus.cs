@@ -4,7 +4,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientConnections;
 using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 
-namespace SmartClass.Common.ScopeHubs._Impl
+namespace SmartClass.Common.ScopeHubs
 {
     public class SignalREventBus : IMyScoped
     {

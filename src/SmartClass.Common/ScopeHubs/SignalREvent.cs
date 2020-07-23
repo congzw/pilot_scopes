@@ -28,7 +28,7 @@ namespace SmartClass.Common.ScopeHubs
 
     #region HubContext Wrapper
 
-    public interface IHubContextWrapperHold
+    public interface IHubContextWrapperHold : IMyScoped
     {
         HubContextWrapper Wrapper { get; set; }
     }
@@ -44,7 +44,7 @@ namespace SmartClass.Common.ScopeHubs
             return HubContext as IHubContext<THub>;
         }
     }
-    
+
     public static class HubContextExtensions
     {
         public static HubContextWrapper AsHubContextWrapper<THub>(this IHubContext<THub> context) where THub : Hub
@@ -59,20 +59,6 @@ namespace SmartClass.Common.ScopeHubs
             hubContext.HubContext = context;
             return hubContext;
         }
-
-
-        //public static HubContextWrapper<THub> AsHubContextWrapper<THub>(this IHubContext<THub> context) where THub : Hub
-        //{
-        //    if (context == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(context));
-        //    }
-        //    var hubContext = new HubContextWrapper<THub>();
-        //    hubContext.Clients = context.Clients;
-        //    hubContext.Groups = context.Groups;
-        //    hubContext.HubContext = context;
-        //    return hubContext;
-        //}
     }
 
     #endregion
@@ -98,7 +84,7 @@ namespace SmartClass.Common.ScopeHubs
         }
 
         #endregion
-        
+
         public Hub RaiseHub { get; }
         public HubContextWrapper Context { get; }
         public SendContext SendContext { get; set; }
@@ -134,13 +120,18 @@ namespace SmartClass.Common.ScopeHubs
         }
     }
 
+    public class SignalREventHandlerOrder
+    {
+        public static int System = -1000;
+    }
+
     public interface ISignalREventHandler : IMyScoped
     {
         float HandleOrder { set; get; }
         bool ShouldHandle(ISignalREvent @event);
         Task HandleAsync(ISignalREvent @event);
     }
-    public interface ISignalREventDispatcher : IMyTransient
+    public interface ISignalREventDispatcher : IMyScoped
     {
         Task Dispatch(ISignalREvent hubEvent);
     }

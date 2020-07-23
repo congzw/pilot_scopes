@@ -14,7 +14,7 @@ namespace SmartClass.Common.Scopes
         void ClearAll();
     }
 
-    public class ScopeRepository : IScopeContextRepository
+    public class ScopeContextRepository : IScopeContextRepository
     {
         //default use memory dictionary impl, can also be replaced by other impl such as database source...
         public IDictionary<string, ScopeContext> Contexts { get; set; } = new ConcurrentDictionary<string, ScopeContext>(StringComparer.OrdinalIgnoreCase);

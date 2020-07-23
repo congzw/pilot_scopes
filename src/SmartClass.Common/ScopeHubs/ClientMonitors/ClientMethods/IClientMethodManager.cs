@@ -37,7 +37,7 @@ namespace SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods
             _clientMonitor = clientMonitor;
         }
 
-        public float HandleOrder { get; set; }
+        public float HandleOrder { get; set; } = SignalREventHandlerOrder.System;
 
         public bool ShouldHandle(ISignalREvent @event)
         {
