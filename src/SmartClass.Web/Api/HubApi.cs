@@ -9,6 +9,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientMethods;
 using SmartClass.Common.ScopeHubs.ClientMonitors.Scopes;
 using SmartClass.Common.ScopeHubs._Impl;
 using SmartClass.Common.Scopes;
+using SmartClass.Domains.TempDb;
 
 namespace SmartClass.Web.Api
 {
@@ -120,7 +121,7 @@ namespace SmartClass.Web.Api
 
         [Route("ResetScope")]
         [HttpGet]
-        public async Task ResetScope(string scopeId)
+        public async Task ResetScope(string scopeId, [FromServices] ITempDbService tempDbService)
         {
             var resetScopeArgs = new ResetScopeArgs()
             {
@@ -129,6 +130,8 @@ namespace SmartClass.Web.Api
             var sendContext = new SendFrom().WithScopeId(scopeId).GetSendContext();
             var hubContextWrapper = _hubContextWrapperHold.Wrapper;
             await _bus.Raise(new ResetScopeEvent(hubContextWrapper, sendContext, resetScopeArgs));
+
+            tempDbService.ClearHblTempDb(new ClearHblTempDbArgs() { ScopeId = scopeId });
         }
 
         [Route("UpdateScope")]
@@ -150,7 +153,7 @@ namespace SmartClass.Web.Api
         public async Task NotifyScope(string scopeId)
         {
             var args = new ClientMethodArgs().ForNotify(new
-                {message = "NotifyScope message" + DateTime.Now.ToString("yyyy-mm-dd HH:MM:SS")});
+            { message = "NotifyScope message" + DateTime.Now.ToString("yyyy-mm-dd HH:MM:SS") });
             var sendContext = new SendContext();
             sendContext.From.ScopeId = scopeId;
             args.SendContext = sendContext;

@@ -5,7 +5,7 @@ using SmartClass.Common.ScopeHubs.ClientMonitors.ClientGroups;
 // ReSharper disable once CheckNamespace
 namespace SmartClass.DAL
 {
-    public class HblTempDbContext : DbContext
+    public class HblTempDbContext : SmartClassDbContext
     {
         public HblTempDbContext(DbContextOptions<HblTempDbContext> options) : base(options)
         {
