@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,11 @@ namespace SmartClass.Common
     {
         public static IServiceCollection AddMyServiceLocator(this IServiceCollection services)
         {
-            services.AddHttpContextAccessor();
+            if (services.All(x => x.ServiceType != typeof(IHttpContextAccessor)))
+            {
+                //only add if the service doesn't exist
+                services.AddHttpContextAccessor();
+            }
             services.AddSingleton<IServiceLocator, HttpRequestServiceLocator>();
             return services;
         }
