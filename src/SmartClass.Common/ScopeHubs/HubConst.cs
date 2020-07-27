@@ -19,9 +19,9 @@
         public static string GroupName_All = string.Empty;
 
         internal static string ClientMethod = "clientMethod";
-        public static string ClientMethod_StubKicked = "stubKicked";
-        public static string ClientMethod_StubScopeUpdated = "stubScopeUpdated";
-        public static string ClientMethod_StubNotify = "stubNotify";
+        public static string ClientMethod_StubKicked = "stub.kicked";
+        public static string ClientMethod_StubScopeUpdated = "stub.scopeUpdated";
+        public static string ClientMethod_StubNotify = "stub.notify";
 
         public static HubConst Ext = new HubConst();
     }
