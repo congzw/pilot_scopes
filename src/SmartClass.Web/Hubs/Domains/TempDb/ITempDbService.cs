@@ -1,4 +1,4 @@
-﻿using SmartClass.Common.ScopeHubs;
+﻿using SmartClass.Common.Scopes;
 
 // ReSharper disable once CheckNamespace
 namespace SmartClass.Domains.TempDb
@@ -8,7 +8,7 @@ namespace SmartClass.Domains.TempDb
         void ClearHblTempDb(ClearHblTempDbArgs args);
     }
 
-    public class ClearHblTempDbArgs : IScopeKey
+    public class ClearHblTempDbArgs : IHaveScopeId
     {
         public string ScopeId { get; set; }
     }
